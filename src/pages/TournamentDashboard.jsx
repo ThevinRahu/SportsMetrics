@@ -13,6 +13,7 @@ export default function TournamentDashboard({ tournament, onRefresh, refreshing 
   const [myTeam, setMyTeam] = useState("");
   const [opponent, setOpponent] = useState("");
   const [activeTab, setActiveTab] = useState("standings");
+  const [venue, setVenue] = useState("neutral"); // "home" | "away" | "neutral"
 
   const teams = tournament.teams;
   const teamKeys = Object.keys(teams);
@@ -113,6 +114,20 @@ export default function TournamentDashboard({ tournament, onRefresh, refreshing 
           onChange={setOpponent}
           excludeKey={effectiveMyTeam}
         />
+      </div>
+
+      {/* Venue Toggle */}
+      <div style={{ display: "flex", gap: 4, marginBottom: 16, justifyContent: "center" }}>
+        {["home", "neutral", "away"].map(v => (
+          <button key={v} onClick={() => setVenue(v)} style={{
+            padding: "6px 14px", fontSize: 10, fontWeight: 600, borderRadius: 6, cursor: "pointer",
+            background: venue === v ? (v === "home" ? theme.greenDark : v === "away" ? theme.redDark : theme.card) : theme.surface,
+            color: venue === v ? (v === "home" ? theme.greenText : v === "away" ? theme.redText : theme.textPrimary) : theme.textDim,
+            border: `1px solid ${venue === v ? (v === "home" ? theme.green : v === "away" ? theme.red : theme.border) : theme.border}`,
+          }}>
+            {v === "home" ? "🏠 Home" : v === "away" ? "✈️ Away" : "⚖️ Neutral"}
+          </button>
+        ))}
       </div>
 
       {/* Tab Navigation */}

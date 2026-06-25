@@ -25,7 +25,7 @@
  * Comprehensive win probability calculation
  * Uses multi-factor model beyond simple Elo
  */
-export function advancedWinProbability(myKey, oppKey, teams) {
+export function advancedWinProbability(myKey, oppKey, teams, venue = "neutral") {
   const my = teams[myKey];
   const opp = teams[oppKey];
   if (!my || !opp) return 50;
@@ -48,8 +48,12 @@ export function advancedWinProbability(myKey, oppKey, teams) {
 
   // Weights learned by the trained model (from feature importance)
   const weights = [0.25, 0.15, 0.12, 0.10, 0.08, 0.06, 0.12, 0.04, 0.10, 0.06, 0.05, 0.04];
-  const rawScore = features.reduce((sum, f, i) => sum + f * weights[i], 0);
+  let rawScore = features.reduce((sum, f, i) => sum + f * weights[i], 0);
   
+  // Home advantage: +0.15 raw score (≈ +4% win probability)
+  if (venue === "home") rawScore += 0.15;
+  else if (venue === "away") rawScore -= 0.15;
+
   // Sigmoid to probability
   const prob = 1 / (1 + Math.exp(-rawScore * 4));
   

@@ -4,6 +4,7 @@ import { advancedWinProbability } from '../analytics/gamePlan';
 import { predictScore, momentumScore } from '../analytics/bayesian';
 import { simulateHeadToHead } from '../analytics/monteCarlo';
 import { mlPredict } from '../analytics/mlEngine';
+import { MomentumChart, H2HHistory } from './MatchCharts';
 import RadarChart from './RadarChart';
 
 function ComparisonBar({ label, myVal, oppVal, myColor, oppColor, higherBetter = true }) {
@@ -400,6 +401,15 @@ export default function MatchAnalysis({ myKey, oppKey, teams, tournamentName }) 
             ))}
           </div>
         )}
+      </div>
+
+      {/* Momentum Charts + H2H */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 16 }}>
+        <MomentumChart teamKey={myKey} teams={teams} />
+        <MomentumChart teamKey={oppKey} teams={teams} />
+      </div>
+      <div style={{ marginTop: 16 }}>
+        <H2HHistory myKey={myKey} oppKey={oppKey} teams={teams} />
       </div>
     </div>
   );
