@@ -1,5 +1,0 @@
-numpy
-scikit-learn
-skl2onnx
-onnx>=1.17
-protobuf
