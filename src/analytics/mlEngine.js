@@ -36,6 +36,7 @@
 // =====================================================
 
 import * as ort from 'onnxruntime-web';
+import { getAllMatches } from '../data/matchHistory';
 
 let onnxClassifier = null;
 let onnxRegressor = null;
@@ -271,6 +272,31 @@ function generateTrainingData(teams) {
   const yWin = [];   // Win/loss (0-1)
   const yMargin = []; // Point margin (normalized)
 
+  // PRIMARY: Use real historical match results
+  const realMatches = getAllMatches() || [];
+
+  if (realMatches.length > 0) {
+    for (const [home, away, hs, as] of realMatches) {
+      const teamA = teams[home];
+      const teamB = teams[away];
+      if (!teamA || !teamB) continue;
+
+      const feats = extractFeatures(teamA, teamB);
+      const featsRev = extractFeatures(teamB, teamA);
+      const aWon = hs > as ? 1 : 0;
+      const margin = (hs - as) / 20; // Normalize margin
+
+      X.push(feats);
+      yWin.push(aWon);
+      yMargin.push(margin);
+
+      X.push(featsRev);
+      yWin.push(1 - aWon);
+      yMargin.push(-margin);
+    }
+  }
+
+  // SUPPLEMENT: Add pairwise synthetic data for teams without match history
   for (let i = 0; i < teamKeys.length; i++) {
     for (let j = i + 1; j < teamKeys.length; j++) {
       const a = teams[teamKeys[i]];
@@ -280,27 +306,23 @@ function generateTrainingData(teams) {
       const featsAB = extractFeatures(a, b);
       const featsBA = extractFeatures(b, a);
 
-      // Determine outcome from team strength
       const aStr = (a.elo || 1400) + (a.form?.rating || 50) * 3 + (a.season?.won || 0) * 5;
       const bStr = (b.elo || 1400) + (b.form?.rating || 50) * 3 + (b.season?.won || 0) * 5;
       const aWinProb = aStr / (aStr + bStr);
-      
-      // Expected margin from pts_pg differential
       const marginAB = ((a.attack?.pts_pg || 20) - (b.attack?.pts_pg || 20)) * 0.6;
 
-      // Data augmentation with noise
-      for (let k = 0; k < 5; k++) {
+      for (let k = 0; k < 3; k++) {
         const noise = () => (Math.random() - 0.5) * 0.06;
         const noisyAB = featsAB.map(f => f + noise());
         const noisyBA = featsBA.map(f => f + noise());
 
         X.push(noisyAB);
         yWin.push(aWinProb + (Math.random() - 0.5) * 0.1 > 0.5 ? 1 : 0);
-        yMargin.push(marginAB + (Math.random() - 0.5) * 5);
+        yMargin.push(marginAB / 20 + (Math.random() - 0.5) * 0.3);
 
         X.push(noisyBA);
         yWin.push(1 - (aWinProb + (Math.random() - 0.5) * 0.1 > 0.5 ? 1 : 0));
-        yMargin.push(-marginAB + (Math.random() - 0.5) * 5);
+        yMargin.push(-marginAB / 20 + (Math.random() - 0.5) * 0.3);
       }
     }
   }

@@ -33,6 +33,7 @@ export default function App() {
   const [refreshStatus, setRefreshStatus] = useState(null);
   const [dbReady, setDbReady] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
 
   // ===== DATABASE INITIALIZATION =====
   // On first load, seed DB with defaults if empty, then load from DB
@@ -196,20 +197,47 @@ export default function App() {
       color: theme.textPrimary,
       fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
     }}>
-      <Sidebar
-        tournaments={tournamentData}
-        activeTournament={activeTournament}
-        activeView={activeView}
-        domesticTournaments={domesticTournaments}
-        activeDomesticId={activeDomesticId}
-        onSelectTournament={(id) => { setActiveTournament(id); setActiveView("tournament"); }}
-        onSelectDomestic={(id) => { setActiveDomesticId(id); setActiveView("domestic"); }}
-        onCreateDomestic={() => setActiveView("domestic-create")}
-        onSelectTheory={() => setActiveView("theory")}
-        onOpenSettings={() => setSettingsOpen(true)}
-      />
+      {/* Mobile menu button */}
+      {!sidebarOpen && (
+        <button
+          onClick={() => setSidebarOpen(true)}
+          style={{
+            position: "fixed", top: 12, left: 12, zIndex: 999,
+            width: 36, height: 36, borderRadius: 8,
+            background: theme.surface, border: `1px solid ${theme.border}`,
+            color: theme.textPrimary, cursor: "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18
+          }}
+        >☰</button>
+      )}
+
+      {/* Sidebar with overlay on mobile */}
+      {sidebarOpen && (
+        <>
+          <div
+            onClick={() => { if (window.innerWidth <= 768) setSidebarOpen(false); }}
+            style={{
+              display: window.innerWidth <= 768 ? "block" : "none",
+              position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 998
+            }}
+          />
+          <Sidebar
+            tournaments={tournamentData}
+            activeTournament={activeTournament}
+            activeView={activeView}
+            domesticTournaments={domesticTournaments}
+            activeDomesticId={activeDomesticId}
+            onSelectTournament={(id) => { setActiveTournament(id); setActiveView("tournament"); if(window.innerWidth<=768) setSidebarOpen(false); }}
+            onSelectDomestic={(id) => { setActiveDomesticId(id); setActiveView("domestic"); if(window.innerWidth<=768) setSidebarOpen(false); }}
+            onCreateDomestic={() => { setActiveView("domestic-create"); if(window.innerWidth<=768) setSidebarOpen(false); }}
+            onSelectTheory={() => { setActiveView("theory"); if(window.innerWidth<=768) setSidebarOpen(false); }}
+            onOpenSettings={() => setSettingsOpen(true)}
+            onClose={() => setSidebarOpen(false)}
+          />
+        </>
+      )}
       
-      <main style={{ flex: 1, overflow: "auto", padding: "24px 28px" }}>
+      <main style={{ flex: 1, overflow: "auto", padding: window.innerWidth <= 768 ? "16px 12px" : "24px 28px", paddingTop: !sidebarOpen && window.innerWidth <= 768 ? 56 : undefined }}>
         {/* Refresh Status Toast */}
         {refreshStatus && (
           <div style={{

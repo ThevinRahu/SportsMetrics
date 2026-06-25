@@ -31,7 +31,7 @@ const PlusIcon = () => (
 export default function Sidebar({ 
   tournaments, activeTournament, activeView,
   domesticTournaments, activeDomesticId,
-  onSelectTournament, onSelectDomestic, onCreateDomestic, onSelectTheory, onOpenSettings 
+  onSelectTournament, onSelectDomestic, onCreateDomestic, onSelectTheory, onOpenSettings, onClose 
 }) {
   const tournamentList = Object.entries(tournaments);
 
@@ -44,12 +44,14 @@ export default function Sidebar({
       display: "flex",
       flexDirection: "column",
       padding: "16px 0",
-      position: "sticky",
+      position: window.innerWidth <= 768 ? "fixed" : "sticky",
       top: 0,
+      left: 0,
+      zIndex: 999,
       overflow: "auto"
     }}>
       {/* Logo */}
-      <div style={{ padding: "8px 20px 24px", borderBottom: `1px solid ${theme.border}` }}>
+      <div style={{ padding: "8px 20px 24px", borderBottom: `1px solid ${theme.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{
             width: 36, height: 36, borderRadius: 10,
@@ -62,6 +64,9 @@ export default function Sidebar({
             <div style={{ fontSize: 10, color: theme.textDim }}>Multi-Sport Analytics Engine</div>
           </div>
         </div>
+        {onClose && (
+          <button onClick={onClose} style={{ background: "none", border: "none", color: theme.textDim, fontSize: 18, cursor: "pointer" }}>✕</button>
+        )}
       </div>
 
       {/* Professional Tournaments */}
