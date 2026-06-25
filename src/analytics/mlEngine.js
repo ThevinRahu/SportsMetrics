@@ -32,7 +32,7 @@
  */
 
 // =====================================================
-// ONNX RUNTIME — Production ML Models (scikit-learn trained)
+// ONNX RUNTIME - Production ML Models (scikit-learn trained)
 // =====================================================
 
 import * as ort from 'onnxruntime-web';
