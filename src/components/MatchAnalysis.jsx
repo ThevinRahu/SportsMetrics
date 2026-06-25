@@ -3,6 +3,7 @@ import { theme, ratingColor, winColor } from '../styles/theme';
 import { advancedWinProbability } from '../analytics/gamePlan';
 import { predictScore, momentumScore } from '../analytics/bayesian';
 import { simulateHeadToHead } from '../analytics/monteCarlo';
+import { ensemblePredict, getModelInfo } from '../analytics/mlEngine';
 import RadarChart from './RadarChart';
 
 function ComparisonBar({ label, myVal, oppVal, myColor, oppColor, higherBetter = true }) {
@@ -116,6 +117,7 @@ export default function MatchAnalysis({ myKey, oppKey, teams, tournamentName }) 
   const prediction = useMemo(() => predictScore(myKey, oppKey, teams), [myKey, oppKey, teams]);
   const h2h = useMemo(() => simulateHeadToHead(myKey, oppKey, teams), [myKey, oppKey, teams]);
   const winProb = advancedWinProbability(myKey, oppKey, teams);
+  const mlResult = useMemo(() => ensemblePredict(myKey, oppKey, teams, advancedWinProbability(myKey, oppKey, teams)), [myKey, oppKey, teams]);
   const intelligence = useMemo(() => generateIntelligence(myKey, oppKey, teams), [myKey, oppKey, teams]);
 
   if (!my || !opp) return <div style={{ color: theme.textDim }}>Select two teams to compare</div>;
@@ -345,6 +347,63 @@ export default function MatchAnalysis({ myKey, oppKey, teams, tournamentName }) 
         <StatCard label="Form Rating Gap" value={((my.form?.rating || 50) - (opp.form?.rating || 50))} suffix="" positive={(my.form?.rating || 50) > (opp.form?.rating || 50)} />
         <StatCard label="Points/Game Diff" value={((my.attack?.pts_pg || 0) - (opp.attack?.pts_pg || 0)).toFixed(1)} suffix="" positive={(my.attack?.pts_pg || 0) > (opp.attack?.pts_pg || 0)} />
         <StatCard label="Prediction Confidence" value={prediction?.confidence || 50} suffix="%" positive={true} />
+      </div>
+
+      {/* ML Prediction Panel */}
+      <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: 12, padding: 16, marginTop: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+          <span style={{ fontSize: 16 }}>🤖</span>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 700 }}>Machine Learning Prediction</div>
+            <div style={{ fontSize: 9, color: theme.textDim }}>
+              Logistic Regression + KNN Ensemble • Trained on {mlResult.trainingSamples || 0} samples • {mlResult.modelAccuracy || 0}% accuracy
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 12, marginBottom: 14 }}>
+          <div style={{ background: theme.surface, borderRadius: 8, padding: 10, textAlign: "center", border: `1px solid ${theme.green}` }}>
+            <div style={{ fontSize: 9, color: theme.textDim, marginBottom: 2 }}>ML Ensemble</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: winColor(mlResult.ensemble) }}>{mlResult.ensemble}%</div>
+          </div>
+          <div style={{ background: theme.surface, borderRadius: 8, padding: 10, textAlign: "center" }}>
+            <div style={{ fontSize: 9, color: theme.textDim, marginBottom: 2 }}>Logistic Reg.</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: winColor(mlResult.ml) }}>{mlResult.ml}%</div>
+          </div>
+          <div style={{ background: theme.surface, borderRadius: 8, padding: 10, textAlign: "center" }}>
+            <div style={{ fontSize: 9, color: theme.textDim, marginBottom: 2 }}>KNN (k=5)</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: winColor(mlResult.knn) }}>{mlResult.knn}%</div>
+          </div>
+          <div style={{ background: theme.surface, borderRadius: 8, padding: 10, textAlign: "center" }}>
+            <div style={{ fontSize: 9, color: theme.textDim, marginBottom: 2 }}>Statistical</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: winColor(mlResult.statistical) }}>{mlResult.statistical}%</div>
+          </div>
+        </div>
+
+        {/* Model weights */}
+        <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+          <div style={{ fontSize: 9, color: theme.textDim }}>
+            Weights: ML {mlResult.weights?.ml}% • KNN {mlResult.weights?.knn}% • Statistical {mlResult.weights?.stat}%
+          </div>
+        </div>
+
+        {/* KNN Nearest Neighbors */}
+        {mlResult.knnNeighbors && mlResult.knnNeighbors.length > 0 && (
+          <div>
+            <div style={{ fontSize: 9, color: theme.textDim, marginBottom: 6, fontWeight: 600 }}>SIMILAR MATCHUPS (KNN):</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+              {mlResult.knnNeighbors.slice(0, 5).map((n, i) => (
+                <span key={i} style={{
+                  fontSize: 9, padding: "3px 8px", borderRadius: 10,
+                  background: n.outcome === "Stronger won" ? theme.greenDark : theme.amberDark,
+                  color: n.outcome === "Stronger won" ? theme.greenText : theme.amberText
+                }}>
+                  {n.matchup} ({n.similarity}% similar)
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
