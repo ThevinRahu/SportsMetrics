@@ -282,7 +282,7 @@ export default function MatchAnalysis({ myKey, oppKey, teams, tournamentName }) 
           <div style={{ fontSize: 9, color: theme.textDim, marginBottom: 12 }}>Goal %</div>
           
           <SetPieceRow label="Goal %" myVal={my.kicking?.goal} oppVal={opp.kicking?.goal} />
-          <SetPieceRow label="Kick Mtrs" myVal={my.kicking?.km} oppVal={opp.kicking?.km} />
+          <SetPieceRow label="Kick Meters" myVal={my.kicking?.km} oppVal={opp.kicking?.km} />
           <SetPieceRow label="Disc Index" myVal={my.discipline?.idx} oppVal={opp.discipline?.idx} />
         </div>
       </div>
