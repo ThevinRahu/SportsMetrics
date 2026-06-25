@@ -40,53 +40,59 @@ export function predictScore(teamAKey, teamBKey, teams) {
   const b = teams[teamBKey];
   if (!a || !b) return null;
 
-  // League average calculation
+  // League averages for normalization
   const allTeams = Object.values(teams);
+  const leagueAvgPts = allTeams.reduce((s, t) => s + (t.attack?.pts_pg || 22), 0) / allTeams.length;
+  const leagueAvgConceded = allTeams.reduce((s, t) => s + (t.season?.pa || 300) / Math.max(1, t.season?.played || 14), 0) / allTeams.length;
+
+  // Score prediction using adjusted Poisson approach:
+  // Expected pts = (team's attack strength / league avg) × (opponent's defensive weakness / league avg) × league avg pts
+  // This produces realistic rugby scores (15-45 range typically)
+  const attackStrengthA = (a.attack?.pts_pg || 22) / Math.max(1, leagueAvgPts);
+  const defenseWeaknessB = ((b.season?.pa || 300) / Math.max(1, b.season?.played || 14)) / Math.max(1, leagueAvgConceded);
+  const expectedPtsA = Math.round(attackStrengthA * defenseWeaknessB * leagueAvgPts);
+
+  const attackStrengthB = (b.attack?.pts_pg || 22) / Math.max(1, leagueAvgPts);
+  const defenseWeaknessA = ((a.season?.pa || 300) / Math.max(1, a.season?.played || 14)) / Math.max(1, leagueAvgConceded);
+  const expectedPtsB = Math.round(attackStrengthB * defenseWeaknessA * leagueAvgPts);
+
+  // Expected tries (for display)
   const leagueAvgTries = allTeams.reduce((s, t) => s + (t.attack?.tries_pg || 3), 0) / allTeams.length;
-  const leagueAvgConceded = allTeams.reduce((s, t) => s + (t.season?.tries_against || 30) / Math.max(1, t.season?.played || 1), 0) / allTeams.length;
+  const triesA = ((a.attack?.tries_pg || 3) / Math.max(1, leagueAvgTries)) * 
+    ((b.season?.tries_against || 40) / Math.max(1, b.season?.played || 14)) / 
+    Math.max(0.5, allTeams.reduce((s, t) => s + (t.season?.tries_against || 40) / Math.max(1, t.season?.played || 14), 0) / allTeams.length) * leagueAvgTries;
+  const triesB = ((b.attack?.tries_pg || 3) / Math.max(1, leagueAvgTries)) * 
+    ((a.season?.tries_against || 40) / Math.max(1, a.season?.played || 14)) / 
+    Math.max(0.5, allTeams.reduce((s, t) => s + (t.season?.tries_against || 40) / Math.max(1, t.season?.played || 14), 0) / allTeams.length) * leagueAvgTries;
 
-  // Expected tries using Poisson model:
-  // λ = (attack_strength / league_avg) × (defense_weakness / league_avg) × league_avg
-  // This normalizes both attack and defense relative to the league
-  const lambdaA = (a.attack?.tries_pg || 3) / Math.max(0.5, leagueAvgTries) * 
-    ((b.season?.tries_against || 30) / Math.max(1, b.season?.played || 1)) / 
-    Math.max(0.5, leagueAvgConceded) * leagueAvgTries;
-  
-  const lambdaB = (b.attack?.tries_pg || 3) / Math.max(0.5, leagueAvgTries) * 
-    ((a.season?.tries_against || 30) / Math.max(1, a.season?.played || 1)) / 
-    Math.max(0.5, leagueAvgConceded) * leagueAvgTries;
-
-  // Generate score distributions (0-12 tries)
+  // Generate try distributions for analysis
   const distA = [];
   const distB = [];
-  for (let k = 0; k <= 12; k++) {
-    distA.push({ tries: k, prob: poissonPMF(k, lambdaA) });
-    distB.push({ tries: k, prob: poissonPMF(k, lambdaB) });
+  for (let k = 0; k <= 10; k++) {
+    distA.push({ tries: k, prob: poissonPMF(k, Math.min(8, triesA)) });
+    distB.push({ tries: k, prob: poissonPMF(k, Math.min(8, triesB)) });
   }
 
-  // Expected points (tries * 7 avg conversion value + penalties)
-  const penA = Math.max(0, (b.discipline?.pen || 80) / 10 - 3) * 3;
-  const penB = Math.max(0, (a.discipline?.pen || 80) / 10 - 3) * 3;
-  
-  const expectedPtsA = Math.round(lambdaA * 6.5 + penA + (a.kicking?.goal || 70) * 0.04);
-  const expectedPtsB = Math.round(lambdaB * 6.5 + penB + (b.kicking?.goal || 70) * 0.04);
+  // Clamp to realistic rugby score range (7-55)
+  const clampedA = Math.max(7, Math.min(55, expectedPtsA));
+  const clampedB = Math.max(7, Math.min(55, expectedPtsB));
 
   return {
     teamA: {
       name: teamAKey,
-      expectedTries: lambdaA.toFixed(1),
-      expectedPts: expectedPtsA,
+      expectedTries: Math.min(8, triesA).toFixed(1),
+      expectedPts: clampedA,
       distribution: distA
     },
     teamB: {
       name: teamBKey,
-      expectedTries: lambdaB.toFixed(1),
-      expectedPts: expectedPtsB,
+      expectedTries: Math.min(8, triesB).toFixed(1),
+      expectedPts: clampedB,
       distribution: distB
     },
-    margin: expectedPtsA - expectedPtsB,
-    confidence: Math.min(95, Math.max(40, 
-      60 + Math.abs(expectedPtsA - expectedPtsB) * 1.5
+    margin: clampedA - clampedB,
+    confidence: Math.min(90, Math.max(40, 
+      55 + Math.abs(clampedA - clampedB) * 1.2
     ))
   };
 }

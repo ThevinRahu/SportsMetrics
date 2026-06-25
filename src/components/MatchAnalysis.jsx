@@ -356,38 +356,52 @@ export default function MatchAnalysis({ myKey, oppKey, teams, tournamentName }) 
           <div>
             <div style={{ fontSize: 11, fontWeight: 700 }}>Machine Learning Prediction</div>
             <div style={{ fontSize: 9, color: theme.textDim }}>
-              Logistic Regression + KNN Ensemble • Trained on {mlResult.trainingSamples || 0} samples • {mlResult.modelAccuracy || 0}% accuracy
+              Logistic Regression + KNN Ensemble • Trained on {mlResult.trainingSamples || 0} samples • {mlResult.modelAccuracy || 0}% training accuracy
             </div>
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 12, marginBottom: 14 }}>
-          <div style={{ background: theme.surface, borderRadius: 8, padding: 10, textAlign: "center", border: `1px solid ${theme.green}` }}>
-            <div style={{ fontSize: 9, color: theme.textDim, marginBottom: 2 }}>ML Ensemble</div>
-            <div style={{ fontSize: 18, fontWeight: 800, color: winColor(mlResult.ensemble) }}>{mlResult.ensemble}%</div>
+        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 12, marginBottom: 14 }}>
+          <div style={{ background: theme.surface, borderRadius: 8, padding: 12, textAlign: "center", border: `1px solid ${theme.green}` }}>
+            <div style={{ fontSize: 9, color: theme.textDim, marginBottom: 2 }}>ML Ensemble ({myKey} win)</div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: winColor(mlResult.ensemble) }}>{mlResult.ensemble}%</div>
+            <div style={{ fontSize: 9, color: theme.textDim, marginTop: 2 }}>Combined prediction</div>
           </div>
           <div style={{ background: theme.surface, borderRadius: 8, padding: 10, textAlign: "center" }}>
             <div style={{ fontSize: 9, color: theme.textDim, marginBottom: 2 }}>Logistic Reg.</div>
-            <div style={{ fontSize: 18, fontWeight: 800, color: winColor(mlResult.ml) }}>{mlResult.ml}%</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: winColor(mlResult.ml) }}>{mlResult.ml}%</div>
+            <div style={{ fontSize: 8, color: theme.textDim }}>Gradient descent</div>
           </div>
           <div style={{ background: theme.surface, borderRadius: 8, padding: 10, textAlign: "center" }}>
             <div style={{ fontSize: 9, color: theme.textDim, marginBottom: 2 }}>KNN (k=5)</div>
-            <div style={{ fontSize: 18, fontWeight: 800, color: winColor(mlResult.knn) }}>{mlResult.knn}%</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: winColor(mlResult.knn) }}>{mlResult.knn}%</div>
+            <div style={{ fontSize: 8, color: theme.textDim }}>Similar matchups</div>
           </div>
           <div style={{ background: theme.surface, borderRadius: 8, padding: 10, textAlign: "center" }}>
             <div style={{ fontSize: 9, color: theme.textDim, marginBottom: 2 }}>Statistical</div>
-            <div style={{ fontSize: 18, fontWeight: 800, color: winColor(mlResult.statistical) }}>{mlResult.statistical}%</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: winColor(mlResult.statistical) }}>{mlResult.statistical}%</div>
+            <div style={{ fontSize: 8, color: theme.textDim }}>Elo + metrics</div>
           </div>
         </div>
 
-        {/* Model weights */}
-        <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
-          <div style={{ fontSize: 9, color: theme.textDim }}>
-            Weights: ML {mlResult.weights?.ml}% • KNN {mlResult.weights?.knn}% • Statistical {mlResult.weights?.stat}%
+        <div style={{ fontSize: 10, color: theme.textDim, marginBottom: 10, lineHeight: 1.5 }}>
+          <strong style={{ color: theme.textSecondary }}>How it works:</strong> The model trained via gradient descent on {mlResult.trainingSamples} samples, learning which metrics best predict wins. KNN finds 5 most similar historical matchups and votes on outcome.
+        </div>
+
+        <div style={{ marginBottom: 10 }}>
+          <div style={{ fontSize: 9, color: theme.textDim, marginBottom: 4 }}>Ensemble weights:</div>
+          <div style={{ display: "flex", height: 6, borderRadius: 3, overflow: "hidden" }}>
+            <div style={{ width: `${mlResult.weights?.ml || 0}%`, background: theme.purple }} />
+            <div style={{ width: `${mlResult.weights?.knn || 0}%`, background: theme.blue }} />
+            <div style={{ width: `${mlResult.weights?.stat || 0}%`, background: theme.green }} />
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 3, fontSize: 8, color: theme.textDim }}>
+            <span style={{ color: theme.purple }}>ML {mlResult.weights?.ml}%</span>
+            <span style={{ color: theme.blue }}>KNN {mlResult.weights?.knn}%</span>
+            <span style={{ color: theme.green }}>Statistical {mlResult.weights?.stat}%</span>
           </div>
         </div>
 
-        {/* KNN Nearest Neighbors */}
         {mlResult.knnNeighbors && mlResult.knnNeighbors.length > 0 && (
           <div>
             <div style={{ fontSize: 9, color: theme.textDim, marginBottom: 6, fontWeight: 600 }}>SIMILAR MATCHUPS (KNN):</div>
@@ -395,8 +409,8 @@ export default function MatchAnalysis({ myKey, oppKey, teams, tournamentName }) 
               {mlResult.knnNeighbors.slice(0, 5).map((n, i) => (
                 <span key={i} style={{
                   fontSize: 9, padding: "3px 8px", borderRadius: 10,
-                  background: n.outcome === "Stronger won" ? theme.greenDark : theme.amberDark,
-                  color: n.outcome === "Stronger won" ? theme.greenText : theme.amberText
+                  background: n.outcome === "Favoured won" ? theme.greenDark : theme.amberDark,
+                  color: n.outcome === "Favoured won" ? theme.greenText : theme.amberText
                 }}>
                   {n.matchup} ({n.similarity}% similar)
                 </span>
