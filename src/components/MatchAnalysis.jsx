@@ -333,7 +333,7 @@ export default function MatchAnalysis({ myKey, oppKey, teams, tournamentName }) 
             </div>
           )) : (
             <div style={{ fontSize: 11, color: theme.textDim, fontStyle: "italic" }}>
-              No significant tactical intelligence gaps detected. Even matchup.
+              No significant tactical intelligence gaps detected. Even matchup!
             </div>
           )}
         </div>
