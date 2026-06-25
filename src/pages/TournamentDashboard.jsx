@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { theme, ratingColor, injuryColor, winColor } from '../styles/theme';
 import { advancedWinProbability, generateGamePlan, improvementImpact } from '../analytics/gamePlan';
 import { momentumScore, injuryRiskEstimate } from '../analytics/bayesian';
+import { mlKeysToWin } from '../analytics/mlEngine';
 import RadarChart from '../components/RadarChart';
 import StandingsTable from '../components/StandingsTable';
 import MatchAnalysis from '../components/MatchAnalysis';
@@ -164,6 +165,7 @@ export default function TournamentDashboard({ tournament, onRefresh, refreshing 
 function GamePlanView({ myKey, oppKey, teams }) {
   const plan = useMemo(() => generateGamePlan(myKey, oppKey, teams), [myKey, oppKey, teams]);
   const impacts = useMemo(() => improvementImpact(myKey, oppKey, teams), [myKey, oppKey, teams]);
+  const mlKeys = useMemo(() => mlKeysToWin(myKey, oppKey, teams), [myKey, oppKey, teams]);
   const winProb = advancedWinProbability(myKey, oppKey, teams);
 
   const priorityColors = { high: theme.red, medium: theme.amber, low: theme.green };
@@ -268,6 +270,55 @@ function GamePlanView({ myKey, oppKey, teams }) {
           </div>
         </div>
       </div>
+
+      {/* ML Keys to Win */}
+      {mlKeys.keysToWin.length > 0 && (
+        <div style={{ background: theme.card, border: `1px solid ${theme.green}`, borderRadius: 12, padding: 16, marginTop: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+            <span style={{ fontSize: 14 }}>🤖</span>
+            <div style={{ fontSize: 11, fontWeight: 700 }}>ML Keys to Win</div>
+            <span style={{ fontSize: 9, color: theme.textDim, marginLeft: "auto" }}>Based on trained model sensitivity analysis</span>
+          </div>
+          {mlKeys.keysToWin.map((k, i) => (
+            <div key={i} style={{ background: theme.surface, borderRadius: 8, padding: 12, marginBottom: 6, borderLeft: `3px solid ${k.status === "strength" ? theme.green : k.status === "weakness" ? theme.amber : theme.blue}` }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                <span style={{ fontSize: 12, fontWeight: 700 }}>{k.area}</span>
+                <span style={{ fontSize: 10, fontWeight: 700, color: theme.green }}>{k.winBoost} win prob</span>
+              </div>
+              <div style={{ fontSize: 11, color: theme.textSecondary }}>{k.recommendation}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ML Vulnerabilities to Exploit */}
+      {mlKeys.vulnerabilities.length > 0 && (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 16 }}>
+          <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: 12, padding: 16 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: theme.textDim, letterSpacing: 1.2, marginBottom: 10, textTransform: "uppercase" }}>
+              🎯 Your Advantages to Press
+            </div>
+            {mlKeys.vulnerabilities.map((v, i) => (
+              <div key={i} style={{ fontSize: 11, color: theme.textSecondary, padding: "8px 0", borderBottom: i < mlKeys.vulnerabilities.length - 1 ? `1px solid ${theme.border}` : "none" }}>
+                <div style={{ fontWeight: 600, color: theme.greenText, marginBottom: 2 }}>{v.area} <span style={{ fontSize: 9, color: theme.textDim }}>({v.advantage} advantage)</span></div>
+                <div>{v.recommendation}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: 12, padding: 16 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: theme.textDim, letterSpacing: 1.2, marginBottom: 10, textTransform: "uppercase" }}>
+              📈 Biggest Improvement Opportunities
+            </div>
+            {mlKeys.winBoosts.length > 0 ? mlKeys.winBoosts.map((w, i) => (
+              <div key={i} style={{ fontSize: 11, color: theme.textSecondary, padding: "8px 0", borderBottom: i < mlKeys.winBoosts.length - 1 ? `1px solid ${theme.border}` : "none" }}>
+                <div style={{ fontWeight: 600, color: theme.amber, marginBottom: 2 }}>{w.area} <span style={{ fontSize: 9, color: theme.textDim }}>({w.deficit} deficit)</span></div>
+                <div>{w.recommendation}</div>
+                <div style={{ fontSize: 9, color: theme.green, marginTop: 2 }}>{w.potentialGain}</div>
+              </div>
+            )) : <div style={{ fontSize: 11, color: theme.textDim }}>No significant deficits detected — you lead in all areas.</div>}
+          </div>
+        </div>
+      )}
 
       {/* Strategic Recommendations & Risks */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 16 }}>

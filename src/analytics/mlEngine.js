@@ -377,6 +377,139 @@ export function getModelInfo() {
   return modelInfo;
 }
 
+/**
+ * ML-Powered Keys to Win
+ * 
+ * Uses the trained model to determine:
+ * 1. Which metrics would MOST increase win probability if improved
+ * 2. What the opponent's biggest vulnerability is (from ML perspective)
+ * 3. Specific tactical recommendations based on model sensitivity
+ * 
+ * This is genuinely ML-driven: we perturb each feature and measure
+ * how much the model's prediction changes (sensitivity analysis).
+ */
+export function mlKeysToWin(teamAKey, teamBKey, teams) {
+  const teamA = teams[teamAKey];
+  const teamB = teams[teamBKey];
+  if (!teamA || !teamB) return { keysToWin: [], vulnerabilities: [], winBoosts: [] };
+
+  if (!gbModel || !rfModel) trainModel(teams);
+  if (!gbModel) return { keysToWin: [], vulnerabilities: [], winBoosts: [] };
+
+  const baseFeatures = extractFeatures(teamA, teamB);
+  const baseProb = gbModel.predict(baseFeatures);
+  const baseMargin = rfModel.predict(baseFeatures);
+
+  // Sensitivity analysis: perturb each feature by +0.2 and see how much win prob changes
+  const sensitivities = FEATURE_NAMES.map((name, i) => {
+    const perturbed = [...baseFeatures];
+    perturbed[i] += 0.2; // Simulate improvement in this metric
+    const newProb = gbModel.predict(perturbed);
+    const newMargin = rfModel.predict(perturbed);
+    return {
+      name,
+      index: i,
+      probGain: Math.round((newProb - baseProb) * 100),
+      marginGain: Math.round(newMargin - baseMargin),
+      currentValue: baseFeatures[i],
+      featureImportance: gbModel.featureImportance[i],
+    };
+  });
+
+  // Sort by potential gain — these are the "keys to win"
+  const keysToWin = sensitivities
+    .filter(s => s.probGain > 0)
+    .sort((a, b) => b.probGain - a.probGain)
+    .slice(0, 5)
+    .map(s => ({
+      area: s.name,
+      winBoost: `+${s.probGain}%`,
+      marginBoost: `+${s.marginGain} pts`,
+      importance: s.featureImportance,
+      status: s.currentValue > 0.1 ? "strength" : s.currentValue < -0.1 ? "weakness" : "neutral",
+      recommendation: getRecommendation(s.name, s.currentValue, s.probGain),
+    }));
+
+  // Find opponent vulnerabilities (where negative features hurt them most)
+  const vulnerabilities = sensitivities
+    .filter(s => s.currentValue > 0.05) // Areas where we're already ahead
+    .sort((a, b) => b.featureImportance - a.featureImportance)
+    .slice(0, 3)
+    .map(s => ({
+      area: s.name,
+      advantage: s.currentValue > 0.3 ? "significant" : "moderate",
+      recommendation: getExploitRecommendation(s.name, s.currentValue),
+    }));
+
+  // Win probability boosts — what improvements matter most
+  const winBoosts = sensitivities
+    .filter(s => s.currentValue < 0) // Areas where we're behind
+    .sort((a, b) => b.probGain - a.probGain)
+    .slice(0, 3)
+    .map(s => ({
+      area: s.name,
+      deficit: s.currentValue < -0.2 ? "major" : "minor",
+      potentialGain: `+${s.probGain}% win probability`,
+      recommendation: getImprovementRecommendation(s.name),
+    }));
+
+  return { keysToWin, vulnerabilities, winBoosts };
+}
+
+function getRecommendation(featureName, value, probGain) {
+  const recs = {
+    "Elo Rating Gap": "Leverage overall squad depth and experience advantage",
+    "Gainline Advantage": "Focus on first-receiver carries and pod structures to cross the advantage line",
+    "Tackle Efficiency": "Target body height in contact, line speed, and 2-man tackle technique",
+    "Scrum Dominance": "Use scrum as a weapon — 8-man shove for penalties, pick-and-go off the base",
+    "Lineout Control": "Vary lineout timing and calls, use back-of-lineout plays to create mismatches",
+    "Kicking Accuracy": "Take every kickable penalty, prioritise goal kicking practice this week",
+    "Form & Momentum": "Maintain winning habits — confidence and rhythm are carrying you",
+    "Discipline Edge": "Stay legal at the breakdown, avoid unnecessary penalties in your half",
+    "Scoring Rate": "Maintain tempo and phase play to convert pressure into points",
+    "Turnover Threat": "Target ball-in-contact with chop-and-steal technique at every breakdown",
+    "Line Break Power": "Use strike runners and late-hitting midfield runners to break the line",
+    "Defensive Pressure": "Rush defence on their playmakers, force errors under pressure",
+  };
+  return recs[featureName] || "Maintain current performance levels in this area";
+}
+
+function getExploitRecommendation(featureName, value) {
+  const recs = {
+    "Elo Rating Gap": "Your overall quality is higher — impose your game model from minute one",
+    "Gainline Advantage": "You dominate the collision — use front-foot ball to stretch their defence",
+    "Tackle Efficiency": "Their tackle completion is lower — use width and offloads to expose gaps",
+    "Scrum Dominance": "You have scrum superiority — target scrum penalties for territory and points",
+    "Lineout Control": "Your lineout is stronger — use lineout drives and maul near their try line",
+    "Kicking Accuracy": "You convert more — any penalty in range should be kicked at posts",
+    "Form & Momentum": "You're in better form — back yourselves in big moments",
+    "Discipline Edge": "They concede more penalties — target the breakdown to earn territory",
+    "Scoring Rate": "You score more per game — maintain ball-in-hand phases and build pressure",
+    "Turnover Threat": "You win more turnovers — contest every breakdown aggressively",
+    "Line Break Power": "You break the line more — use your strike runners early and often",
+    "Defensive Pressure": "They miss more tackles — attack their edges with pace",
+  };
+  return recs[featureName] || "Press your advantage in this area";
+}
+
+function getImprovementRecommendation(featureName) {
+  const recs = {
+    "Elo Rating Gap": "Accept underdog status — focus on disrupting their rhythm with physicality",
+    "Gainline Advantage": "Improve carry power: first-receiver hits, forward pods, support running",
+    "Tackle Efficiency": "Tackle technique sessions: body position, timing, chop tackle drills",
+    "Scrum Dominance": "Shore up scrum: binding technique, 8-man coordination, quick ball protection",
+    "Lineout Control": "Lineout work: vary calls, dummy jumpers, improve timing with hooker",
+    "Kicking Accuracy": "Goal kicking drills under pressure — this could decide a tight match",
+    "Form & Momentum": "Break negative patterns: start fast, win first collision, early scoreboard pressure",
+    "Discipline Edge": "Reduce penalties: breakdown entry angles, offside awareness, referee management",
+    "Scoring Rate": "Red zone finishing: phase play in 22, blind-side attacks, maul-to-try",
+    "Turnover Threat": "Contest more at breakdown: body position over ball, support arriving faster",
+    "Line Break Power": "Create line breaks: late runners, miss-pass to isolate defenders, decoy runners",
+    "Defensive Pressure": "Reduce missed tackles: line speed, communication in drift, 1-on-1 technique",
+  };
+  return recs[featureName] || "Prioritise improvement in this area during training week";
+}
+
 export function retrainModel(teams) {
   gbModel = null;
   rfModel = null;
@@ -387,4 +520,4 @@ function getEmptyPrediction() {
   return { winProbability: 50, expectedMargin: 0, confidence: 50, keyFactors: [], modelAccuracy: 0, trainingSamples: 0, trained: false };
 }
 
-export default { trainModel, mlPredict, getFeatureImportance, getModelInfo, retrainModel };
+export default { trainModel, mlPredict, mlKeysToWin, getFeatureImportance, getModelInfo, retrainModel };
