@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { theme, ratingColor, winColor } from '../styles/theme';
 import { advancedWinProbability } from '../analytics/gamePlan';
 import { predictScore, momentumScore } from '../analytics/bayesian';
@@ -117,7 +117,20 @@ export default function MatchAnalysis({ myKey, oppKey, teams, tournamentName }) 
   const prediction = useMemo(() => predictScore(myKey, oppKey, teams), [myKey, oppKey, teams]);
   const h2h = useMemo(() => simulateHeadToHead(myKey, oppKey, teams), [myKey, oppKey, teams]);
   const winProb = advancedWinProbability(myKey, oppKey, teams);
-  const mlResult = useMemo(() => mlPredict(myKey, oppKey, teams), [myKey, oppKey, teams]);
+  const mlResult = useMemo(() => {
+    // Kick off async prediction, use sync fallback immediately
+    const empty = { winProbability: 50, expectedMargin: 0, confidence: 50, keyFactors: [], modelAccuracy: 0, trainingSamples: 0, trained: false };
+    return empty;
+  }, []);
+  const [mlData, setMlData] = useState(null);
+  useEffect(() => {
+    let cancelled = false;
+    mlPredict(myKey, oppKey, teams).then(result => {
+      if (!cancelled) setMlData(result);
+    });
+    return () => { cancelled = true; };
+  }, [myKey, oppKey, teams]);
+  const mlFinal = mlData || { winProbability: 50, expectedMargin: 0, confidence: 50, keyFactors: [], modelAccuracy: 0, trainingSamples: 0, trained: false };
   const intelligence = useMemo(() => generateIntelligence(myKey, oppKey, teams), [myKey, oppKey, teams]);
 
   if (!my || !opp) return <div style={{ color: theme.textDim }}>Select two teams to compare</div>;
@@ -355,28 +368,28 @@ export default function MatchAnalysis({ myKey, oppKey, teams, tournamentName }) 
           <span style={{ fontSize: 16 }}>🤖</span>
           <div>
             <div style={{ fontSize: 12, fontWeight: 700 }}>ML Prediction</div>
-            <div style={{ fontSize: 9, color: theme.textDim }}>Gradient Boosted Trees + Random Forest • {mlResult.trainingSamples || 0} samples • {mlResult.modelAccuracy || 0}% accuracy</div>
+            <div style={{ fontSize: 9, color: theme.textDim }}>Gradient Boosted Trees + Random Forest • {mlFinal.trainingSamples || 0} samples • {mlFinal.modelAccuracy || 0}% accuracy</div>
           </div>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
           <div style={{ background: theme.surface, borderRadius: 10, padding: 14, textAlign: "center", border: `1px solid ${theme.border}` }}>
             <div style={{ fontSize: 9, color: theme.textDim, marginBottom: 4 }}>{myKey} Win Probability</div>
-            <div style={{ fontSize: 26, fontWeight: 800, color: winColor(mlResult.winProbability || 50) }}>{mlResult.winProbability || 50}%</div>
+            <div style={{ fontSize: 26, fontWeight: 800, color: winColor(mlFinal.winProbability || 50) }}>{mlFinal.winProbability || 50}%</div>
           </div>
           <div style={{ background: theme.surface, borderRadius: 10, padding: 14, textAlign: "center", border: `1px solid ${theme.border}` }}>
             <div style={{ fontSize: 9, color: theme.textDim, marginBottom: 4 }}>Expected Margin</div>
-            <div style={{ fontSize: 26, fontWeight: 800, color: (mlResult.expectedMargin || 0) > 0 ? theme.green : (mlResult.expectedMargin || 0) < 0 ? theme.red : theme.textSecondary }}>{(mlResult.expectedMargin || 0) > 0 ? "+" : ""}{mlResult.expectedMargin || 0}</div>
+            <div style={{ fontSize: 26, fontWeight: 800, color: (mlFinal.expectedMargin || 0) > 0 ? theme.green : (mlFinal.expectedMargin || 0) < 0 ? theme.red : theme.textSecondary }}>{(mlFinal.expectedMargin || 0) > 0 ? "+" : ""}{mlFinal.expectedMargin || 0}</div>
             <div style={{ fontSize: 9, color: theme.textDim }}>points</div>
           </div>
           <div style={{ background: theme.surface, borderRadius: 10, padding: 14, textAlign: "center", border: `1px solid ${theme.border}` }}>
             <div style={{ fontSize: 9, color: theme.textDim, marginBottom: 4 }}>Model Confidence</div>
-            <div style={{ fontSize: 26, fontWeight: 800, color: ratingColor(mlResult.confidence || 50) }}>{mlResult.confidence || 50}%</div>
+            <div style={{ fontSize: 26, fontWeight: 800, color: ratingColor(mlFinal.confidence || 50) }}>{mlFinal.confidence || 50}%</div>
           </div>
         </div>
-        {mlResult.keyFactors && mlResult.keyFactors.length > 0 && (
+        {mlFinal.keyFactors && mlFinal.keyFactors.length > 0 && (
           <div>
             <div style={{ fontSize: 10, fontWeight: 700, color: theme.textDim, marginBottom: 8, textTransform: "uppercase", letterSpacing: 1 }}>Key Factors Driving This Prediction</div>
-            {mlResult.keyFactors.map((f, i) => (
+            {mlFinal.keyFactors.map((f, i) => (
               <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
                 <div style={{ flex: 1, fontSize: 11, color: theme.textSecondary }}>{f.name}</div>
                 <div style={{ width: 80, height: 5, background: theme.surface, borderRadius: 3, overflow: "hidden" }}>
@@ -422,3 +435,4 @@ function StatCard({ label, value, suffix = "", positive }) {
     </div>
   );
 }
+

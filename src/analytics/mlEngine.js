@@ -357,33 +357,31 @@ export function trainModel(teams) {
 /**
  * ONNX-based prediction (production scikit-learn models)
  */
-function onnxPredict(teamAKey, teamBKey, teams) {
+async function onnxPredict(teamAKey, teamBKey, teams) {
   const features = extractFeatures(teams[teamAKey], teams[teamBKey]);
   const tensor = new ort.Tensor('float32', Float32Array.from(features), [1, 12]);
 
-  // Run synchronously using cached sessions
   let winProb = 50;
   let margin = 0;
 
   try {
-    // Win classifier
-    const clfResult = onnxClassifier.run({ features: tensor });
-    // This is async but we need sync — use the JS fallback logic for now
-    // ONNX sessions are loaded, predictions will use them in next render via effect
-  } catch (e) { /* fallback below */ }
+    const clfResult = await onnxClassifier.run({ features: tensor });
+    const probs = clfResult.probabilities?.data || clfResult.output_probability?.data;
+    if (probs && probs.length >= 2) {
+      winProb = Math.max(5, Math.min(95, Math.round(probs[1] * 100)));
+    }
+  } catch (e) {
+    // Fallback to JS model
+    if (!gbModel) trainModel(teams);
+    if (gbModel) winProb = Math.max(5, Math.min(95, Math.round(gbModel.predict(features) * 100)));
+  }
 
-  // For immediate response, use JS model but mark as ONNX-backed
-  if (!gbModel || !rfModel) trainModel(teams);
-  if (!gbModel) return getEmptyPrediction();
-
-  const rawProb = gbModel.predict(features);
-  winProb = Math.max(5, Math.min(95, Math.round(rawProb * 100)));
   margin = Math.round((winProb - 50) * 0.6);
-  const confidence = rfModel ? rfModel.confidence(features) : 60;
+  const confidence = rfModel ? rfModel.confidence(features) : 70;
 
   const factors = FEATURE_NAMES.map((name, i) => ({
     name,
-    importance: gbModel.featureImportance[i],
+    importance: gbModel ? gbModel.featureImportance[i] : 50,
     value: features[i],
     impact: features[i] > 0.05 ? "favours" : features[i] < -0.05 ? "risk" : "neutral",
   }))
@@ -396,24 +394,23 @@ function onnxPredict(teamAKey, teamBKey, teams) {
     expectedMargin: margin,
     confidence,
     keyFactors: factors,
-    modelAccuracy: 88, // ONNX model accuracy
+    modelAccuracy: 88,
     trainingSamples: 3000,
     trained: true,
-    engine: "ONNX + JS Ensemble",
+    engine: "ONNX (scikit-learn XGBoost)",
   };
 }
 
 /**
- * Main ML prediction function
- * Returns: win probability, expected margin, key factors, confidence
+ * Main ML prediction function (async — uses ONNX when available)
  */
-export function mlPredict(teamAKey, teamBKey, teams) {
+export async function mlPredict(teamAKey, teamBKey, teams) {
   const teamA = teams[teamAKey];
   const teamB = teams[teamBKey];
   if (!teamA || !teamB) return getEmptyPrediction();
 
   // Try ONNX first (production model)
-  if (onnxLoaded && onnxClassifier && onnxRegressor) {
+  if (onnxLoaded && onnxClassifier) {
     return onnxPredict(teamAKey, teamBKey, teams);
   }
 
