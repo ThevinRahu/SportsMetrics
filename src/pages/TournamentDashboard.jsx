@@ -101,10 +101,10 @@ export default function TournamentDashboard({ tournament, onRefresh, refreshing 
         <div style={{ 
           fontSize: 13, fontWeight: 700, padding: "10px 16px",
           background: theme.card, border: `1px solid ${theme.border}`, borderRadius: 8,
-          color: winColor(advancedWinProbability(effectiveMyTeam, effectiveOpponent, teams)),
+          color: winColor(advancedWinProbability(effectiveMyTeam, effectiveOpponent, teams, venue)),
           textAlign: "center", minWidth: 80
         }}>
-          {advancedWinProbability(effectiveMyTeam, effectiveOpponent, teams)}%
+          {advancedWinProbability(effectiveMyTeam, effectiveOpponent, teams, venue)}%
           <div style={{ fontSize: 9, color: theme.textDim, fontWeight: 400 }}>Win Prob</div>
         </div>
         <TeamSelector
@@ -164,6 +164,7 @@ export default function TournamentDashboard({ tournament, onRefresh, refreshing 
           oppKey={effectiveOpponent} 
           teams={teams}
           tournamentName={tournament.name}
+          venue={venue}
         />
       )}
 
@@ -640,3 +641,4 @@ function MiniStat({ label, value, color }) {
     </div>
   );
 }
+

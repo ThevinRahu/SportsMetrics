@@ -111,13 +111,13 @@ function generateIntelligence(myKey, oppKey, teams) {
   return insights.slice(0, 8); // Cap at 8 most relevant
 }
 
-export default function MatchAnalysis({ myKey, oppKey, teams, tournamentName }) {
+export default function MatchAnalysis({ myKey, oppKey, teams, tournamentName, venue = "neutral" }) {
   const my = teams[myKey];
   const opp = teams[oppKey];
   
-  const prediction = useMemo(() => predictScore(myKey, oppKey, teams), [myKey, oppKey, teams]);
+  const prediction = useMemo(() => predictScore(myKey, oppKey, teams, venue), [myKey, oppKey, teams, venue]);
   const h2h = useMemo(() => simulateHeadToHead(myKey, oppKey, teams), [myKey, oppKey, teams]);
-  const winProb = advancedWinProbability(myKey, oppKey, teams);
+  const winProb = advancedWinProbability(myKey, oppKey, teams, venue);
   const mlResult = useMemo(() => {
     // Kick off async prediction, use sync fallback immediately
     const empty = { winProbability: 50, expectedMargin: 0, confidence: 50, keyFactors: [], modelAccuracy: 0, trainingSamples: 0, trained: false };

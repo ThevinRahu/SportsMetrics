@@ -35,7 +35,7 @@ function poissonPMF(k, lambda) {
  * 
  * @returns {{ teamA: { expectedTries, expectedPts, distribution }, teamB: same }}
  */
-export function predictScore(teamAKey, teamBKey, teams) {
+export function predictScore(teamAKey, teamBKey, teams, venue = "neutral") {
   const a = teams[teamAKey];
   const b = teams[teamBKey];
   if (!a || !b) return null;
@@ -59,7 +59,11 @@ export function predictScore(teamAKey, teamBKey, teams) {
 
   // Weighted sum using learned-style weights (same logic as the trained model)
   const weights = [0.25, 0.15, 0.12, 0.10, 0.08, 0.06, 0.12, 0.04, 0.10, 0.06, 0.05, 0.04];
-  const rawScore = features.reduce((sum, f, i) => sum + f * weights[i], 0);
+  let rawScore = features.reduce((sum, f, i) => sum + f * weights[i], 0);
+  
+  // Home advantage adjustment
+  if (venue === "home") rawScore += 0.15;
+  else if (venue === "away") rawScore -= 0.15;
   
   // Convert to win probability via sigmoid
   const winProb = 1 / (1 + Math.exp(-rawScore * 4));
