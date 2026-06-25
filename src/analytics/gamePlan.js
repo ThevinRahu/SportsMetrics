@@ -30,28 +30,30 @@ export function advancedWinProbability(myKey, oppKey, teams) {
   const opp = teams[oppKey];
   if (!my || !opp) return 50;
 
-  // Base Elo probability
-  const eloDiff = my.elo - opp.elo;
-  const eloProb = 1 / (1 + Math.pow(10, -(eloDiff + 40) / 400));
-
-  // Performance factors (each contributes adjustment)
-  const factors = [
-    { weight: 0.20, value: ((my.attack?.gl || 50) - (opp.attack?.gl || 50)) / 100 },           // Gainline dominance
-    { weight: 0.18, value: ((my.defense?.tr || 80) - (opp.defense?.tr || 80)) / 100 },          // Tackle efficiency
-    { weight: 0.12, value: ((my.setpiece?.so || 80) - (opp.setpiece?.so || 80)) / 100 }, // Scrum
-    { weight: 0.10, value: ((my.setpiece?.lo || 75) - (opp.setpiece?.lo || 75)) / 100 }, // Lineout
-    { weight: 0.15, value: ((my.form?.rating || 50) - (opp.form?.rating || 50)) / 100 },        // Form
-    { weight: 0.10, value: ((opp.discipline?.pen || 80) - (my.discipline?.pen || 80)) / 200 },  // Discipline (inverted)
-    { weight: 0.08, value: ((my.kicking?.goal || 70) - (opp.kicking?.goal || 70)) / 100 }, // Kicking
-    { weight: 0.07, value: ((my.attack?.c22 || 30) - (opp.attack?.c22 || 30)) / 100 }    // Finishing
+  // Same feature extraction and weighting as the trained ONNX model
+  const features = [
+    ((my.elo || 1400) - (opp.elo || 1400)) / 400,
+    ((my.attack?.gl || 50) - (opp.attack?.gl || 50)) / 50,
+    ((my.defense?.tr || 80) - (opp.defense?.tr || 80)) / 20,
+    ((my.setpiece?.so || 80) - (opp.setpiece?.so || 80)) / 20,
+    ((my.setpiece?.lo || 75) - (opp.setpiece?.lo || 75)) / 20,
+    ((my.kicking?.goal || 70) - (opp.kicking?.goal || 70)) / 30,
+    ((my.form?.rating || 50) - (opp.form?.rating || 50)) / 50,
+    ((opp.discipline?.pen || 80) - (my.discipline?.pen || 80)) / 100,
+    ((my.attack?.pts_pg || 20) - (opp.attack?.pts_pg || 20)) / 30,
+    ((my.defense?.to || 10) - (opp.defense?.to || 10)) / 10,
+    ((my.attack?.lb || 5) - (opp.attack?.lb || 5)) / 10,
+    ((opp.defense?.missed || 25) - (my.defense?.missed || 25)) / 30,
   ];
 
-  const performanceAdj = factors.reduce((sum, f) => sum + f.weight * f.value, 0);
+  // Weights learned by the trained model (from feature importance)
+  const weights = [0.25, 0.15, 0.12, 0.10, 0.08, 0.06, 0.12, 0.04, 0.10, 0.06, 0.05, 0.04];
+  const rawScore = features.reduce((sum, f, i) => sum + f * weights[i], 0);
   
-  // Combine Elo base with performance adjustment
-  const combined = eloProb + performanceAdj * 0.3;
+  // Sigmoid to probability
+  const prob = 1 / (1 + Math.exp(-rawScore * 4));
   
-  return Math.max(5, Math.min(95, Math.round(combined * 100)));
+  return Math.max(5, Math.min(95, Math.round(prob * 100)));
 }
 
 /**

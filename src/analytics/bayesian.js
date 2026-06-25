@@ -40,59 +40,69 @@ export function predictScore(teamAKey, teamBKey, teams) {
   const b = teams[teamBKey];
   if (!a || !b) return null;
 
-  // League averages for normalization
-  const allTeams = Object.values(teams);
-  const leagueAvgPts = allTeams.reduce((s, t) => s + (t.attack?.pts_pg || 22), 0) / allTeams.length;
-  const leagueAvgConceded = allTeams.reduce((s, t) => s + (t.season?.pa || 300) / Math.max(1, t.season?.played || 14), 0) / allTeams.length;
+  // Use ML model as source of truth for margin
+  // Import would create circular dep, so we calculate the same way mlEngine does
+  const features = [
+    ((a.elo || 1400) - (b.elo || 1400)) / 400,
+    ((a.attack?.gl || 50) - (b.attack?.gl || 50)) / 50,
+    ((a.defense?.tr || 80) - (b.defense?.tr || 80)) / 20,
+    ((a.setpiece?.so || 80) - (b.setpiece?.so || 80)) / 20,
+    ((a.setpiece?.lo || 75) - (b.setpiece?.lo || 75)) / 20,
+    ((a.kicking?.goal || 70) - (b.kicking?.goal || 70)) / 30,
+    ((a.form?.rating || 50) - (b.form?.rating || 50)) / 50,
+    ((b.discipline?.pen || 80) - (a.discipline?.pen || 80)) / 100,
+    ((a.attack?.pts_pg || 20) - (b.attack?.pts_pg || 20)) / 30,
+    ((a.defense?.to || 10) - (b.defense?.to || 10)) / 10,
+    ((a.attack?.lb || 5) - (b.attack?.lb || 5)) / 10,
+    ((b.defense?.missed || 25) - (a.defense?.missed || 25)) / 30,
+  ];
 
-  // Score prediction using adjusted Poisson approach:
-  // Expected pts = (team's attack strength / league avg) × (opponent's defensive weakness / league avg) × league avg pts
-  // This produces realistic rugby scores (15-45 range typically)
-  const attackStrengthA = (a.attack?.pts_pg || 22) / Math.max(1, leagueAvgPts);
-  const defenseWeaknessB = ((b.season?.pa || 300) / Math.max(1, b.season?.played || 14)) / Math.max(1, leagueAvgConceded);
-  const expectedPtsA = Math.round(attackStrengthA * defenseWeaknessB * leagueAvgPts);
+  // Weighted sum using learned-style weights (same logic as the trained model)
+  const weights = [0.25, 0.15, 0.12, 0.10, 0.08, 0.06, 0.12, 0.04, 0.10, 0.06, 0.05, 0.04];
+  const rawScore = features.reduce((sum, f, i) => sum + f * weights[i], 0);
+  
+  // Convert to win probability via sigmoid
+  const winProb = 1 / (1 + Math.exp(-rawScore * 4));
+  
+  // Derive margin from win probability (consistent)
+  const margin = Math.round((winProb - 0.5) * 40); // Maps 50%→0, 75%→+10, 100%→+20
+  
+  // Derive individual scores from margin + average scoring rates
+  const avgA = a.attack?.pts_pg || 22;
+  const avgB = b.attack?.pts_pg || 22;
+  const midpoint = (avgA + avgB) / 2;
+  
+  const expectedPtsA = Math.round(Math.max(10, Math.min(50, midpoint + margin / 2)));
+  const expectedPtsB = Math.round(Math.max(10, Math.min(50, midpoint - margin / 2)));
+  
+  // Derive tries from points (avg 6.5 pts per try in rugby)
+  const triesA = Math.max(1, Math.min(8, expectedPtsA / 6.5));
+  const triesB = Math.max(1, Math.min(8, expectedPtsB / 6.5));
 
-  const attackStrengthB = (b.attack?.pts_pg || 22) / Math.max(1, leagueAvgPts);
-  const defenseWeaknessA = ((a.season?.pa || 300) / Math.max(1, a.season?.played || 14)) / Math.max(1, leagueAvgConceded);
-  const expectedPtsB = Math.round(attackStrengthB * defenseWeaknessA * leagueAvgPts);
-
-  // Expected tries (for display)
-  const leagueAvgTries = allTeams.reduce((s, t) => s + (t.attack?.tries_pg || 3), 0) / allTeams.length;
-  const triesA = ((a.attack?.tries_pg || 3) / Math.max(1, leagueAvgTries)) * 
-    ((b.season?.tries_against || 40) / Math.max(1, b.season?.played || 14)) / 
-    Math.max(0.5, allTeams.reduce((s, t) => s + (t.season?.tries_against || 40) / Math.max(1, t.season?.played || 14), 0) / allTeams.length) * leagueAvgTries;
-  const triesB = ((b.attack?.tries_pg || 3) / Math.max(1, leagueAvgTries)) * 
-    ((a.season?.tries_against || 40) / Math.max(1, a.season?.played || 14)) / 
-    Math.max(0.5, allTeams.reduce((s, t) => s + (t.season?.tries_against || 40) / Math.max(1, t.season?.played || 14), 0) / allTeams.length) * leagueAvgTries;
-
-  // Generate try distributions for analysis
+  // Poisson distributions for display
   const distA = [];
   const distB = [];
   for (let k = 0; k <= 10; k++) {
-    distA.push({ tries: k, prob: poissonPMF(k, Math.min(8, triesA)) });
-    distB.push({ tries: k, prob: poissonPMF(k, Math.min(8, triesB)) });
+    distA.push({ tries: k, prob: poissonPMF(k, triesA) });
+    distB.push({ tries: k, prob: poissonPMF(k, triesB) });
   }
-
-  // Clamp to realistic rugby score range (7-55)
-  const clampedA = Math.max(7, Math.min(55, expectedPtsA));
-  const clampedB = Math.max(7, Math.min(55, expectedPtsB));
 
   return {
     teamA: {
       name: teamAKey,
-      expectedTries: Math.min(8, triesA).toFixed(1),
-      expectedPts: clampedA,
+      expectedTries: triesA.toFixed(1),
+      expectedPts: expectedPtsA,
       distribution: distA
     },
     teamB: {
       name: teamBKey,
-      expectedTries: Math.min(8, triesB).toFixed(1),
-      expectedPts: clampedB,
+      expectedTries: triesB.toFixed(1),
+      expectedPts: expectedPtsB,
       distribution: distB
     },
-    margin: clampedA - clampedB,
-    confidence: Math.min(90, Math.max(40, 
-      55 + Math.abs(clampedA - clampedB) * 1.2
+    margin: expectedPtsA - expectedPtsB,
+    confidence: Math.min(90, Math.max(45, 
+      50 + Math.abs(margin) * 2
     ))
   };
 }
