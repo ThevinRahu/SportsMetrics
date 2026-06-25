@@ -155,7 +155,7 @@ export default function TournamentDashboard({ tournament, onRefresh, refreshing 
       )}
 
       {activeTab === "overview" && (
-        <OverviewTab myKey={effectiveMyTeam} oppKey={effectiveOpponent} teams={teams} />
+        <OverviewTab myKey={effectiveMyTeam} oppKey={effectiveOpponent} teams={teams} venue={venue} />
       )}
       
       {activeTab === "analysis" && (
@@ -173,7 +173,7 @@ export default function TournamentDashboard({ tournament, onRefresh, refreshing 
       )}
       
       {activeTab === "gameplan" && (
-        <GamePlanView myKey={effectiveMyTeam} oppKey={effectiveOpponent} teams={teams} />
+        <GamePlanView myKey={effectiveMyTeam} oppKey={effectiveOpponent} teams={teams} venue={venue} />
       )}
       
       {activeTab === "simulator" && (
@@ -188,11 +188,11 @@ export default function TournamentDashboard({ tournament, onRefresh, refreshing 
 }
 
 // Game Plan View
-function GamePlanView({ myKey, oppKey, teams }) {
+function GamePlanView({ myKey, oppKey, teams, venue }) {
   const plan = useMemo(() => generateGamePlan(myKey, oppKey, teams), [myKey, oppKey, teams]);
   const impacts = useMemo(() => improvementImpact(myKey, oppKey, teams), [myKey, oppKey, teams]);
   const mlKeys = useMemo(() => mlKeysToWin(myKey, oppKey, teams), [myKey, oppKey, teams]);
-  const winProb = advancedWinProbability(myKey, oppKey, teams);
+  const winProb = advancedWinProbability(myKey, oppKey, teams, venue);
 
   const priorityColors = { high: theme.red, medium: theme.amber, low: theme.green };
   const priorityBg = { high: theme.redDark, medium: theme.amberDark, low: theme.greenDark };
@@ -437,12 +437,12 @@ function PlayersView({ teams, myKey, oppKey }) {
 }
 
 // Overview Tab - Team summary, form, key numbers
-function OverviewTab({ myKey, oppKey, teams }) {
+function OverviewTab({ myKey, oppKey, teams, venue = "neutral" }) {
   const my = teams[myKey];
   const opp = teams[oppKey];
   if (!my || !opp) return null;
 
-  const winProb = advancedWinProbability(myKey, oppKey, teams);
+  const winProb = advancedWinProbability(myKey, oppKey, teams, venue);
   const myMomentum = momentumScore(my);
   const oppMomentum = momentumScore(opp);
 
@@ -641,4 +641,5 @@ function MiniStat({ label, value, color }) {
     </div>
   );
 }
+
 
