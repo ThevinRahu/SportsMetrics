@@ -1,0 +1,60 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  background: #0a0e1a;
+  color: #f1f5f9;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0e1a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #253352;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3b5998;
+}
+
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+}
+
+input, select, button {
+  outline: none;
+  font-family: inherit;
+}
+
+input:focus, select:focus {
+  border-color: #10b981 !important;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+table {
+  border-spacing: 0;
+}
