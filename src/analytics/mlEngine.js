@@ -425,7 +425,7 @@ async function onnxPredict(teamAKey, teamBKey, teams) {
 }
 
 /**
- * Main ML prediction function (async — uses ONNX when available)
+ * Main ML prediction function (async - uses ONNX when available)
  */
 export async function mlPredict(teamAKey, teamBKey, teams) {
   const teamA = teams[teamAKey];
