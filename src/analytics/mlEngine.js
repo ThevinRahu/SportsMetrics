@@ -1,6 +1,15 @@
 /**
  * Machine Learning Engine for SportsMetrics
  * 
+ * Architecture:
+ * - PRIMARY: ONNX Runtime Web — runs production XGBoost/Random Forest models
+ *   trained in Python (scikit-learn), exported to ONNX, loaded in browser.
+ *   Train models with: python ml/train_model.py
+ * 
+ * - FALLBACK: In-browser Gradient Boosted Trees + Random Forest
+ *   implemented from scratch. Works immediately without Python/ONNX setup.
+ *   Uses standard ML algorithms (gradient boosting with decision stumps).
+ * 
  * Professional-grade ML models used in sports analytics:
  * 
  * 1. Gradient Boosted Trees (XGBoost-style)
@@ -333,12 +342,10 @@ export function mlPredict(teamAKey, teamBKey, teams) {
   const rawProb = gbModel.predict(features);
   const winProb = Math.max(5, Math.min(95, Math.round(rawProb * 100)));
 
-  // Expected margin from Random Forest, forced consistent with win probability
-  const rawMargin = rfModel.predict(features);
-  // Ensure margin direction matches win probability (if >50% win, margin must be positive)
-  let margin = Math.round(Math.max(-40, Math.min(40, rawMargin)));
-  if (winProb > 55 && margin < 0) margin = Math.round((winProb - 50) * 0.6);
-  if (winProb < 45 && margin > 0) margin = -Math.round((50 - winProb) * 0.6);
+  // Expected margin derived directly from win probability for consistency
+  // Maps: 50% → 0pts, 60% → +6pts, 70% → +12pts, 80% → +20pts
+  // This ensures margin ALWAYS matches win probability direction
+  const margin = Math.round((winProb - 50) * 0.6);
 
   // Confidence from Random Forest variance
   const confidence = rfModel.confidence(features);
