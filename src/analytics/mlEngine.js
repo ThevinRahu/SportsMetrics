@@ -333,21 +333,24 @@ export function mlPredict(teamAKey, teamBKey, teams) {
   const rawProb = gbModel.predict(features);
   const winProb = Math.max(5, Math.min(95, Math.round(rawProb * 100)));
 
-  // Expected margin from Random Forest
+  // Expected margin from Random Forest, forced consistent with win probability
   const rawMargin = rfModel.predict(features);
-  const margin = Math.round(Math.max(-40, Math.min(40, rawMargin)));
+  // Ensure margin direction matches win probability (if >50% win, margin must be positive)
+  let margin = Math.round(Math.max(-40, Math.min(40, rawMargin)));
+  if (winProb > 55 && margin < 0) margin = Math.round((winProb - 50) * 0.6);
+  if (winProb < 45 && margin > 0) margin = -Math.round((50 - winProb) * 0.6);
 
   // Confidence from Random Forest variance
   const confidence = rfModel.confidence(features);
 
-  // Top contributing factors (from feature importance + this matchup's features)
+  // Top contributing factors — colour based on whether feature favours YOUR team
   const factors = FEATURE_NAMES.map((name, i) => ({
     name,
     importance: gbModel.featureImportance[i],
     value: features[i],
-    impact: features[i] > 0 ? "favours" : features[i] < -0.1 ? "risk" : "neutral",
+    impact: features[i] > 0.05 ? "favours" : features[i] < -0.05 ? "risk" : "neutral",
   }))
-    .filter(f => f.importance > 20 || Math.abs(f.value) > 0.2)
+    .filter(f => f.importance > 15 || Math.abs(f.value) > 0.15)
     .sort((a, b) => b.importance - a.importance)
     .slice(0, 5);
 
