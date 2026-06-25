@@ -2,7 +2,7 @@
 
 **AI & ML-Powered Sports Analytics Platform for Professional Coaching**
 
-SportsMetrics uses real machine learning models, statistical algorithms, and AI-powered data extraction to deliver match predictions, tactical game plans, and season projections. Built for coaches who need data-driven decisions — not guesswork.
+SportsMetrics uses real machine learning models, statistical algorithms, and AI-powered data extraction to deliver match predictions, tactical game plans, and season projections. Built for coaches who need data-driven decisions - not guesswork.
 
 Currently live with **Rugby Union**. Architecture designed for gradual expansion into Football, Cricket, Basketball, and other sports.
 
@@ -15,9 +15,9 @@ Currently live with **Rugby Union**. Architecture designed for gradual expansion
 | Model | Type | Accuracy | What it predicts |
 |-------|------|----------|-----------------|
 | **ONNX GradientBoostingClassifier** | Pre-trained (scikit-learn) | 93.5% | Win probability |
-| **ONNX RandomForestRegressor** | Pre-trained (scikit-learn) | — | Expected margin |
+| **ONNX RandomForestRegressor** | Pre-trained (scikit-learn) | - | Expected margin |
 | **JS Gradient Boosted Trees** | Trains at runtime | 81%+ | Win prob + feature importance |
-| **JS Random Forest** | Trains at runtime | — | Confidence intervals |
+| **JS Random Forest** | Trains at runtime | - | Confidence intervals |
 
 All models trained on **92 real match results** from Super Rugby Pacific 2026 and Six Nations 2026 (verified from all.rugby + sixnationsrugby.com).
 
@@ -32,16 +32,16 @@ python ml/train_model.py
 ## Features
 
 ### 🏆 Tournaments
-- **Super Rugby Pacific 2026** — Complete verified data
-- **Nations Championship 2026** — Pre-tournament (starts Jul 4)
-- **Rugby Championship 2026** — Pre-tournament (starts Aug)
-- **Domestic/Custom** — Manual data entry for any level
+- **Super Rugby Pacific 2026** - Complete verified data
+- **Nations Championship 2026** - Pre-tournament (starts Jul 4)
+- **Rugby Championship 2026** - Pre-tournament (starts Aug)
+- **Domestic/Custom** - Manual data entry for any level
 
 ### 🤖 ML Prediction Panel
-- **Win Probability** — From trained Gradient Boosted Trees
-- **Expected Margin** — How many points you'll win/lose by
-- **Model Confidence** — How certain the model is (tree vote variance)
-- **Key Factors** — Which metrics are driving THIS specific prediction
+- **Win Probability** - From trained Gradient Boosted Trees
+- **Expected Margin** - How many points you'll win/lose by
+- **Model Confidence** - How certain the model is (tree vote variance)
+- **Key Factors** - Which metrics are driving THIS specific prediction
 
 ### 📊 Match Analysis
 - Head-to-head metric comparison bars
@@ -49,13 +49,13 @@ python ml/train_model.py
 - Predicted score (consistent with win probability)
 - Opponent threat assessment
 - Tactical intelligence insights
-- **Momentum charts** — Form trajectory over last 10 matches
-- **H2H history** — Past meetings with win record and scores
+- **Momentum charts** - Form trajectory over last 10 matches
+- **H2H history** - Past meetings with win record and scores
 
 ### 🎯 Game Plan
 - Areas to improve (ranked by priority)
 - Exploitable opponent weaknesses
-- **ML Keys to Win** — Sensitivity analysis showing where improvement matters most
+- **ML Keys to Win** - Sensitivity analysis showing where improvement matters most
 - Strategic recommendations
 - Risk factors
 - Drill suggestions
@@ -77,9 +77,9 @@ python ml/train_model.py
 - ML model retrains automatically on new data
 
 ### 💾 Database (IndexedDB)
-- Tournament data, match history, custom teams — all persistent
+- Tournament data, match history, custom teams - all persistent
 - Match results grow with every refresh
-- No server needed — runs entirely in browser
+- No server needed - runs entirely in browser
 
 ---
 
@@ -87,13 +87,13 @@ python ml/train_model.py
 
 | Algorithm | Used for | Why this one |
 |-----------|----------|--------------|
-| **Gradient Boosted Trees** | Win probability, key factors | #1 for tabular data — beats neural nets, interpretable |
+| **Gradient Boosted Trees** | Win probability, key factors | #1 for tabular data - beats neural nets, interpretable |
 | **Random Forest** | Margin prediction, confidence | Robust, gives uncertainty via tree variance |
 | **Sigmoid / Logistic** | Score prediction, unified model | Standard probability output, impossible to contradict |
 | **Monte Carlo Simulation** | Season projections | Only way to model uncertainty across remaining fixtures |
-| **Exponential Moving Average** | Form / momentum | Captures direction + recency — better than simple win% |
+| **Exponential Moving Average** | Form / momentum | Captures direction + recency - better than simple win% |
 | **Poisson Distribution** | Try scoring distributions | Statistically correct model for discrete scoring events |
-| **Sensitivity Analysis** | "Keys to Win" | SHAP-like — shows which improvement gives biggest win% boost |
+| **Sensitivity Analysis** | "Keys to Win" | SHAP-like - shows which improvement gives biggest win% boost |
 | **ONNX Runtime (WebAssembly)** | Production inference | Real scikit-learn models running in browser at native speed |
 
 ---
@@ -144,7 +144,7 @@ src/
 │   ├── nationsChampionship2026.js
 │   └── rugbyChampionship2026.js
 ├── db/
-│   └── index.js         # IndexedDB (Dexie) — tournaments + matches
+│   └── index.js         # IndexedDB (Dexie) - tournaments + matches
 ├── services/
 │   └── dataFetcher.js   # AI-powered refresh (Groq + CORS proxy)
 ├── pages/
@@ -195,6 +195,6 @@ src/
 
 ## License
 
-Private — commercial use intended.
+Private - commercial use intended.
 
-*SportsMetrics v1.0 — Rugby Union live. More sports coming soon.*
+*SportsMetrics v1.0 - Rugby Union live. More sports coming soon.*
