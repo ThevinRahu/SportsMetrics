@@ -14,6 +14,7 @@ import db, {
   logRefresh 
 } from './db';
 import { refreshTournamentData } from './services/dataFetcher';
+import { retrainModel } from './analytics/mlEngine';
 
 // Default tournament data (used for initial seeding only)
 const DEFAULT_TOURNAMENTS = {
@@ -118,6 +119,11 @@ export default function App() {
         // Persist to IndexedDB
         await saveTournament(updatedData);
         
+        // Retrain ML model on updated data
+        if (updatedData.teams) {
+          retrainModel(updatedData.teams);
+        }
+
         // Log the refresh
         await logRefresh(tournamentId, result.success, result.source, result.error || "");
 

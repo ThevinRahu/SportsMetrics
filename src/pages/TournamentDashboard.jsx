@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { theme, ratingColor, injuryColor, winColor } from '../styles/theme';
 import { advancedWinProbability, generateGamePlan, improvementImpact } from '../analytics/gamePlan';
 import { momentumScore, injuryRiskEstimate } from '../analytics/bayesian';
-import { mlKeysToWin } from '../analytics/mlEngine';
+import { mlKeysToWin, retrainModel } from '../analytics/mlEngine';
 import RadarChart from '../components/RadarChart';
 import StandingsTable from '../components/StandingsTable';
 import MatchAnalysis from '../components/MatchAnalysis';
@@ -63,6 +63,16 @@ export default function TournamentDashboard({ tournament, onRefresh, refreshing 
             }}
           >
             {refreshing ? "↻ Refreshing..." : "↻ Refresh Data"}
+          </button>
+          <button
+            onClick={() => { retrainModel(teams); setActiveTab(activeTab); }}
+            style={{
+              padding: "8px 12px", fontSize: 10, fontWeight: 600,
+              background: theme.card, color: theme.purple,
+              border: `1px solid ${theme.purple}`, borderRadius: 8, cursor: "pointer",
+            }}
+          >
+            🤖 Retrain ML
           </button>
         </div>
       </div>

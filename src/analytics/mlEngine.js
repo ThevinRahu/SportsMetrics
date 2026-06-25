@@ -609,7 +609,43 @@ function getImprovementRecommendation(featureName) {
 export function retrainModel(teams) {
   gbModel = null;
   rfModel = null;
-  return trainModel(teams);
+  // Retrain JS fallback immediately
+  trainModel(teams);
+  // Also trigger server-side Python retrain (async, updates ONNX when done)
+  retrainONNX(teams);
+  return modelInfo;
+}
+
+/**
+ * Server-side retrain: calls /api/retrain with team data,
+ * receives fresh ONNX models trained by scikit-learn, loads them.
+ */
+async function retrainONNX(teams) {
+  try {
+    const response = await fetch('/api/retrain', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ teams }),
+    });
+    if (!response.ok) {
+      console.warn('Server retrain failed:', response.status);
+      return;
+    }
+    const data = await response.json();
+    if (data.classifier && data.regressor) {
+      // Decode base64 ONNX models and load them
+      const clfBuffer = Uint8Array.from(atob(data.classifier), c => c.charCodeAt(0)).buffer;
+      const regBuffer = Uint8Array.from(atob(data.regressor), c => c.charCodeAt(0)).buffer;
+      onnxClassifier = await ort.InferenceSession.create(clfBuffer);
+      onnxRegressor = await ort.InferenceSession.create(regBuffer);
+      onnxLoaded = true;
+      modelInfo.accuracy = data.accuracy;
+      modelInfo.samples = data.samples;
+      console.log(`✓ ONNX retrained: ${data.accuracy}% accuracy on ${data.samples} samples`);
+    }
+  } catch (e) {
+    console.warn('Server retrain unavailable:', e.message);
+  }
 }
 
 function getEmptyPrediction() {
