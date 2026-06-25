@@ -1,4 +1,5 @@
-numpy==2.0.2
-scikit-learn==1.5.2
-skl2onnx==1.17.0
-onnx==1.16.2
+numpy
+scikit-learn
+skl2onnx
+onnx>=1.17
+protobuf
