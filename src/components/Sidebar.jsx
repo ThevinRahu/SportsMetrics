@@ -145,7 +145,7 @@ export default function Sidebar({
 
       {/* Theory & Methodology */}
       <div style={{ marginTop: "auto", padding: "12px", borderTop: `1px solid ${theme.border}` }}>
-        <button
+        {/* <button
           onClick={onSelectTheory}
           style={{
             display: "flex", alignItems: "center", gap: 10,
@@ -158,7 +158,7 @@ export default function Sidebar({
         >
           <BookIcon />
           <div style={{ fontSize: 12, fontWeight: 600 }}>Analytics Theory</div>
-        </button>
+        </button> */}
         <button
           onClick={onOpenSettings}
           style={{
