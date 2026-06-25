@@ -3,9 +3,5 @@ name = "thevinrahu/sportsmetrics"
 version = "1.0.0"
 description = "AI-powered multi-sport analytics platform"
 
-[[module]]
-name = "sportsmetrics"
-source = "."
-
 [fs]
-public = "dist"
+public = "/opt/static_app"
