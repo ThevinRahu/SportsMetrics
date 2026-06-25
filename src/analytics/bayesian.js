@@ -45,14 +45,16 @@ export function predictScore(teamAKey, teamBKey, teams) {
   const leagueAvgTries = allTeams.reduce((s, t) => s + (t.attack?.tries_pg || 3), 0) / allTeams.length;
   const leagueAvgConceded = allTeams.reduce((s, t) => s + (t.season?.tries_against || 30) / Math.max(1, t.season?.played || 1), 0) / allTeams.length;
 
-  // Expected tries using attack strength vs defense weakness
-  const lambdaA = (a.attack?.tries_pg || 3) * 
+  // Expected tries using Poisson model:
+  // λ = (attack_strength / league_avg) × (defense_weakness / league_avg) × league_avg
+  // This normalizes both attack and defense relative to the league
+  const lambdaA = (a.attack?.tries_pg || 3) / Math.max(0.5, leagueAvgTries) * 
     ((b.season?.tries_against || 30) / Math.max(1, b.season?.played || 1)) / 
-    Math.max(0.5, leagueAvgConceded);
+    Math.max(0.5, leagueAvgConceded) * leagueAvgTries;
   
-  const lambdaB = (b.attack?.tries_pg || 3) * 
+  const lambdaB = (b.attack?.tries_pg || 3) / Math.max(0.5, leagueAvgTries) * 
     ((a.season?.tries_against || 30) / Math.max(1, a.season?.played || 1)) / 
-    Math.max(0.5, leagueAvgConceded);
+    Math.max(0.5, leagueAvgConceded) * leagueAvgTries;
 
   // Generate score distributions (0-12 tries)
   const distA = [];
