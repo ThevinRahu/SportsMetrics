@@ -315,7 +315,7 @@ function GamePlanView({ myKey, oppKey, teams }) {
                 <div>{w.recommendation}</div>
                 <div style={{ fontSize: 9, color: theme.green, marginTop: 2 }}>{w.potentialGain}</div>
               </div>
-            )) : <div style={{ fontSize: 11, color: theme.textDim }}>No significant deficits detected — you lead in all areas.</div>}
+            )) : <div style={{ fontSize: 11, color: theme.textDim }}>No significant deficits detected - you lead in all areas.</div>}
           </div>
         </div>
       )}
