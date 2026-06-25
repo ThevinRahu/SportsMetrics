@@ -36,7 +36,7 @@
 // =====================================================
 
 import * as ort from 'onnxruntime-web';
-import { getAllMatches } from '../data/matchHistory';
+import { getAllMatches as getStaticMatches } from '../data/matchHistory';
 
 let onnxClassifier = null;
 let onnxRegressor = null;
@@ -272,8 +272,9 @@ function generateTrainingData(teams) {
   const yWin = [];   // Win/loss (0-1)
   const yMargin = []; // Point margin (normalized)
 
-  // PRIMARY: Use real historical match results
-  const realMatches = getAllMatches() || [];
+  // PRIMARY: Use real historical match results from static file
+  // (DB matches are loaded async separately and used when retrain is called)
+  const realMatches = getStaticMatches() || [];
 
   if (realMatches.length > 0) {
     for (const [home, away, hs, as] of realMatches) {

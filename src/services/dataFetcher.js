@@ -102,11 +102,11 @@ function truncateContent(html, maxChars) {
  * This way we can distinguish "AI found this value" from "AI didn't find it".
  */
 function getExtractionPrompt(tournamentName, content, existingTeamNames) {
-  return `You are a rugby data extraction AI. Extract team statistics from this webpage for "${tournamentName}".
+  return `You are a rugby data extraction AI. Extract team statistics AND match results from this webpage for "${tournamentName}".
 
 TEAMS: ${existingTeamNames.join(", ")}
 
-Return ONLY valid JSON with this structure. Use NULL for any field you cannot find in the content- do NOT guess or use default values:
+Return ONLY valid JSON with this structure. Use NULL for any field you cannot find:
 {
   "teams": {
     "Team Name": {
@@ -120,8 +120,18 @@ Return ONLY valid JSON with this structure. Use NULL for any field you cannot fi
       "elo": null
     }
   },
+  "matches": [
+    { "home": "Team A", "away": "Team B", "homeScore": 35, "awayScore": 21, "date": "2026-07-04", "round": 1 }
+  ],
   "meta": { "round": null, "source": "url" }
 }
+
+IMPORTANT - MATCHES SECTION:
+- Extract ALL match results you can find on the page
+- Each match needs: home team name, away team name, home score, away score
+- Date and round are optional (use null if not found)
+- Team names must match the TEAMS list I provided
+- This is CRITICAL for ML training - extract every result you can find
 
 FIELDS:
 - season: played, won, lost, drawn, competition points, points for, points against, tries scored, tries conceded, try bonus pts, losing bonus pts  
@@ -321,9 +331,26 @@ export async function refreshTournamentData(tournamentId, existingData) {
       lastRefreshSource: dataUrl,
       teamsUpdated,
     };
+
+    // Extract match results from AI response
+    results.matches = [];
+    if (Array.isArray(aiResult.matches)) {
+      results.matches = aiResult.matches
+        .filter(m => m && m.home && m.away && m.homeScore != null && m.awayScore != null)
+        .map(m => ({
+          homeTeam: m.home,
+          awayTeam: m.away,
+          homeScore: m.homeScore,
+          awayScore: m.awayScore,
+          date: m.date || new Date().toISOString().split('T')[0],
+          round: m.round || null,
+          competition: existingData.name || tournamentId,
+          tournamentId,
+        }));
+    }
     
-    if (teamsUpdated === 0) {
-      results.error = "AI processed content but no new data was found different from existing. Source may not have detailed stats.";
+    if (teamsUpdated === 0 && results.matches.length === 0) {
+      results.error = "AI processed content but no new data was found. Source may not have detailed stats.";
     } else {
       results.error = null;
     }

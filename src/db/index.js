@@ -28,6 +28,8 @@ db.version(2).stores({
   refreshLogs: '++id, tournamentId, timestamp, success, source',
   // User-created domestic tournaments
   customTournaments: 'id, name, sport, createdAt',
+  // Match results history (dynamic, updated on refresh)
+  matches: '++id, tournamentId, homeTeam, awayTeam, date, competition',
 });
 
 export default db;
@@ -122,4 +124,48 @@ export async function clearAll() {
   await db.tournaments.clear();
   await db.refreshLogs.clear();
   await db.customTournaments.clear();
+  await db.matches.clear();
+}
+
+// ===== MATCH HISTORY =====
+
+/**
+ * Save match results to DB
+ */
+export async function saveMatches(matches) {
+  // matches: array of { homeTeam, awayTeam, homeScore, awayScore, date, competition, tournamentId }
+  for (const m of matches) {
+    // Check for duplicate (same teams + same scores + same date)
+    const existing = await db.matches
+      .where('homeTeam').equals(m.homeTeam)
+      .filter(r => r.awayTeam === m.awayTeam && r.homeScore === m.homeScore && r.awayScore === m.awayScore)
+      .first();
+    if (!existing) {
+      await db.matches.add(m);
+    }
+  }
+}
+
+/**
+ * Get all matches from DB
+ */
+export async function getAllMatchesFromDB() {
+  return db.matches.toArray();
+}
+
+/**
+ * Get matches for a specific tournament
+ */
+export async function getMatchesByTournament(tournamentId) {
+  return db.matches.where('tournamentId').equals(tournamentId).toArray();
+}
+
+/**
+ * Seed match history from static data (first load only)
+ */
+export async function seedMatchHistory(staticMatches) {
+  const count = await db.matches.count();
+  if (count === 0 && staticMatches.length > 0) {
+    await db.matches.bulkAdd(staticMatches);
+  }
 }

@@ -11,10 +11,11 @@ import { RUGBY_CHAMPIONSHIP_2026 } from './data/rugbyChampionship2026';
 import db, { 
   saveTournament, getAllTournaments,
   saveCustomTournament, getAllCustomTournaments, updateCustomTournament,
-  logRefresh 
+  logRefresh, saveMatches, seedMatchHistory, getAllMatchesFromDB
 } from './db';
 import { refreshTournamentData } from './services/dataFetcher';
 import { retrainModel } from './analytics/mlEngine';
+import { getAllMatches } from './data/matchHistory';
 
 // Default tournament data (used for initial seeding only)
 const DEFAULT_TOURNAMENTS = {
@@ -79,6 +80,13 @@ export default function App() {
           setDomesticTournaments(customStored);
         }
 
+        // Seed match history from static file (first load only)
+        const staticMatches = getAllMatches().map(([home, away, hs, as, year, comp]) => ({
+          homeTeam: home, awayTeam: away, homeScore: hs, awayScore: as,
+          date: year + "-01-01", competition: comp, tournamentId: comp === "SRP" ? "srp2026" : "nc2026"
+        }));
+        await seedMatchHistory(staticMatches);
+
         setDbReady(true);
       } catch (e) {
         console.error("DB init failed, using in-memory defaults:", e);
@@ -123,6 +131,11 @@ export default function App() {
         // Retrain ML model on updated data
         if (updatedData.teams) {
           retrainModel(updatedData.teams);
+        }
+
+        // Save extracted match results to DB
+        if (result.matches && result.matches.length > 0) {
+          await saveMatches(result.matches);
         }
 
         // Log the refresh
