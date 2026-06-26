@@ -79,6 +79,7 @@ const FEATURE_NAMES = [
   "Turnover Threat",
   "Line Break Power",
   "Defensive Pressure",
+  "Venue Advantage",
 ];
 
 function extractFeatures(teamA, teamB, venue = "neutral") {
