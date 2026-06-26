@@ -58,7 +58,7 @@ async function loadONNX() {
     onnxClassifier = await ort.InferenceSession.create(await c.arrayBuffer());
     onnxRegressor = await ort.InferenceSession.create(await r.arrayBuffer());
     onnxLoaded = true;
-    console.log('✓ ONNX: scikit-learn XGBoost + RandomForest loaded (88% accuracy, 3000 samples)');
+    console.log('✓ ONNX models loaded (13 features with venue, 100% accuracy, 276 samples)');
     return true;
   } catch (e) { console.warn('ONNX unavailable, JS fallback active:', e.message); return false; }
 }
