@@ -385,6 +385,7 @@ export function trainModel(teams) {
 async function onnxPredict(teamAKey, teamBKey, teams, venue = "neutral") {
   const venueVal = venue === "home" ? 0.3 : venue === "away" ? -0.3 : 0;
   const features = [...extractFeatures(teams[teamAKey], teams[teamBKey]), venueVal];
+  console.log(`ONNX predict: ${teamAKey} vs ${teamBKey}, venue=${venue}(${venueVal}), features[12]=${features[12]}, len=${features.length}`);
   const tensor = new ort.Tensor('float32', Float32Array.from(features), [1, 13]);
 
   let winProb = 50;
