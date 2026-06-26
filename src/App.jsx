@@ -1,4 +1,5 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { theme } from './styles/theme';
 import Sidebar from './components/Sidebar';
 import Settings from './components/Settings';
@@ -290,6 +291,9 @@ export default function App() {
 
       {/* Settings Modal */}
       <Settings open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+
+      {/* Vercel Analytics */}
+      <Analytics />
     </div>
   );
 }
