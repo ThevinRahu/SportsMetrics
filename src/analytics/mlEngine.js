@@ -81,7 +81,7 @@ const FEATURE_NAMES = [
   "Defensive Pressure",
 ];
 
-function extractFeatures(teamA, teamB) {
+function extractFeatures(teamA, teamB, venue = "neutral") {
   return [
     ((teamA.elo || 1400) - (teamB.elo || 1400)) / 400,
     ((teamA.attack?.gl || 50) - (teamB.attack?.gl || 50)) / 50,
@@ -95,6 +95,7 @@ function extractFeatures(teamA, teamB) {
     ((teamA.defense?.to || 10) - (teamB.defense?.to || 10)) / 10,
     ((teamA.attack?.lb || 5) - (teamB.attack?.lb || 5)) / 10,
     ((teamB.defense?.missed || 25) - (teamA.defense?.missed || 25)) / 30,
+    venue === "home" ? 0.3 : venue === "away" ? -0.3 : 0, // Feature 13: venue advantage
   ];
 }
 
@@ -427,14 +428,14 @@ async function onnxPredict(teamAKey, teamBKey, teams) {
 /**
  * Main ML prediction function (async - uses ONNX when available)
  */
-export async function mlPredict(teamAKey, teamBKey, teams) {
+export async function mlPredict(teamAKey, teamBKey, teams, venue = "neutral") {
   const teamA = teams[teamAKey];
   const teamB = teams[teamBKey];
   if (!teamA || !teamB) return getEmptyPrediction();
 
-  // Try ONNX first (production model)
+  // Try ONNX first (production model) - note: ONNX uses 12 features (no venue), JS uses 13
   if (onnxLoaded && onnxClassifier) {
-    return onnxPredict(teamAKey, teamBKey, teams);
+    return onnxPredict(teamAKey, teamBKey, teams, venue);
   }
 
   // Fallback: JS Gradient Boosting
@@ -442,7 +443,7 @@ export async function mlPredict(teamAKey, teamBKey, teams) {
   if (!gbModel || !rfModel) trainModel(teams);
   if (!gbModel || !rfModel) return getEmptyPrediction();
 
-  const features = extractFeatures(teamA, teamB);
+  const features = extractFeatures(teamA, teamB, venue);
 
   // Win probability from Gradient Boosted Trees
   const rawProb = gbModel.predict(features);
@@ -470,6 +471,8 @@ export async function mlPredict(teamAKey, teamBKey, teams) {
   return {
     winProbability: winProb,
     expectedMargin: margin,
+    scoreA: Math.round(Math.max(10, Math.min(50, ((teamA.attack?.pts_pg || 22) + (teamB.attack?.pts_pg || 22)) / 2 + margin / 2))),
+    scoreB: Math.round(Math.max(10, Math.min(50, ((teamA.attack?.pts_pg || 22) + (teamB.attack?.pts_pg || 22)) / 2 - margin / 2))),
     confidence,
     keyFactors: factors,
     modelAccuracy: modelInfo.accuracy,
@@ -633,7 +636,7 @@ export function retrainModel(teams) {
 }
 
 function getEmptyPrediction() {
-  return { winProbability: 50, expectedMargin: 0, confidence: 50, keyFactors: [], modelAccuracy: 0, trainingSamples: 0, trained: false };
+  return { winProbability: 50, expectedMargin: 0, scoreA: 25, scoreB: 25, confidence: 50, keyFactors: [], modelAccuracy: 0, trainingSamples: 0, trained: false };
 }
 
 export default { trainModel, mlPredict, mlKeysToWin, getFeatureImportance, getModelInfo, retrainModel };

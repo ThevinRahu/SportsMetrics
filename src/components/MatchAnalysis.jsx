@@ -126,11 +126,11 @@ export default function MatchAnalysis({ myKey, oppKey, teams, tournamentName, ve
   const [mlData, setMlData] = useState(null);
   useEffect(() => {
     let cancelled = false;
-    mlPredict(myKey, oppKey, teams).then(result => {
+    mlPredict(myKey, oppKey, teams, venue).then(result => {
       if (!cancelled) setMlData(result);
     });
     return () => { cancelled = true; };
-  }, [myKey, oppKey, teams]);
+  }, [myKey, oppKey, teams, venue]);
   const mlFinal = mlData || { winProbability: 50, expectedMargin: 0, confidence: 50, keyFactors: [], modelAccuracy: 0, trainingSamples: 0, trained: false };
   const intelligence = useMemo(() => generateIntelligence(myKey, oppKey, teams), [myKey, oppKey, teams]);
 
@@ -431,4 +431,5 @@ function StatCard({ label, value, suffix = "", positive }) {
     </div>
   );
 }
+
 
