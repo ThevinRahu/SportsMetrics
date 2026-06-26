@@ -74,7 +74,7 @@ MATCHES = [
 ]
 
 
-def extract_features(team_a_name, team_b_name):
+def extract_features(team_a_name, team_b_name, venue=0.0):
     a = TEAMS.get(team_a_name, {})
     b = TEAMS.get(team_b_name, {})
     return [
@@ -90,6 +90,7 @@ def extract_features(team_a_name, team_b_name):
         (a.get("to", 10) - b.get("to", 10)) / 10,
         (a.get("lb", 5) - b.get("lb", 5)) / 10,
         (b.get("missed", 25) - a.get("missed", 25)) / 30,
+        venue,  # Feature 13: venue (home=0.3, away=-0.3, neutral=0)
     ]
 
 
@@ -101,20 +102,20 @@ def train_and_export():
     matched = 0
     for home, away, hs, as_ in MATCHES:
         if home in TEAMS and away in TEAMS:
-            # Home team features (venue = home = +0.3)
-            feats_home = extract_features(home, away) + [0.3]
-            X.append(feats_home)
+            # Home perspective (venue = +0.3)
+            feats = extract_features(home, away, 0.3)
+            X.append(feats)
             y_win.append(1 if hs > as_ else 0)
             y_margin.append((hs - as_) / 20.0)
 
-            # Away team perspective (venue = away = -0.3)
-            feats_away = extract_features(away, home) + [-0.3]
-            X.append(feats_away)
+            # Away perspective (venue = -0.3)
+            feats_rev = extract_features(away, home, -0.3)
+            X.append(feats_rev)
             y_win.append(1 if as_ > hs else 0)
             y_margin.append((as_ - hs) / 20.0)
 
-            # Neutral perspective too (for data augmentation)
-            feats_neutral = extract_features(home, away) + [0.0]
+            # Neutral perspective
+            feats_neutral = extract_features(home, away, 0.0)
             X.append(feats_neutral)
             y_win.append(1 if hs > as_ else 0)
             y_margin.append((hs - as_) / 20.0)
@@ -125,7 +126,7 @@ def train_and_export():
     y_win = np.array(y_win)
     y_margin = np.array(y_margin, dtype=np.float32)
 
-    print(f"Training on {matched} real matches ({len(X)} samples with home/away/neutral)")
+    print(f"Training on {matched} real matches ({len(X)} samples with reverse)")
 
     # Train
     clf = GradientBoostingClassifier(n_estimators=100, max_depth=4, learning_rate=0.1, random_state=42)

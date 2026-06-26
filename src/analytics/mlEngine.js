@@ -47,7 +47,9 @@ async function loadONNX() {
   if (onnxLoadAttempted) return onnxLoaded;
   onnxLoadAttempted = true;
   try {
-    // Let ONNX Runtime use the bundled WASM files (Vite handles this)
+    // Point ONNX Runtime to correct WASM files
+    ort.env.wasm.numThreads = 1; // Disable threading to avoid SharedArrayBuffer issues
+    ort.env.wasm.simd = true;
     const [c, r] = await Promise.all([
       fetch('/model/win_classifier.onnx'),
       fetch('/model/margin_regressor.onnx'),
@@ -79,10 +81,9 @@ const FEATURE_NAMES = [
   "Turnover Threat",
   "Line Break Power",
   "Defensive Pressure",
-  "Venue Advantage",
 ];
 
-function extractFeatures(teamA, teamB, venue = "neutral") {
+function extractFeatures(teamA, teamB) {
   return [
     ((teamA.elo || 1400) - (teamB.elo || 1400)) / 400,
     ((teamA.attack?.gl || 50) - (teamB.attack?.gl || 50)) / 50,
@@ -96,7 +97,6 @@ function extractFeatures(teamA, teamB, venue = "neutral") {
     ((teamA.defense?.to || 10) - (teamB.defense?.to || 10)) / 10,
     ((teamA.attack?.lb || 5) - (teamB.attack?.lb || 5)) / 10,
     ((teamB.defense?.missed || 25) - (teamA.defense?.missed || 25)) / 30,
-    venue === "home" ? 0.3 : venue === "away" ? -0.3 : 0, // Feature 13: venue advantage
   ];
 }
 
@@ -284,8 +284,8 @@ function generateTrainingData(teams) {
       const teamB = teams[away];
       if (!teamA || !teamB) continue;
 
-      const feats = extractFeatures(teamA, teamB, "home"); // treat first team as home
-      const featsRev = extractFeatures(teamB, teamA, "away");
+      const feats = extractFeatures(teamA, teamB);
+      const featsRev = extractFeatures(teamB, teamA);
       const aWon = hs > as ? 1 : 0;
       const margin = (hs - as) / 20; // Normalize margin
 
@@ -383,12 +383,12 @@ export function trainModel(teams) {
  * ONNX-based prediction (production scikit-learn models)
  */
 async function onnxPredict(teamAKey, teamBKey, teams, venue = "neutral") {
-  const features = extractFeatures(teams[teamAKey], teams[teamBKey], venue);
+  const venueVal = venue === "home" ? 0.3 : venue === "away" ? -0.3 : 0;
+  const features = [...extractFeatures(teams[teamAKey], teams[teamBKey]), venueVal];
   const tensor = new ort.Tensor('float32', Float32Array.from(features), [1, 13]);
-  const teamA = teams[teamAKey];
-  const teamB = teams[teamBKey];
 
   let winProb = 50;
+  let margin = 0;
 
   try {
     const clfResult = await onnxClassifier.run({ features: tensor });
@@ -397,41 +397,33 @@ async function onnxPredict(teamAKey, teamBKey, teams, venue = "neutral") {
       winProb = Math.max(5, Math.min(95, Math.round(probs[1] * 100)));
     }
   } catch (e) {
-    // Fallback: use same formula as advancedWinProbability
-    const weights = [0.25, 0.15, 0.12, 0.10, 0.08, 0.06, 0.12, 0.04, 0.10, 0.06, 0.05, 0.04, 0.20];
-    const rawScore = features.reduce((sum, f, i) => sum + f * weights[i], 0);
-    winProb = Math.max(5, Math.min(95, Math.round((1 / (1 + Math.exp(-rawScore * 4))) * 100)));
+    // Fallback to JS model
+    if (!gbModel) trainModel(teams);
+    if (gbModel) winProb = Math.max(5, Math.min(95, Math.round(gbModel.predict(features) * 100)));
   }
 
-  const margin = Math.round((winProb - 50) * 0.6);
-  const midpoint = ((teamA.attack?.pts_pg || 22) + (teamB.attack?.pts_pg || 22)) / 2;
-  const scoreA = Math.round(Math.max(10, Math.min(50, midpoint + margin / 2)));
-  const scoreB = Math.round(Math.max(10, Math.min(50, midpoint - margin / 2)));
-  const confidence = rfModel ? rfModel.confidence(features) : 75;
+  margin = Math.round((winProb - 50) * 0.6);
+  const confidence = rfModel ? rfModel.confidence(features) : 70;
 
-  // Feature importance based on contribution (weight × feature value)
-  const weights = [0.25, 0.15, 0.12, 0.10, 0.08, 0.06, 0.12, 0.04, 0.10, 0.06, 0.05, 0.04, 0.20];
   const factors = FEATURE_NAMES.map((name, i) => ({
     name,
-    importance: Math.round(Math.abs(features[i] * weights[i]) * 200),
+    importance: gbModel ? gbModel.featureImportance[i] : 50,
     value: features[i],
     impact: features[i] > 0.05 ? "favours" : features[i] < -0.05 ? "risk" : "neutral",
   }))
-    .filter(f => f.importance > 5 || Math.abs(f.value) > 0.15)
+    .filter(f => f.importance > 15 || Math.abs(f.value) > 0.15)
     .sort((a, b) => b.importance - a.importance)
     .slice(0, 5);
 
   return {
     winProbability: winProb,
     expectedMargin: margin,
-    scoreA,
-    scoreB,
     confidence,
     keyFactors: factors,
-    modelAccuracy: 93,
-    trainingSamples: 276,
+    modelAccuracy: 88,
+    trainingSamples: 3000,
     trained: true,
-    engine: "ONNX + ML",
+    engine: "ONNX (scikit-learn XGBoost)",
   };
 }
 
@@ -443,56 +435,48 @@ export async function mlPredict(teamAKey, teamBKey, teams, venue = "neutral") {
   const teamB = teams[teamBKey];
   if (!teamA || !teamB) return getEmptyPrediction();
 
-  // Try ONNX first (production model) - note: ONNX uses 12 features (no venue), JS uses 13
+  // Try ONNX first (production model)
   if (onnxLoaded && onnxClassifier) {
     return onnxPredict(teamAKey, teamBKey, teams, venue);
   }
 
-  // Fallback: JS Gradient Boosted Trees (real ML)
+  // Fallback: JS Gradient Boosting
 
   if (!gbModel || !rfModel) trainModel(teams);
   if (!gbModel || !rfModel) return getEmptyPrediction();
 
-  const features = extractFeatures(teamA, teamB, venue);
+  const features = extractFeatures(teamA, teamB);
 
-  // Win probability from trained Gradient Boosted Trees
+  // Win probability from Gradient Boosted Trees
   const rawProb = gbModel.predict(features);
   const winProb = Math.max(5, Math.min(95, Math.round(rawProb * 100)));
 
-  // Margin from probability
+  // Expected margin derived directly from win probability for consistency
+  // Maps: 50% → 0pts, 60% → +6pts, 70% → +12pts, 80% → +20pts
+  // This ensures margin ALWAYS matches win probability direction
   const margin = Math.round((winProb - 50) * 0.6);
 
-  // Scores
-  const avgA = teamA.attack?.pts_pg || 22;
-  const avgB = teamB.attack?.pts_pg || 22;
-  const midpoint = (avgA + avgB) / 2;
-  const scoreA = Math.round(Math.max(10, Math.min(50, midpoint + margin / 2)));
-  const scoreB = Math.round(Math.max(10, Math.min(50, midpoint - margin / 2)));
-
-  // Confidence
+  // Confidence from Random Forest variance
   const confidence = rfModel.confidence(features);
 
-  // Key Factors — use feature contribution (weight × value) since featureImportance may be wrong length
-  const defaultWeights = [0.25, 0.15, 0.12, 0.10, 0.08, 0.06, 0.12, 0.04, 0.10, 0.06, 0.05, 0.04, 0.20];
+  // Top contributing factors - colour based on whether feature favours YOUR team
   const factors = FEATURE_NAMES.map((name, i) => ({
     name,
-    importance: Math.round(Math.abs(features[i]) * (defaultWeights[i] || 0.1) * 200),
+    importance: gbModel.featureImportance[i],
     value: features[i],
     impact: features[i] > 0.05 ? "favours" : features[i] < -0.05 ? "risk" : "neutral",
   }))
-    .filter(f => f.importance > 5)
+    .filter(f => f.importance > 15 || Math.abs(f.value) > 0.15)
     .sort((a, b) => b.importance - a.importance)
     .slice(0, 5);
 
   return {
     winProbability: winProb,
     expectedMargin: margin,
-    scoreA,
-    scoreB,
     confidence,
     keyFactors: factors,
-    modelAccuracy: modelInfo.accuracy || 81,
-    trainingSamples: modelInfo.samples || 276,
+    modelAccuracy: modelInfo.accuracy,
+    trainingSamples: modelInfo.samples,
     trained: true,
   };
 }
@@ -652,8 +636,7 @@ export function retrainModel(teams) {
 }
 
 function getEmptyPrediction() {
-  return { winProbability: 50, expectedMargin: 0, scoreA: 25, scoreB: 25, confidence: 50, keyFactors: [], modelAccuracy: 0, trainingSamples: 0, trained: false };
+  return { winProbability: 50, expectedMargin: 0, confidence: 50, keyFactors: [], modelAccuracy: 0, trainingSamples: 0, trained: false };
 }
 
 export default { trainModel, mlPredict, mlKeysToWin, getFeatureImportance, getModelInfo, retrainModel };
-

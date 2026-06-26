@@ -149,110 +149,124 @@ export default function MatchAnalysis({ myKey, oppKey, teams, tournamentName, ve
 
   return (
     <div>
-      {/* ML PREDICTION - PRIMARY (at top) */}
+      {/* Score Prediction Header */}
       <div style={{ 
+        display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: 20,
         background: theme.card, border: `1px solid ${theme.border}`, borderRadius: 12,
-        padding: 24, marginBottom: 20
+        padding: 24, marginBottom: 20, alignItems: "center"
       }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ width: 48, height: 48, borderRadius: "50%", background: myColor, margin: "0 auto 8px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 800 }}>
+            {my.abbr?.slice(0, 2)}
+          </div>
+          <div style={{ fontSize: 14, fontWeight: 700 }}>{myKey}</div>
+          <div style={{ fontSize: 10, color: theme.textDim, marginTop: 2 }}>{my.season?.won}W-{my.season?.lost}L</div>
+          <div style={{ fontSize: 9, color: theme.textDim }}>ELO {my.elo}</div>
+          <div style={{ fontSize: 28, fontWeight: 800, marginTop: 8, color: winColor(winProb) }}>
+            {prediction?.teamA?.expectedPts || 0}
+          </div>
+          <div style={{ fontSize: 9, color: theme.textDim }}>Predicted Score</div>
+          <div style={{ fontSize: 11, color: theme.textSecondary, marginTop: 4 }}>
+            ~{prediction?.teamA?.expectedTries || 0} tries
+          </div>
+          {/* Form row */}
+          <div style={{ display: "flex", gap: 3, justifyContent: "center", marginTop: 8 }}>
+            {(my.form?.last5 || []).map((r, i) => (
+              <div key={i} style={{
+                width: 18, height: 18, borderRadius: 3,
+                background: r === "W" ? theme.greenDark : theme.redDark,
+                border: `1px solid ${r === "W" ? theme.green : theme.red}`,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 8, fontWeight: 700, color: r === "W" ? theme.greenText : theme.redText
+              }}>{r}</div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: 9, color: theme.textDim, marginBottom: 4 }}>PREDICTED RESULT</div>
+          <div style={{ fontSize: 11, color: theme.textSecondary, marginBottom: 8 }}>
+            Margin: {Math.abs(prediction?.margin || 0)} pts
+          </div>
+          <div style={{ 
+            fontSize: 36, fontWeight: 800,
+            color: winColor(winProb)
+          }}>{winProb}%</div>
+          <div style={{ fontSize: 9, color: theme.textDim }}>Win Probability</div>
+          <div style={{ marginTop: 10, fontSize: 10, color: theme.textSecondary }}>
+            Monte Carlo: {h2h.aWins}% - {h2h.bWins}%
+          </div>
+          <div style={{ fontSize: 9, color: theme.textDim, marginTop: 2 }}>
+            (1000 simulations)
+          </div>
+        </div>
+
+        <div style={{ textAlign: "center" }}>
+          <div style={{ width: 48, height: 48, borderRadius: "50%", background: oppColor, margin: "0 auto 8px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 800, color: "#fff" }}>
+            {opp.abbr?.slice(0, 2)}
+          </div>
+          <div style={{ fontSize: 14, fontWeight: 700 }}>{oppKey}</div>
+          <div style={{ fontSize: 10, color: theme.textDim, marginTop: 2 }}>{opp.season?.won}W-{opp.season?.lost}L</div>
+          <div style={{ fontSize: 9, color: theme.textDim }}>ELO {opp.elo}</div>
+          <div style={{ fontSize: 28, fontWeight: 800, marginTop: 8, color: winColor(100 - winProb) }}>
+            {prediction?.teamB?.expectedPts || 0}
+          </div>
+          <div style={{ fontSize: 9, color: theme.textDim }}>Predicted Score</div>
+          <div style={{ fontSize: 11, color: theme.textSecondary, marginTop: 4 }}>
+            ~{prediction?.teamB?.expectedTries || 0} tries
+          </div>
+          <div style={{ display: "flex", gap: 3, justifyContent: "center", marginTop: 8 }}>
+            {(opp.form?.last5 || []).map((r, i) => (
+              <div key={i} style={{
+                width: 18, height: 18, borderRadius: 3,
+                background: r === "W" ? theme.greenDark : theme.redDark,
+                border: `1px solid ${r === "W" ? theme.green : theme.red}`,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 8, fontWeight: 700, color: r === "W" ? theme.greenText : theme.redText
+              }}>{r}</div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ML Prediction Panel - positioned after scores, before radar */}
+      <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: 12, padding: 16, marginBottom: 16 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
           <span style={{ fontSize: 16 }}>🤖</span>
           <div>
-            <div style={{ fontSize: 13, fontWeight: 700 }}>ML Match Prediction</div>
-            <div style={{ fontSize: 9, color: theme.textDim }}>Gradient Boosted Trees • {mlFinal.trainingSamples || 0} samples • {mlFinal.modelAccuracy || 0}% accuracy</div>
+            <div style={{ fontSize: 12, fontWeight: 700 }}>ML Prediction</div>
+            <div style={{ fontSize: 9, color: theme.textDim }}>ONNX Gradient Boosted Trees • {mlFinal.trainingSamples || 0} samples • {mlFinal.modelAccuracy || 0}% accuracy</div>
           </div>
         </div>
-
-        <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: 20, alignItems: "center" }}>
-          <div style={{ textAlign: "center" }}>
-            <div style={{ width: 48, height: 48, borderRadius: "50%", background: myColor, margin: "0 auto 8px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 800 }}>
-              {my.abbr?.slice(0, 2)}
-            </div>
-            <div style={{ fontSize: 14, fontWeight: 700 }}>{myKey}</div>
-            <div style={{ fontSize: 10, color: theme.textDim }}>{my.season?.won}W-{my.season?.lost}L • ELO {my.elo}</div>
-            <div style={{ fontSize: 28, fontWeight: 800, marginTop: 8, color: winColor(mlFinal.winProbability || 50) }}>
-              {Math.round(((my.attack?.pts_pg || 22) + (opp.attack?.pts_pg || 22)) / 2 + (mlFinal.expectedMargin || 0) / 2)}
-            </div>
-            <div style={{ fontSize: 9, color: theme.textDim }}>ML Predicted Score</div>
-            <div style={{ display: "flex", gap: 3, justifyContent: "center", marginTop: 8 }}>
-              {(my.form?.last5 || []).map((r, i) => (
-                <div key={i} style={{ width: 18, height: 18, borderRadius: 3, background: r === "W" ? theme.greenDark : theme.redDark, border: `1px solid ${r === "W" ? theme.green : theme.red}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, fontWeight: 700, color: r === "W" ? theme.greenText : theme.redText }}>{r}</div>
-              ))}
-            </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
+          <div style={{ background: theme.surface, borderRadius: 10, padding: 14, textAlign: "center", border: `1px solid ${theme.border}` }}>
+            <div style={{ fontSize: 9, color: theme.textDim, marginBottom: 4 }}>{myKey} Win Probability</div>
+            <div style={{ fontSize: 26, fontWeight: 800, color: winColor(mlFinal.winProbability || 50) }}>{mlFinal.winProbability || 50}%</div>
           </div>
-
-          <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: 9, color: theme.textDim, marginBottom: 4 }}>ML PREDICTION</div>
-            <div style={{ fontSize: 42, fontWeight: 800, color: winColor(mlFinal.winProbability || 50) }}>{mlFinal.winProbability || 50}%</div>
-            <div style={{ fontSize: 9, color: theme.textDim }}>Win Probability</div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: (mlFinal.expectedMargin || 0) >= 0 ? theme.green : theme.red, marginTop: 8 }}>
-              {(mlFinal.expectedMargin || 0) >= 0 ? "+" : ""}{mlFinal.expectedMargin || 0} pts margin
-            </div>
-            <div style={{ fontSize: 10, color: theme.textSecondary, marginTop: 6 }}>
-              Confidence: {mlFinal.confidence || 50}%
-            </div>
+          <div style={{ background: theme.surface, borderRadius: 10, padding: 14, textAlign: "center", border: `1px solid ${theme.border}` }}>
+            <div style={{ fontSize: 9, color: theme.textDim, marginBottom: 4 }}>Expected Margin</div>
+            <div style={{ fontSize: 26, fontWeight: 800, color: (mlFinal.expectedMargin || 0) > 0 ? theme.green : (mlFinal.expectedMargin || 0) < 0 ? theme.red : theme.textSecondary }}>{(mlFinal.expectedMargin || 0) > 0 ? "+" : ""}{mlFinal.expectedMargin || 0}</div>
+            <div style={{ fontSize: 9, color: theme.textDim }}>points</div>
           </div>
-
-          <div style={{ textAlign: "center" }}>
-            <div style={{ width: 48, height: 48, borderRadius: "50%", background: oppColor, margin: "0 auto 8px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 800, color: "#fff" }}>
-              {opp.abbr?.slice(0, 2)}
-            </div>
-            <div style={{ fontSize: 14, fontWeight: 700 }}>{oppKey}</div>
-            <div style={{ fontSize: 10, color: theme.textDim }}>{opp.season?.won}W-{opp.season?.lost}L • ELO {opp.elo}</div>
-            <div style={{ fontSize: 28, fontWeight: 800, marginTop: 8, color: winColor(100 - (mlFinal.winProbability || 50)) }}>
-              {Math.round(((my.attack?.pts_pg || 22) + (opp.attack?.pts_pg || 22)) / 2 - (mlFinal.expectedMargin || 0) / 2)}
-            </div>
-            <div style={{ fontSize: 9, color: theme.textDim }}>ML Predicted Score</div>
-            <div style={{ display: "flex", gap: 3, justifyContent: "center", marginTop: 8 }}>
-              {(opp.form?.last5 || []).map((r, i) => (
-                <div key={i} style={{ width: 18, height: 18, borderRadius: 3, background: r === "W" ? theme.greenDark : theme.redDark, border: `1px solid ${r === "W" ? theme.green : theme.red}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, fontWeight: 700, color: r === "W" ? theme.greenText : theme.redText }}>{r}</div>
-              ))}
-            </div>
+          <div style={{ background: theme.surface, borderRadius: 10, padding: 14, textAlign: "center", border: `1px solid ${theme.border}` }}>
+            <div style={{ fontSize: 9, color: theme.textDim, marginBottom: 4 }}>Model Confidence</div>
+            <div style={{ fontSize: 26, fontWeight: 800, color: ratingColor(mlFinal.confidence || 50) }}>{mlFinal.confidence || 50}%</div>
           </div>
         </div>
-
-        {/* Key Factors */}
         {mlFinal.keyFactors && mlFinal.keyFactors.length > 0 && (
-          <div style={{ marginTop: 16, paddingTop: 16, borderTop: `1px solid ${theme.border}` }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: theme.textDim, marginBottom: 8, textTransform: "uppercase", letterSpacing: 1 }}>Key Factors</div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
-              {mlFinal.keyFactors.map((f, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <div style={{ flex: 1, fontSize: 10, color: theme.textSecondary }}>{f.name}</div>
-                  <div style={{ width: 50, height: 4, background: theme.surface, borderRadius: 2, overflow: "hidden" }}>
-                    <div style={{ width: `${f.importance}%`, height: "100%", borderRadius: 2, background: f.impact === "favours" ? theme.green : f.impact === "risk" ? theme.red : theme.textDim }} />
-                  </div>
-                  <span style={{ fontSize: 9, color: f.impact === "favours" ? theme.green : f.impact === "risk" ? theme.red : theme.textDim, minWidth: 24 }}>{f.importance}%</span>
+          <div>
+            <div style={{ fontSize: 10, fontWeight: 700, color: theme.textDim, marginBottom: 8, textTransform: "uppercase", letterSpacing: 1 }}>Key Factors Driving This Prediction</div>
+            {mlFinal.keyFactors.map((f, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+                <div style={{ flex: 1, fontSize: 11, color: theme.textSecondary }}>{f.name}</div>
+                <div style={{ width: 80, height: 5, background: theme.surface, borderRadius: 3, overflow: "hidden" }}>
+                  <div style={{ width: `${f.importance}%`, height: "100%", borderRadius: 3, background: f.impact === "favours" ? theme.green : f.impact === "risk" ? theme.red : theme.textDim }} />
                 </div>
-              ))}
-            </div>
+                <div style={{ fontSize: 10, fontWeight: 600, minWidth: 28, textAlign: "right", color: f.impact === "favours" ? theme.green : f.impact === "risk" ? theme.red : theme.textDim }}>{f.importance}%</div>
+              </div>
+            ))}
           </div>
         )}
-      </div>
-
-      {/* STATISTICAL PREDICTION - SECONDARY (below) */}
-      <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: 12, padding: 16, marginBottom: 20 }}>
-        <div style={{ fontSize: 10, fontWeight: 700, color: theme.textDim, letterSpacing: 1, marginBottom: 12, textTransform: "uppercase" }}>
-          Statistical Model Prediction
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 12 }}>
-          <div style={{ background: theme.surface, borderRadius: 8, padding: 10, textAlign: "center" }}>
-            <div style={{ fontSize: 9, color: theme.textDim }}>Win Prob (Statistical)</div>
-            <div style={{ fontSize: 18, fontWeight: 800, color: winColor(winProb) }}>{winProb}%</div>
-          </div>
-          <div style={{ background: theme.surface, borderRadius: 8, padding: 10, textAlign: "center" }}>
-            <div style={{ fontSize: 9, color: theme.textDim }}>Predicted Score</div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: theme.textSecondary }}>{prediction?.teamA?.expectedPts || 0} - {prediction?.teamB?.expectedPts || 0}</div>
-          </div>
-          <div style={{ background: theme.surface, borderRadius: 8, padding: 10, textAlign: "center" }}>
-            <div style={{ fontSize: 9, color: theme.textDim }}>Monte Carlo</div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: theme.textSecondary }}>{h2h.aWins}% - {h2h.bWins}%</div>
-            <div style={{ fontSize: 8, color: theme.textDim }}>1000 sims</div>
-          </div>
-          <div style={{ background: theme.surface, borderRadius: 8, padding: 10, textAlign: "center" }}>
-            <div style={{ fontSize: 9, color: theme.textDim }}>Stat Confidence</div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: theme.textSecondary }}>{prediction?.confidence || 50}%</div>
-          </div>
-        </div>
       </div>
 
       {/* Head-to-Head Comparison Bars + Radar */}
