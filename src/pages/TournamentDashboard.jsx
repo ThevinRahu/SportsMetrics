@@ -66,7 +66,10 @@ export default function TournamentDashboard({ tournament, onRefresh, refreshing 
             {refreshing ? "↻ Refreshing..." : "↻ Refresh Data"}
           </button>
           <button
-            onClick={() => { retrainModel(teams); setActiveTab(activeTab); }}
+            onClick={() => { 
+              const result = retrainModel(teams); 
+              alert(`ML retrained: ${result.accuracy}% accuracy on ${result.samples} samples`);
+            }}
             style={{
               padding: "8px 12px", fontSize: 10, fontWeight: 600,
               background: theme.card, color: theme.purple,

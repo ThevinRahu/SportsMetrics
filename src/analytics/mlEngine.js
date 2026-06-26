@@ -47,7 +47,7 @@ async function loadONNX() {
   if (onnxLoadAttempted) return onnxLoaded;
   onnxLoadAttempted = true;
   try {
-    ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.21.0/dist/';
+    // Let ONNX Runtime use the bundled WASM files (Vite handles this)
     const [c, r] = await Promise.all([
       fetch('/model/win_classifier.onnx'),
       fetch('/model/margin_regressor.onnx'),
