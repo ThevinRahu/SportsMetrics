@@ -71,6 +71,33 @@ MATCHES = [
     ("England","Ireland",21,42),("Wales","Scotland",23,26),("France","Italy",33,8),
     ("Ireland","Wales",27,17),("Scotland","France",50,40),("Italy","England",23,18),
     ("Ireland","Scotland",43,21),("Wales","Italy",31,17),("France","England",48,46),
+    # Super Rugby Pacific 2025 (HOME team listed first - verified from all.rugby)
+    ("Crusaders","Hurricanes",33,25),("Waratahs","Highlanders",37,36),("Fijian Drua","Brumbies",32,36),
+    ("Blues","Chiefs",14,25),("Western Force","Moana Pasifika",45,44),("Chiefs","Crusaders",49,24),
+    ("Reds","Moana Pasifika",56,36),("Hurricanes","Fijian Drua",38,34),("Highlanders","Blues",29,21),
+    ("Brumbies","Western Force",42,45),("Moana Pasifika","Highlanders",29,31),("Waratahs","Fijian Drua",29,24),
+    ("Chiefs","Brumbies",49,34),("Hurricanes","Blues",29,33),("Western Force","Reds",24,28),
+    ("Blues","Brumbies",20,21),("Fijian Drua","Chiefs",28,24),("Moana Pasifika","Hurricanes",40,31),
+    ("Waratahs","Western Force",34,10),("Crusaders","Reds",43,19),("Highlanders","Hurricanes",18,20),
+    ("Brumbies","Fijian Drua",38,21),("Crusaders","Western Force",55,33),("Chiefs","Blues",32,31),
+    ("Reds","Waratahs",35,15),("Moana Pasifika","Chiefs",35,50),("Highlanders","Reds",23,29),
+    ("Blues","Crusaders",19,42),("Waratahs","Brumbies",28,23),("Western Force","Fijian Drua",52,15),
+    ("Hurricanes","Waratahs",57,12),("Brumbies","Highlanders",34,27),("Crusaders","Moana Pasifika",29,45),
+    ("Reds","Western Force",28,24),("Chiefs","Reds",27,15),("Moana Pasifika","Waratahs",45,28),
+    ("Fijian Drua","Crusaders",14,31),("Blues","Hurricanes",19,18),("Western Force","Highlanders",29,20),
+    ("Hurricanes","Crusaders",24,31),("Waratahs","Chiefs",21,14),("Blues","Moana Pasifika",36,17),
+    ("Highlanders","Fijian Drua",43,20),("Reds","Brumbies",26,39),("Crusaders","Blues",25,22),
+    ("Fijian Drua","Waratahs",28,14),("Moana Pasifika","Brumbies",0,24),("Chiefs","Highlanders",46,10),
+    ("Western Force","Hurricanes",17,17),("Chiefs","Western Force",56,22),("Reds","Blues",35,21),
+    ("Moana Pasifika","Fijian Drua",34,15),("Highlanders","Crusaders",10,43),("Brumbies","Hurricanes",29,35),
+    ("Blues","Western Force",40,19),("Fijian Drua","Reds",36,33),("Hurricanes","Chiefs",35,17),
+    ("Brumbies","Waratahs",40,17),("Highlanders","Moana Pasifika",29,34),("Fijian Drua","Blues",5,34),
+    ("Waratahs","Reds",21,28),("Crusaders","Chiefs",19,35),("Western Force","Brumbies",14,33),
+    ("Hurricanes","Highlanders",24,20),("Waratahs","Crusaders",33,48),("Fijian Drua","Western Force",38,7),
+    ("Moana Pasifika","Blues",27,21),("Brumbies","Reds",24,14),("Crusaders","Highlanders",15,12),
+    ("Reds","Hurricanes",27,31),("Chiefs","Moana Pasifika",85,7),("Western Force","Waratahs",17,22),
+    ("Highlanders","Chiefs",24,41),("Brumbies","Crusaders",31,33),("Blues","Waratahs",46,6),
+    ("Hurricanes","Moana Pasifika",64,12),("Reds","Fijian Drua",52,7),
 ]
 
 
@@ -102,23 +129,17 @@ def train_and_export():
     matched = 0
     for home, away, hs, as_ in MATCHES:
         if home in TEAMS and away in TEAMS:
-            # Home perspective (venue = +0.3)
-            feats = extract_features(home, away, 0.3)
+            # Home team perspective (venue = +0.5)
+            feats = extract_features(home, away, 0.5)
             X.append(feats)
             y_win.append(1 if hs > as_ else 0)
             y_margin.append((hs - as_) / 20.0)
 
-            # Away perspective (venue = -0.3)
-            feats_rev = extract_features(away, home, -0.3)
+            # Away team perspective (venue = -0.5)
+            feats_rev = extract_features(away, home, -0.5)
             X.append(feats_rev)
             y_win.append(1 if as_ > hs else 0)
             y_margin.append((as_ - hs) / 20.0)
-
-            # Neutral perspective
-            feats_neutral = extract_features(home, away, 0.0)
-            X.append(feats_neutral)
-            y_win.append(1 if hs > as_ else 0)
-            y_margin.append((hs - as_) / 20.0)
 
             matched += 1
 
@@ -143,7 +164,8 @@ def train_and_export():
 
     initial_type = [('features', FloatTensorType([None, 13]))]
 
-    onnx_clf = convert_sklearn(clf, initial_types=initial_type, target_opset=13)
+    onnx_clf = convert_sklearn(clf, initial_types=initial_type, target_opset=13,
+                              options={id(clf): {'zipmap': False}})
     with open(os.path.join(output_dir, 'win_classifier.onnx'), 'wb') as f:
         f.write(onnx_clf.SerializeToString())
 
