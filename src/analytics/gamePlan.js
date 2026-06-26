@@ -44,15 +44,12 @@ export function advancedWinProbability(myKey, oppKey, teams, venue = "neutral") 
     ((my.defense?.to || 10) - (opp.defense?.to || 10)) / 10,
     ((my.attack?.lb || 5) - (opp.attack?.lb || 5)) / 10,
     ((opp.defense?.missed || 25) - (my.defense?.missed || 25)) / 30,
+    venue === "home" ? 0.3 : venue === "away" ? -0.3 : 0, // venue feature
   ];
 
-  // Weights learned by the trained model (from feature importance)
-  const weights = [0.25, 0.15, 0.12, 0.10, 0.08, 0.06, 0.12, 0.04, 0.10, 0.06, 0.05, 0.04];
+  // Weights (13 features including venue)
+  const weights = [0.25, 0.15, 0.12, 0.10, 0.08, 0.06, 0.12, 0.04, 0.10, 0.06, 0.05, 0.04, 0.15];
   let rawScore = features.reduce((sum, f, i) => sum + f * weights[i], 0);
-  
-  // Home advantage: +0.15 raw score (≈ +4% win probability)
-  if (venue === "home") rawScore += 0.15;
-  else if (venue === "away") rawScore -= 0.15;
 
   // Sigmoid to probability
   const prob = 1 / (1 + Math.exp(-rawScore * 4));

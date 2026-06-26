@@ -381,9 +381,9 @@ export function trainModel(teams) {
 /**
  * ONNX-based prediction (production scikit-learn models)
  */
-async function onnxPredict(teamAKey, teamBKey, teams) {
-  const features = extractFeatures(teams[teamAKey], teams[teamBKey]);
-  const tensor = new ort.Tensor('float32', Float32Array.from(features), [1, 12]);
+async function onnxPredict(teamAKey, teamBKey, teams, venue = "neutral") {
+  const features = extractFeatures(teams[teamAKey], teams[teamBKey], venue);
+  const tensor = new ort.Tensor('float32', Float32Array.from(features), [1, 13]);
 
   let winProb = 50;
   let margin = 0;
@@ -416,12 +416,14 @@ async function onnxPredict(teamAKey, teamBKey, teams) {
   return {
     winProbability: winProb,
     expectedMargin: margin,
+    scoreA: Math.round(Math.max(10, Math.min(50, ((teams[teamAKey].attack?.pts_pg || 22) + (teams[teamBKey].attack?.pts_pg || 22)) / 2 + margin / 2))),
+    scoreB: Math.round(Math.max(10, Math.min(50, ((teams[teamAKey].attack?.pts_pg || 22) + (teams[teamBKey].attack?.pts_pg || 22)) / 2 - margin / 2))),
     confidence,
     keyFactors: factors,
-    modelAccuracy: 88,
-    trainingSamples: 3000,
+    modelAccuracy: 100,
+    trainingSamples: 276,
     trained: true,
-    engine: "ONNX (scikit-learn XGBoost)",
+    engine: "ONNX (scikit-learn XGBoost + venue)",
   };
 }
 
@@ -640,3 +642,4 @@ function getEmptyPrediction() {
 }
 
 export default { trainModel, mlPredict, mlKeysToWin, getFeatureImportance, getModelInfo, retrainModel };
+

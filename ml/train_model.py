@@ -101,23 +101,31 @@ def train_and_export():
     matched = 0
     for home, away, hs, as_ in MATCHES:
         if home in TEAMS and away in TEAMS:
-            feats = extract_features(home, away)
-            X.append(feats)
+            # Home team features (venue = home = +0.3)
+            feats_home = extract_features(home, away) + [0.3]
+            X.append(feats_home)
             y_win.append(1 if hs > as_ else 0)
             y_margin.append((hs - as_) / 20.0)
 
-            # Reverse
-            feats_rev = extract_features(away, home)
-            X.append(feats_rev)
+            # Away team perspective (venue = away = -0.3)
+            feats_away = extract_features(away, home) + [-0.3]
+            X.append(feats_away)
             y_win.append(1 if as_ > hs else 0)
             y_margin.append((as_ - hs) / 20.0)
+
+            # Neutral perspective too (for data augmentation)
+            feats_neutral = extract_features(home, away) + [0.0]
+            X.append(feats_neutral)
+            y_win.append(1 if hs > as_ else 0)
+            y_margin.append((hs - as_) / 20.0)
+
             matched += 1
 
     X = np.array(X, dtype=np.float32)
     y_win = np.array(y_win)
     y_margin = np.array(y_margin, dtype=np.float32)
 
-    print(f"Training on {matched} real matches ({len(X)} samples with reverse)")
+    print(f"Training on {matched} real matches ({len(X)} samples with home/away/neutral)")
 
     # Train
     clf = GradientBoostingClassifier(n_estimators=100, max_depth=4, learning_rate=0.1, random_state=42)
@@ -132,7 +140,7 @@ def train_and_export():
     output_dir = os.path.join(os.path.dirname(__file__), '..', 'public', 'model')
     os.makedirs(output_dir, exist_ok=True)
 
-    initial_type = [('features', FloatTensorType([None, 12]))]
+    initial_type = [('features', FloatTensorType([None, 13]))]
 
     onnx_clf = convert_sklearn(clf, initial_types=initial_type, target_opset=13)
     with open(os.path.join(output_dir, 'win_classifier.onnx'), 'wb') as f:
