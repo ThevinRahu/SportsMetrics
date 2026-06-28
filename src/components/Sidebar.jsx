@@ -53,15 +53,10 @@ export default function Sidebar({
       {/* Logo */}
       <div style={{ padding: "8px 20px 24px", borderBottom: `1px solid ${theme.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{
-            width: 36, height: 36, borderRadius: 10,
-            background: theme.gradientPrimary,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 18, fontWeight: 800
-          }}>S</div>
+          <img src="/logo.png" alt="SportsMetrics" style={{ width: 36, height: 36, borderRadius: 8, objectFit: "cover" }} />
           <div>
             <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: -0.3 }}>SportsMetrics</div>
-            <div style={{ fontSize: 10, color: theme.textDim }}>Multi-Sport Analytics Engine</div>
+            <div style={{ fontSize: 9, color: theme.textDim }}>Breaking Down Sport Through Numbers</div>
           </div>
         </div>
         {onClose && (
