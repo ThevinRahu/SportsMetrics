@@ -286,10 +286,12 @@ export default function MatchAnalysis({ myKey, oppKey, teams, tournamentName, ve
           </div>
           <ComparisonBar label="Gainline %" myVal={my.attack?.gl} oppVal={opp.attack?.gl} myColor={myColor} oppColor={oppColor} />
           <ComparisonBar label="Tackle %" myVal={my.defense?.tr} oppVal={opp.defense?.tr} myColor={myColor} oppColor={oppColor} />
+          <ComparisonBar label="Missed Tackles" myVal={my.defense?.missed} oppVal={opp.defense?.missed} myColor={myColor} oppColor={oppColor} higherBetter={false} />
           <ComparisonBar label="Line Breaks" myVal={my.attack?.lb} oppVal={opp.attack?.lb} myColor={myColor} oppColor={oppColor} />
           <ComparisonBar label="Turnovers" myVal={my.defense?.to} oppVal={opp.defense?.to} myColor={myColor} oppColor={oppColor} />
           <ComparisonBar label="Dominant Tackles" myVal={my.defense?.dom} oppVal={opp.defense?.dom} myColor={myColor} oppColor={oppColor} />
           <ComparisonBar label="Penalties (lo)" myVal={my.discipline?.pen} oppVal={opp.discipline?.pen} myColor={myColor} oppColor={oppColor} higherBetter={false} />
+          <ComparisonBar label="Pts/Game" myVal={my.attack?.pts_pg} oppVal={opp.attack?.pts_pg} myColor={myColor} oppColor={oppColor} />
           <ComparisonBar label="22m Conv %" myVal={my.attack?.c22} oppVal={opp.attack?.c22} myColor={myColor} oppColor={oppColor} />
           <ComparisonBar label="Goal Kick %" myVal={my.kicking?.goal} oppVal={opp.kicking?.goal} myColor={myColor} oppColor={oppColor} />
         </div>
