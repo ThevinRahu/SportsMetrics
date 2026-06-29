@@ -12,19 +12,48 @@ Currently live with **Rugby Union**. Architecture designed for gradual expansion
 
 ## Machine Learning Models
 
-| Model | Type | Accuracy | What it predicts |
-|-------|------|----------|-----------------|
-| **ONNX GradientBoostingClassifier** | Pre-trained (scikit-learn) | 93.5% | Win probability |
-| **ONNX RandomForestRegressor** | Pre-trained (scikit-learn) | - | Expected margin |
-| **JS Gradient Boosted Trees** | Trains at runtime | 81%+ | Win prob + feature importance |
-| **JS Random Forest** | Trains at runtime | - | Confidence intervals |
+| Model | Type | Training Data | What it predicts |
+|-------|------|---------------|-----------------|
+| **ONNX GradientBoostingClassifier** | Pre-trained (scikit-learn) | 1642 samples | Win probability |
+| **ONNX RandomForestRegressor** | Pre-trained (scikit-learn) | 1642 samples | Expected margin & score |
+| **JS Gradient Boosted Trees** | Trains at runtime | Tournament data | Win prob + feature importance |
+| **JS Random Forest** | Trains at runtime | Tournament data | Confidence intervals |
 
-All models trained on **92 real match results** from Super Rugby Pacific 2026 and Six Nations 2026 (verified from all.rugby + sixnationsrugby.com).
+### Training Data Sources
+- **169 verified matches** from Super Rugby Pacific 2025/2026 + Six Nations 2026 (exact team stats from all.rugby, rugbypass.com)
+- **673 matches from rugbypy** across Top 14, URC, Premiership, Japan League One, Sevens, and international competitions - with real per-match stats (tackles, line breaks, 22m entries, ruck speed, turnovers, carries, dominant tackles)
+- **120 teams** total with real rugby metrics
 
-### Retrain ONNX models:
+### 13 Input Features (what drives predictions)
+| # | Feature | Source Stat | Importance |
+|---|---------|-------------|------------|
+| 1 | Elo Rating Gap | Overall team quality | 21.2% |
+| 2 | Gainline Advantage | 22m entries / gainline % | 2.0% |
+| 3 | Tackle Efficiency | Tackle rate % | 4.4% |
+| 4 | Scrum Dominance | Scrum success % | 3.7% |
+| 5 | Lineout Control | Lineout success % | 4.9% |
+| 6 | Kicking Accuracy | Goal kick % | 5.1% |
+| 7 | Form & Momentum | Recent results (0-100) | 19.7% |
+| 8 | Discipline Edge | Penalties conceded | 6.7% |
+| 9 | Scoring Rate | Points per game | 8.4% |
+| 10 | Turnover Threat | Turnovers won/game | 5.5% |
+| 11 | Line Break Power | Line breaks/game | 6.4% |
+| 12 | Defensive Pressure | Missed tackles/game | 6.8% |
+| 13 | Venue | Home (+0.5) / Away (-0.5) / Neutral (0) | 5.3% |
+
+### How Prediction Works
+1. User selects two teams + venue
+2. Browser computes 13 feature differences from team stats
+3. ONNX classifier (200-tree GBT) returns win probability
+4. ONNX regressor (100-tree RandomForest) returns expected margin
+5. Scores derived from margin + teams' average scoring rates
+
+### Retrain Models
 ```bash
-pip install scikit-learn skl2onnx onnx numpy
-python ml/train_model.py
+pip install scikit-learn skl2onnx onnx numpy onnxruntime rugbypy
+python ml/fetch_all_stats.py    # Fetch latest stats from rugbypy (optional)
+python ml/fetch_and_train.py    # Train and export ONNX models
+python ml/sanity_check.py       # Verify predictions are sane
 ```
 
 ---
@@ -38,10 +67,11 @@ python ml/train_model.py
 - **Domestic/Custom** - Manual data entry for any level
 
 ### 🤖 ML Prediction Panel
-- **Win Probability** - From trained Gradient Boosted Trees
-- **Expected Margin** - How many points you'll win/lose by
-- **Model Confidence** - How certain the model is (tree vote variance)
+- **Win Probability** - From ONNX GradientBoostedTrees (trained on real stats)
+- **Expected Margin** - From ONNX RandomForest regressor
+- **Predicted Score** - ML margin + team scoring averages
 - **Key Factors** - Which metrics are driving THIS specific prediction
+- **Model Confidence** - Tree vote variance from Random Forest
 
 ### 📊 Match Analysis
 - Head-to-head metric comparison bars
@@ -67,8 +97,8 @@ python ml/train_model.py
 
 ### 🏠 Venue Toggle
 - Home / Away / Neutral selection
-- Adjusts all predictions (+4% home advantage)
-- Passed to every model and algorithm
+- ONNX model natively handles venue (~12% prediction swing)
+- Affects win probability, margin, and scores
 
 ### 🔄 AI Data Refresh
 - Fetches live data from tournament websites
@@ -89,12 +119,11 @@ python ml/train_model.py
 |-----------|----------|--------------|
 | **Gradient Boosted Trees** | Win probability, key factors | #1 for tabular data - beats neural nets, interpretable |
 | **Random Forest** | Margin prediction, confidence | Robust, gives uncertainty via tree variance |
-| **Sigmoid / Logistic** | Score prediction, unified model | Standard probability output, impossible to contradict |
+| **ONNX Runtime (WebAssembly)** | Production inference | Real scikit-learn models running in browser at native speed |
 | **Monte Carlo Simulation** | Season projections | Only way to model uncertainty across remaining fixtures |
+| **Sensitivity Analysis** | "Keys to Win" | SHAP-like - shows which improvement gives biggest win% boost |
 | **Exponential Moving Average** | Form / momentum | Captures direction + recency - better than simple win% |
 | **Poisson Distribution** | Try scoring distributions | Statistically correct model for discrete scoring events |
-| **Sensitivity Analysis** | "Keys to Win" | SHAP-like - shows which improvement gives biggest win% boost |
-| **ONNX Runtime (WebAssembly)** | Production inference | Real scikit-learn models running in browser at native speed |
 
 ---
 
@@ -139,7 +168,7 @@ src/
 ├── config/
 │   └── sports.js        # Multi-sport metric definitions
 ├── data/
-│   ├── matchHistory.js  # 92 real match results (seeds IndexedDB)
+│   ├── matchHistory.js  # Real match results (seeds IndexedDB)
 │   ├── superRugby2026.js        # Verified team data
 │   ├── nationsChampionship2026.js
 │   └── rugbyChampionship2026.js
@@ -151,11 +180,16 @@ src/
 │   ├── TournamentDashboard.jsx  # Main view (7 tabs)
 │   ├── DomesticTournament.jsx   # Custom tournaments
 │   └── AnalyticsTheory.jsx      # Algorithm explanations
-├── ml/
-│   └── train_model.py   # ONNX model training script
-└── public/model/
-    ├── win_classifier.onnx      # scikit-learn GBT (93.5% accuracy)
-    └── margin_regressor.onnx    # scikit-learn Random Forest
+ml/
+├── fetch_all_stats.py       # Fetch per-match stats from rugbypy API
+├── fetch_and_train.py       # Feature-aligned training + ONNX export
+├── train_model.py           # Legacy training (verified matches only)
+├── sanity_check.py          # Validate ONNX predictions
+├── rugbypy_matches.json     # 682 match results from rugbypy
+└── rugbypy_team_stats.json  # 1363 per-match stat records (real data)
+public/model/
+├── win_classifier.onnx      # GBT 200 trees, 82% train accuracy
+└── margin_regressor.onnx    # RF 100 trees, R²=0.448
 ```
 
 ---
@@ -167,6 +201,7 @@ src/
 | all.rugby | Super Rugby standings + all match results | ✅ |
 | sixnationsrugby.com | Six Nations 2026 all results | ✅ |
 | rugbypass.com | Detailed team stats (tackles, carries, breaks) | ✅ |
+| rugbypy (API) | 1363 per-match stat records across 131 teams | ✅ |
 | sofascore.com | World Rugby rankings | ✅ |
 | super.rugby | Official competition stats | ✅ |
 
@@ -187,6 +222,8 @@ src/
 
 - React 19 + Vite
 - ONNX Runtime Web (WebAssembly ML inference)
+- scikit-learn (model training - GBT + RandomForest)
+- rugbypy (real match data + per-match stats)
 - Dexie.js (IndexedDB)
 - Groq API (AI data extraction)
 - Vercel (hosting)
@@ -197,4 +234,4 @@ src/
 
 Private - commercial use intended.
 
-*SportsMetrics v1.0 - Rugby Union live. More sports coming soon.*
+*SportsMetrics v1.1 - ML models trained on real rugby stats from 120 teams across 6 competitions.*
