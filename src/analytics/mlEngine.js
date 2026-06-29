@@ -479,16 +479,47 @@ async function onnxPredict(teamAKey, teamBKey, teams, venue = "neutral") {
   const scoreB = Math.round(Math.max(10, Math.min(50, midpoint - margin / 2)));
   const confidence = rfModel ? rfModel.confidence(features) : 75;
 
-  const defaultWeights = [0.25, 0.15, 0.12, 0.10, 0.08, 0.06, 0.12, 0.04, 0.10, 0.06, 0.05, 0.04, 0.20];
-  const factors = FEATURE_NAMES.map((name, i) => ({
-    name,
-    importance: Math.round(Math.abs(features[i]) * (defaultWeights[i] || 0.1) * 500),
-    value: features[i],
-    impact: features[i] > 0.05 ? "favours" : features[i] < -0.05 ? "risk" : "neutral",
-  }))
-    .filter(f => f.importance > 1)
-    .sort((a, b) => b.importance - a.importance)
-    .slice(0, 5);
+  // ML-driven key factors: perturb each feature and measure ONNX prediction change
+  // This is a local SHAP-like approach — shows which stats matter most for THIS matchup
+  const MODEL_IMPORTANCES = [0.212, 0.020, 0.044, 0.037, 0.049, 0.051, 0.197, 0.067, 0.084, 0.055, 0.064, 0.068, 0.053];
+  let factors = [];
+  try {
+    const baseProb = winProb / 100;
+    const perturbResults = [];
+    for (let i = 0; i < 12; i++) {
+      // Zero out this feature to see how much prediction drops
+      const perturbed = [...features];
+      perturbed[i] = 0;
+      const pTensor = new ort.Tensor('float32', new Float32Array(perturbed), [1, 13]);
+      const pResult = await onnxClassifier.run({ features: pTensor });
+      const pProbs = pResult.probabilities?.data;
+      const pProb = pProbs ? pProbs[1] : baseProb;
+      // Impact = how much removing this feature changes the prediction
+      const impact = Math.abs(baseProb - pProb);
+      perturbResults.push({
+        name: FEATURE_NAMES[i],
+        // Combine: ONNX sensitivity (60%) + trained importance (20%) + feature magnitude (20%)
+        importance: Math.round((impact * 600 + MODEL_IMPORTANCES[i] * 200 + Math.abs(features[i]) * 200)),
+        value: features[i],
+        impact: features[i] > 0.05 ? "favours" : features[i] < -0.05 ? "risk" : "neutral",
+      });
+    }
+    factors = perturbResults
+      .filter(f => f.importance > 2)
+      .sort((a, b) => b.importance - a.importance)
+      .slice(0, 5);
+  } catch (e) {
+    // Fallback: use trained model importances * feature values
+    factors = FEATURE_NAMES.map((name, i) => ({
+      name,
+      importance: Math.round(Math.abs(features[i]) * MODEL_IMPORTANCES[i] * 500),
+      value: features[i],
+      impact: features[i] > 0.05 ? "favours" : features[i] < -0.05 ? "risk" : "neutral",
+    }))
+      .filter(f => f.importance > 1)
+      .sort((a, b) => b.importance - a.importance)
+      .slice(0, 5);
+  }
 
   const result = {
     winProbability: winProb,
