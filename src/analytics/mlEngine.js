@@ -465,7 +465,7 @@ async function onnxPredict(teamAKey, teamBKey, teams, venue = "neutral") {
         if ((winProb >= 50 && mlMargin >= 0) || (winProb < 50 && mlMargin <= 0)) {
           margin = Math.max(-40, Math.min(40, mlMargin));
         } else {
-          // Direction mismatch — use win prob direction with ML magnitude
+          // Direction mismatch - use win prob direction with ML magnitude
           margin = Math.max(-40, Math.min(40, Math.sign(winProb - 50) * Math.abs(mlMargin)));
         }
       }
