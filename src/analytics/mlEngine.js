@@ -57,7 +57,7 @@ async function loadONNX() {
     onnxClassifier = await ort.InferenceSession.create(await c.arrayBuffer());
     onnxRegressor = await ort.InferenceSession.create(await r.arrayBuffer());
     onnxLoaded = true;
-    console.log('✓ ONNX models loaded (scikit-learn GBT, 82% accuracy, 676 samples)');
+    console.log('ONNX models loaded (scikit-learn GBT, 1642 samples, feature-aligned)');
     return true;
   } catch (e) { console.warn('ONNX unavailable, JS fallback active:', e.message); return false; }
 }
@@ -390,7 +390,8 @@ async function onnxPredict(teamAKey, teamBKey, teams, venue = "neutral") {
   }
   onnxBusy = true;
 
-  const venueVal = 0; // Always pass neutral to ONNX for base prediction
+  // Pass actual venue to ONNX (model trained with venue feature)
+  const venueVal = venue === "home" ? 0.5 : venue === "away" ? -0.5 : 0;
   const features = [...extractFeatures(teams[teamAKey], teams[teamBKey]), venueVal];
   console.log(`ONNX input: ${teamAKey} vs ${teamBKey}, features=[${features.map(f=>f.toFixed(2)).join(',')}]`);
   const teamA = teams[teamAKey];
@@ -447,13 +448,31 @@ async function onnxPredict(teamAKey, teamBKey, teams, venue = "neutral") {
     onnxBusy = false;
   }
 
-  // Venue is handled by the ONNX model directly via feature 13
+  // Venue is handled natively by ONNX model (feature 13 = 0.5/0/-0.5)
   winProb = Math.max(5, Math.min(95, winProb));
 
-  // Apply professional venue calibration post-ONNX (+3 home, -3 away)
-  if (venue === "home") winProb = Math.min(95, winProb + 3);
-  else if (venue === "away") winProb = Math.max(5, winProb - 3);
-  const margin = Math.round((winProb - 50) * 0.6);
+  // Get margin from ONNX regressor (trained on real score differences)
+  let margin = Math.round((winProb - 50) * 0.6); // fallback
+  try {
+    if (onnxRegressor) {
+      const regTensor = new ort.Tensor('float32', new Float32Array(features), [1, 13]);
+      const regResult = await onnxRegressor.run({ features: regTensor });
+      const regOutput = regResult.variable?.data || Object.values(regResult)[0]?.data;
+      if (regOutput && regOutput.length > 0) {
+        // Regressor was trained on (score_diff / 20), multiply back to real points
+        const mlMargin = Math.round(regOutput[0] * 20);
+        // Ensure margin direction is consistent with win probability
+        if ((winProb >= 50 && mlMargin >= 0) || (winProb < 50 && mlMargin <= 0)) {
+          margin = Math.max(-40, Math.min(40, mlMargin));
+        } else {
+          // Direction mismatch — use win prob direction with ML magnitude
+          margin = Math.max(-40, Math.min(40, Math.sign(winProb - 50) * Math.abs(mlMargin)));
+        }
+      }
+    }
+  } catch (e) {
+    // Fallback already set above
+  }
   
   const midpoint = ((teamA.attack?.pts_pg || 22) + (teamB.attack?.pts_pg || 22)) / 2;
   const scoreA = Math.round(Math.max(10, Math.min(50, midpoint + margin / 2)));
@@ -479,9 +498,9 @@ async function onnxPredict(teamAKey, teamBKey, teams, venue = "neutral") {
     confidence,
     keyFactors: factors,
     modelAccuracy: 82,
-    trainingSamples: 676,
+    trainingSamples: 1642,
     trained: true,
-    engine: "ONNX + venue calibration",
+    engine: "ONNX (GBT, real rugby stats, feature-aligned)",
   };
   onnxBusy = false;
   return result;

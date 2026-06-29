@@ -1,0 +1,4776 @@
+[
+    {
+        "home": "Pau",
+        "away": "Toulon",
+        "hs": 32,
+        "as": 12,
+        "comp": "Top 14"
+    },
+    {
+        "home": "New Zealand 7s Mens",
+        "away": "South Africa 7s Mens",
+        "hs": 14,
+        "as": 12,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Australia 7s Mens",
+        "away": "Spain 7s Mens",
+        "hs": 12,
+        "as": 26,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Australia 7s Womens",
+        "away": "New Zealand 7s Womens",
+        "hs": 7,
+        "as": 36,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Canada 7s Womens",
+        "away": "Usa 7s Womens",
+        "hs": 24,
+        "as": 19,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Fiji 7s Mens",
+        "away": "France 7s Mens",
+        "hs": 21,
+        "as": 12,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Fiji 7s Womens",
+        "away": "France 7s Womens",
+        "hs": 14,
+        "as": 17,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Great Britain 7s Womens",
+        "away": "Japan 7s Womens",
+        "hs": 5,
+        "as": 41,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Argentina 7s Mens",
+        "away": "Great Britain 7s Mens",
+        "hs": 14,
+        "as": 10,
+        "comp": "Sevens"
+    },
+    {
+        "home": "France 7s Mens",
+        "away": "South Africa 7s Mens",
+        "hs": 12,
+        "as": 5,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Fiji 7s Mens",
+        "away": "New Zealand 7s Mens",
+        "hs": 21,
+        "as": 14,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Australia 7s Womens",
+        "away": "Canada 7s Womens",
+        "hs": 35,
+        "as": 10,
+        "comp": "Sevens"
+    },
+    {
+        "home": "New Zealand 7s Womens",
+        "away": "Usa 7s Womens",
+        "hs": 44,
+        "as": 7,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Australia 7s Mens",
+        "away": "Great Britain 7s Mens",
+        "hs": 26,
+        "as": 19,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Argentina 7s Mens",
+        "away": "Spain 7s Mens",
+        "hs": 26,
+        "as": 12,
+        "comp": "Sevens"
+    },
+    {
+        "home": "France 7s Womens",
+        "away": "Japan 7s Womens",
+        "hs": 32,
+        "as": 0,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Fiji 7s Womens",
+        "away": "Great Britain 7s Womens",
+        "hs": 43,
+        "as": 12,
+        "comp": "Sevens"
+    },
+    {
+        "home": "France",
+        "away": "Ireland",
+        "hs": 36,
+        "as": 14,
+        "comp": "Internationals"
+    },
+    {
+        "home": "Italy U20",
+        "away": "Scotland U20",
+        "hs": 10,
+        "as": 36,
+        "comp": "U20 Six Nations"
+    },
+    {
+        "home": "England U20",
+        "away": "Wales U20",
+        "hs": 19,
+        "as": 16,
+        "comp": "U20 Six Nations"
+    },
+    {
+        "home": "Italy",
+        "away": "Scotland",
+        "hs": 18,
+        "as": 15,
+        "comp": "Internationals"
+    },
+    {
+        "home": "Kobelco Kobe Steelers",
+        "away": "Shizuoka Bluerevs",
+        "hs": 60,
+        "as": 45,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Blackrams Tokyo",
+        "away": "Saitama Wild Knights",
+        "hs": 6,
+        "as": 13,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Mie Honda Heat",
+        "away": "Toshiba Brave Lupus Tokyo",
+        "hs": 44,
+        "as": 38,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Toyota Verblitz",
+        "away": "Yokohama Canon Eagles",
+        "hs": 14,
+        "as": 20,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "France U20",
+        "away": "Ireland U20",
+        "hs": 50,
+        "as": 21,
+        "comp": "U20 Six Nations"
+    },
+    {
+        "home": "Kubota Spears",
+        "away": "Urayasu D Rocks",
+        "hs": 48,
+        "as": 14,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Australia 7s Mens",
+        "away": "Great Britain 7s Mens",
+        "hs": 24,
+        "as": 21,
+        "comp": "Sevens"
+    },
+    {
+        "home": "France 7s Mens",
+        "away": "New Zealand 7s Mens",
+        "hs": 21,
+        "as": 26,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Fiji 7s Mens",
+        "away": "South Africa 7s Mens",
+        "hs": 20,
+        "as": 14,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Argentina 7s Mens",
+        "away": "Spain 7s Mens",
+        "hs": 26,
+        "as": 19,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Australia 7s Womens",
+        "away": "Canada 7s Womens",
+        "hs": 38,
+        "as": 10,
+        "comp": "Sevens"
+    },
+    {
+        "home": "France 7s Womens",
+        "away": "Great Britain 7s Womens",
+        "hs": 42,
+        "as": 10,
+        "comp": "Sevens"
+    },
+    {
+        "home": "New Zealand 7s Womens",
+        "away": "Usa 7s Womens",
+        "hs": 31,
+        "as": 0,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Fiji 7s Womens",
+        "away": "Japan 7s Womens",
+        "hs": 14,
+        "as": 31,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Great Britain 7s Mens",
+        "away": "New Zealand 7s Mens",
+        "hs": 19,
+        "as": 26,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Australia 7s Mens",
+        "away": "France 7s Mens",
+        "hs": 14,
+        "as": 29,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Fiji 7s Mens",
+        "away": "Spain 7s Mens",
+        "hs": 26,
+        "as": 24,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Argentina 7s Mens",
+        "away": "South Africa 7s Mens",
+        "hs": 19,
+        "as": 12,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Australia 7s Womens",
+        "away": "France 7s Womens",
+        "hs": 26,
+        "as": 12,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Canada 7s Womens",
+        "away": "Great Britain 7s Womens",
+        "hs": 45,
+        "as": 7,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Fiji 7s Womens",
+        "away": "New Zealand 7s Womens",
+        "hs": 36,
+        "as": 5,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Japan 7s Womens",
+        "away": "Usa 7s Womens",
+        "hs": 38,
+        "as": 14,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Australia 7s Mens",
+        "away": "New Zealand 7s Mens",
+        "hs": 14,
+        "as": 21,
+        "comp": "Sevens"
+    },
+    {
+        "home": "France 7s Mens",
+        "away": "Great Britain 7s Mens",
+        "hs": 36,
+        "as": 10,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Argentina 7s Mens",
+        "away": "Fiji 7s Mens",
+        "hs": 26,
+        "as": 10,
+        "comp": "Sevens"
+    },
+    {
+        "home": "South Africa 7s Mens",
+        "away": "Spain 7s Mens",
+        "hs": 33,
+        "as": 14,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Australia 7s Womens",
+        "away": "Great Britain 7s Womens",
+        "hs": 54,
+        "as": 5,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Canada 7s Womens",
+        "away": "France 7s Womens",
+        "hs": 12,
+        "as": 24,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Japan 7s Womens",
+        "away": "New Zealand 7s Womens",
+        "hs": 34,
+        "as": 12,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Fiji 7s Womens",
+        "away": "Usa 7s Womens",
+        "hs": 34,
+        "as": 15,
+        "comp": "Sevens"
+    },
+    {
+        "home": "England",
+        "away": "Wales",
+        "hs": 48,
+        "as": 7,
+        "comp": "Internationals"
+    },
+    {
+        "home": "Exeter Chiefs Women",
+        "away": "Harlequins Women",
+        "hs": 38,
+        "as": 38,
+        "comp": "Premiership Womens Rugby"
+    },
+    {
+        "home": "Fiji 7s Mens",
+        "away": "South Africa 7s Mens",
+        "hs": 19,
+        "as": 21,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Australia 7s Womens",
+        "away": "New Zealand 7s Womens",
+        "hs": 29,
+        "as": 7,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Australia 7s Mens",
+        "away": "New Zealand 7s Mens",
+        "hs": 10,
+        "as": 12,
+        "comp": "Sevens"
+    },
+    {
+        "home": "France 7s Womens",
+        "away": "Usa 7s Womens",
+        "hs": 21,
+        "as": 14,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Canada 7s Womens",
+        "away": "Japan 7s Womens",
+        "hs": 5,
+        "as": 36,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Fiji 7s Mens",
+        "away": "New Zealand 7s Mens",
+        "hs": 35,
+        "as": 0,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Australia 7s Womens",
+        "away": "Usa 7s Womens",
+        "hs": 26,
+        "as": 5,
+        "comp": "Sevens"
+    },
+    {
+        "home": "France 7s Mens",
+        "away": "Great Britain 7s Mens",
+        "hs": 17,
+        "as": 24,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Argentina 7s Mens",
+        "away": "France 7s Mens",
+        "hs": 12,
+        "as": 47,
+        "comp": "Sevens"
+    },
+    {
+        "home": "France 7s Womens",
+        "away": "New Zealand 7s Womens",
+        "hs": 34,
+        "as": 14,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Canada 7s Womens",
+        "away": "Fiji 7s Womens",
+        "hs": 26,
+        "as": 19,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Great Britain 7s Mens",
+        "away": "Spain 7s Mens",
+        "hs": 28,
+        "as": 19,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Australia 7s Mens",
+        "away": "South Africa 7s Mens",
+        "hs": 12,
+        "as": 28,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Great Britain 7s Womens",
+        "away": "Japan 7s Womens",
+        "hs": 29,
+        "as": 7,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Argentina 7s Mens",
+        "away": "Spain 7s Mens",
+        "hs": 19,
+        "as": 24,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Fiji 7s Womens",
+        "away": "Great Britain 7s Womens",
+        "hs": 5,
+        "as": 41,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Colomiers",
+        "away": "Uso Nevers",
+        "hs": 27,
+        "as": 39,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Beziers",
+        "away": "Grenoble",
+        "hs": 26,
+        "as": 17,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Oyonnax",
+        "away": "Provence Rugby",
+        "hs": 35,
+        "as": 34,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Carcassonne",
+        "away": "Vannes",
+        "hs": 26,
+        "as": 0,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Mont De Marsan",
+        "away": "Soyaux Angouleme",
+        "hs": 23,
+        "as": 13,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Aurillac",
+        "away": "Dax",
+        "hs": 19,
+        "as": 15,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Agen",
+        "away": "Brive",
+        "hs": 18,
+        "as": 13,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Crusaders",
+        "away": "Highlanders",
+        "hs": 25,
+        "as": 23,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "England U20",
+        "away": "Scotland U20",
+        "hs": 17,
+        "as": 33,
+        "comp": "U20 Six Nations"
+    },
+    {
+        "home": "Reds",
+        "away": "Waratahs",
+        "hs": 36,
+        "as": 12,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Ireland U20",
+        "away": "Italy U20",
+        "hs": 30,
+        "as": 27,
+        "comp": "U20 Six Nations"
+    },
+    {
+        "home": "Biarritz",
+        "away": "Valence Romans",
+        "hs": 15,
+        "as": 9,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Ireland",
+        "away": "Italy",
+        "hs": 20,
+        "as": 13,
+        "comp": "Internationals"
+    },
+    {
+        "home": "England",
+        "away": "Scotland",
+        "hs": 31,
+        "as": 20,
+        "comp": "Internationals"
+    },
+    {
+        "home": "Bordeaux",
+        "away": "Castres",
+        "hs": 57,
+        "as": 32,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Bayonne",
+        "away": "Racing 92",
+        "hs": 36,
+        "as": 41,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Lyon",
+        "away": "Us Montauban",
+        "hs": 73,
+        "as": 12,
+        "comp": "Top 14"
+    },
+    {
+        "home": "La Rochelle",
+        "away": "Montpellier",
+        "hs": 33,
+        "as": 43,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Clermont",
+        "away": "Toulon",
+        "hs": 14,
+        "as": 34,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Gloucester Hartpury Women Rfc",
+        "away": "Harlequins Women",
+        "hs": 45,
+        "as": 22,
+        "comp": "Premiership Womens Rugby"
+    },
+    {
+        "home": "Fijian Drua",
+        "away": "Moana Pasifika",
+        "hs": 26,
+        "as": 40,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Blues",
+        "away": "Chiefs",
+        "hs": 15,
+        "as": 19,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Brumbies",
+        "away": "Force",
+        "hs": 24,
+        "as": 56,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Blackrams Tokyo",
+        "away": "Yokohama Canon Eagles",
+        "hs": 31,
+        "as": 53,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Saitama Wild Knights",
+        "away": "Toyota Verblitz",
+        "hs": 26,
+        "as": 20,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Kubota Spears",
+        "away": "Shizuoka Bluerevs",
+        "hs": 19,
+        "as": 42,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Mie Honda Heat",
+        "away": "Mitsubishi Sagamihara Dynaboars",
+        "hs": 44,
+        "as": 34,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Tokyo Sungoliath",
+        "away": "Urayasu D Rocks",
+        "hs": 19,
+        "as": 41,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "France U20",
+        "away": "Wales U20",
+        "hs": 24,
+        "as": 34,
+        "comp": "U20 Six Nations"
+    },
+    {
+        "home": "France",
+        "away": "Wales",
+        "hs": 12,
+        "as": 54,
+        "comp": "Internationals"
+    },
+    {
+        "home": "Stade Francais",
+        "away": "Toulouse",
+        "hs": 9,
+        "as": 13,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Kobelco Kobe Steelers",
+        "away": "Toshiba Brave Lupus Tokyo",
+        "hs": 33,
+        "as": 34,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Agen",
+        "away": "Valence Romans",
+        "hs": 34,
+        "as": 23,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Beziers",
+        "away": "Colomiers",
+        "hs": 18,
+        "as": 0,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Mont De Marsan",
+        "away": "Oyonnax",
+        "hs": 73,
+        "as": 7,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Aurillac",
+        "away": "Soyaux Angouleme",
+        "hs": 18,
+        "as": 3,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Carcassonne",
+        "away": "Uso Nevers",
+        "hs": 42,
+        "as": 31,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Dax",
+        "away": "Provence Rugby",
+        "hs": 33,
+        "as": 21,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Hurricanes",
+        "away": "Moana Pasifika",
+        "hs": 52,
+        "as": 10,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Fijian Drua",
+        "away": "Waratahs",
+        "hs": 36,
+        "as": 13,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Scotland U20",
+        "away": "Wales U20",
+        "hs": 31,
+        "as": 21,
+        "comp": "U20 Six Nations"
+    },
+    {
+        "home": "England U20",
+        "away": "Ireland U20",
+        "hs": 21,
+        "as": 31,
+        "comp": "U20 Six Nations"
+    },
+    {
+        "home": "Biarritz",
+        "away": "Vannes",
+        "hs": 33,
+        "as": 40,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "England",
+        "away": "Ireland",
+        "hs": 21,
+        "as": 42,
+        "comp": "Internationals"
+    },
+    {
+        "home": "Scotland",
+        "away": "Wales",
+        "hs": 23,
+        "as": 26,
+        "comp": "Internationals"
+    },
+    {
+        "home": "Lions",
+        "away": "Sharks",
+        "hs": 34,
+        "as": 22,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Brive",
+        "away": "Grenoble",
+        "hs": 20,
+        "as": 18,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Chiefs",
+        "away": "Highlanders",
+        "hs": 23,
+        "as": 26,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Blues",
+        "away": "Force",
+        "hs": 32,
+        "as": 42,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Kubota Spears",
+        "away": "Mitsubishi Sagamihara Dynaboars",
+        "hs": 26,
+        "as": 10,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Blackrams Tokyo",
+        "away": "Urayasu D Rocks",
+        "hs": 41,
+        "as": 19,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Toshiba Brave Lupus Tokyo",
+        "away": "Toyota Verblitz",
+        "hs": 52,
+        "as": 21,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Kobelco Kobe Steelers",
+        "away": "Saitama Wild Knights",
+        "hs": 40,
+        "as": 24,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "France U20",
+        "away": "Italy U20",
+        "hs": 32,
+        "as": 17,
+        "comp": "U20 Six Nations"
+    },
+    {
+        "home": "France",
+        "away": "Italy",
+        "hs": 33,
+        "as": 8,
+        "comp": "Internationals"
+    },
+    {
+        "home": "Pau",
+        "away": "Perpignan",
+        "hs": 40,
+        "as": 24,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Mie Honda Heat",
+        "away": "Shizuoka Bluerevs",
+        "hs": 26,
+        "as": 21,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Brumbies",
+        "away": "Crusaders",
+        "hs": 24,
+        "as": 50,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Tokyo Sungoliath",
+        "away": "Yokohama Canon Eagles",
+        "hs": 54,
+        "as": 22,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Soyaux Angouleme",
+        "away": "Valence Romans",
+        "hs": 17,
+        "as": 13,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Cardiff Blues",
+        "away": "Leinster",
+        "hs": 8,
+        "as": 7,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Edinburgh",
+        "away": "Scarlets",
+        "hs": 24,
+        "as": 19,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Agen",
+        "away": "Provence Rugby",
+        "hs": 22,
+        "as": 24,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Beziers",
+        "away": "Oyonnax",
+        "hs": 16,
+        "as": 15,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Brive",
+        "away": "Dax",
+        "hs": 48,
+        "as": 24,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Biarritz",
+        "away": "Mont De Marsan",
+        "hs": 34,
+        "as": 16,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Aurillac",
+        "away": "Carcassonne",
+        "hs": 23,
+        "as": 21,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Grenoble",
+        "away": "Uso Nevers",
+        "hs": 26,
+        "as": 27,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Colomiers",
+        "away": "Vannes",
+        "hs": 40,
+        "as": 12,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Force",
+        "away": "Moana Pasifika",
+        "hs": 19,
+        "as": 35,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Highlanders",
+        "away": "Reds",
+        "hs": 31,
+        "as": 14,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Lions",
+        "away": "Stormers",
+        "hs": 24,
+        "as": 10,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Connacht",
+        "away": "Glasgow",
+        "hs": 15,
+        "as": 10,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Bulls",
+        "away": "Sharks",
+        "hs": 41,
+        "as": 12,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Munster",
+        "away": "Zebre",
+        "hs": 21,
+        "as": 7,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Benetton",
+        "away": "Gwent Dragons",
+        "hs": 15,
+        "as": 15,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Ospreys",
+        "away": "Ulster",
+        "hs": 21,
+        "as": 10,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Bayonne",
+        "away": "Clermont",
+        "hs": 38,
+        "as": 15,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Lyon",
+        "away": "Toulon",
+        "hs": 13,
+        "as": 13,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Montpellier",
+        "away": "Racing 92",
+        "hs": 41,
+        "as": 17,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Perpignan",
+        "away": "Stade Francais",
+        "hs": 42,
+        "as": 21,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Toulouse",
+        "away": "Us Montauban",
+        "hs": 68,
+        "as": 13,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Castres",
+        "away": "La Rochelle",
+        "hs": 26,
+        "as": 31,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Fijian Drua",
+        "away": "Hurricanes",
+        "hs": 25,
+        "as": 20,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Chiefs",
+        "away": "Crusaders",
+        "hs": 33,
+        "as": 43,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Blues",
+        "away": "Brumbies",
+        "hs": 30,
+        "as": 27,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Blackrams Tokyo",
+        "away": "Toshiba Brave Lupus Tokyo",
+        "hs": 14,
+        "as": 33,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Kobelco Kobe Steelers",
+        "away": "Urayasu D Rocks",
+        "hs": 19,
+        "as": 78,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Mie Honda Heat",
+        "away": "Saitama Wild Knights",
+        "hs": 66,
+        "as": 19,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Bordeaux",
+        "away": "Pau",
+        "hs": 39,
+        "as": 17,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Kubota Spears",
+        "away": "Yokohama Canon Eagles",
+        "hs": 10,
+        "as": 28,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Mitsubishi Sagamihara Dynaboars",
+        "away": "Toyota Verblitz",
+        "hs": 29,
+        "as": 31,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Shizuoka Bluerevs",
+        "away": "Tokyo Sungoliath",
+        "hs": 24,
+        "as": 57,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Brive",
+        "away": "Colomiers",
+        "hs": 10,
+        "as": 23,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Ireland",
+        "away": "Wales",
+        "hs": 27,
+        "as": 17,
+        "comp": "Internationals"
+    },
+    {
+        "home": "Biarritz",
+        "away": "Provence Rugby",
+        "hs": 26,
+        "as": 18,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Grenoble",
+        "away": "Soyaux Angouleme",
+        "hs": 24,
+        "as": 20,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Dax",
+        "away": "Oyonnax",
+        "hs": 52,
+        "as": 16,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Aurillac",
+        "away": "Uso Nevers",
+        "hs": 41,
+        "as": 35,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Beziers",
+        "away": "Mont De Marsan",
+        "hs": 41,
+        "as": 24,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Agen",
+        "away": "Carcassonne",
+        "hs": 54,
+        "as": 17,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Valence Romans",
+        "away": "Vannes",
+        "hs": 26,
+        "as": 36,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Chiefs",
+        "away": "Moana Pasifika",
+        "hs": 57,
+        "as": 24,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Hurricanes",
+        "away": "Waratahs",
+        "hs": 19,
+        "as": 59,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "France U20",
+        "away": "Scotland U20",
+        "hs": 26,
+        "as": 45,
+        "comp": "U20 Six Nations"
+    },
+    {
+        "home": "England U20",
+        "away": "Italy U20",
+        "hs": 17,
+        "as": 37,
+        "comp": "U20 Six Nations"
+    },
+    {
+        "home": "France",
+        "away": "Scotland",
+        "hs": 50,
+        "as": 40,
+        "comp": "Internationals"
+    },
+    {
+        "home": "England",
+        "away": "Italy",
+        "hs": 23,
+        "as": 18,
+        "comp": "Internationals"
+    },
+    {
+        "home": "Force",
+        "away": "Highlanders",
+        "hs": 39,
+        "as": 31,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Harlequins Women",
+        "away": "Saracens Women",
+        "hs": 26,
+        "as": 43,
+        "comp": "Premiership Womens Rugby"
+    },
+    {
+        "home": "Blues",
+        "away": "Crusaders",
+        "hs": 29,
+        "as": 13,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Brumbies",
+        "away": "Reds",
+        "hs": 31,
+        "as": 34,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Mitsubishi Sagamihara Dynaboars",
+        "away": "Tokyo Sungoliath",
+        "hs": 15,
+        "as": 34,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Ireland U20",
+        "away": "Wales U20",
+        "hs": 48,
+        "as": 33,
+        "comp": "U20 Six Nations"
+    },
+    {
+        "home": "South Africa 7s Mens",
+        "away": "Spain 7s Mens",
+        "hs": 28,
+        "as": 7,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Great Britain 7s Mens",
+        "away": "New Zealand 7s Mens",
+        "hs": 29,
+        "as": 5,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Argentina 7s Mens",
+        "away": "Fiji 7s Mens",
+        "hs": 14,
+        "as": 17,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Canada 7s Womens",
+        "away": "Usa 7s Womens",
+        "hs": 40,
+        "as": 7,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Australia 7s Mens",
+        "away": "France 7s Mens",
+        "hs": 19,
+        "as": 7,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Australia 7s Womens",
+        "away": "Fiji 7s Womens",
+        "hs": 38,
+        "as": 24,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Great Britain 7s Womens",
+        "away": "New Zealand 7s Womens",
+        "hs": 35,
+        "as": 5,
+        "comp": "Sevens"
+    },
+    {
+        "home": "France 7s Womens",
+        "away": "Japan 7s Womens",
+        "hs": 22,
+        "as": 0,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Great Britain 7s Mens",
+        "away": "South Africa 7s Mens",
+        "hs": 21,
+        "as": 5,
+        "comp": "Sevens"
+    },
+    {
+        "home": "New Zealand 7s Mens",
+        "away": "Spain 7s Mens",
+        "hs": 10,
+        "as": 12,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Fiji 7s Mens",
+        "away": "France 7s Mens",
+        "hs": 26,
+        "as": 21,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Argentina 7s Mens",
+        "away": "Australia 7s Mens",
+        "hs": 17,
+        "as": 15,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Australia 7s Womens",
+        "away": "Usa 7s Womens",
+        "hs": 22,
+        "as": 7,
+        "comp": "Sevens"
+    },
+    {
+        "home": "France 7s Womens",
+        "away": "New Zealand 7s Womens",
+        "hs": 38,
+        "as": 17,
+        "comp": "Sevens"
+    },
+    {
+        "home": "New Zealand 7s Mens",
+        "away": "South Africa 7s Mens",
+        "hs": 17,
+        "as": 12,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Great Britain 7s Mens",
+        "away": "Spain 7s Mens",
+        "hs": 10,
+        "as": 14,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Australia 7s Womens",
+        "away": "Canada 7s Womens",
+        "hs": 26,
+        "as": 12,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Japan 7s Womens",
+        "away": "New Zealand 7s Womens",
+        "hs": 43,
+        "as": 5,
+        "comp": "Sevens"
+    },
+    {
+        "home": "France 7s Womens",
+        "away": "Great Britain 7s Womens",
+        "hs": 38,
+        "as": 5,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Fiji 7s Womens",
+        "away": "Usa 7s Womens",
+        "hs": 26,
+        "as": 19,
+        "comp": "Sevens"
+    },
+    {
+        "home": "France 7s Womens",
+        "away": "Usa 7s Womens",
+        "hs": 35,
+        "as": 21,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Australia 7s Mens",
+        "away": "Fiji 7s Mens",
+        "hs": 10,
+        "as": 29,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Canada 7s Womens",
+        "away": "Fiji 7s Womens",
+        "hs": 26,
+        "as": 19,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Argentina 7s Mens",
+        "away": "France 7s Mens",
+        "hs": 34,
+        "as": 15,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Great Britain 7s Womens",
+        "away": "Japan 7s Womens",
+        "hs": 34,
+        "as": 19,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Great Britain 7s Mens",
+        "away": "New Zealand 7s Mens",
+        "hs": 29,
+        "as": 5,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Fiji 7s Mens",
+        "away": "Spain 7s Mens",
+        "hs": 17,
+        "as": 24,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Australia 7s Womens",
+        "away": "France 7s Womens",
+        "hs": 14,
+        "as": 5,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Australia 7s Mens",
+        "away": "South Africa 7s Mens",
+        "hs": 19,
+        "as": 12,
+        "comp": "Sevens"
+    },
+    {
+        "home": "France 7s Mens",
+        "away": "Great Britain 7s Mens",
+        "hs": 21,
+        "as": 19,
+        "comp": "Sevens"
+    },
+    {
+        "home": "New Zealand 7s Womens",
+        "away": "Usa 7s Womens",
+        "hs": 19,
+        "as": 12,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Fiji 7s Womens",
+        "away": "Great Britain 7s Womens",
+        "hs": 32,
+        "as": 12,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Argentina 7s Mens",
+        "away": "New Zealand 7s Mens",
+        "hs": 21,
+        "as": 24,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Canada 7s Womens",
+        "away": "Japan 7s Womens",
+        "hs": 12,
+        "as": 19,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Australia 7s Womens",
+        "away": "New Zealand 7s Womens",
+        "hs": 24,
+        "as": 17,
+        "comp": "Sevens"
+    },
+    {
+        "home": "South Africa 7s Mens",
+        "away": "Spain 7s Mens",
+        "hs": 38,
+        "as": 12,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Force",
+        "away": "Hurricanes",
+        "hs": 31,
+        "as": 23,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Connacht",
+        "away": "Scarlets",
+        "hs": 31,
+        "as": 14,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Edinburgh",
+        "away": "Ulster",
+        "hs": 19,
+        "as": 40,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Ireland",
+        "away": "Scotland",
+        "hs": 43,
+        "as": 21,
+        "comp": "Internationals"
+    },
+    {
+        "home": "Italy",
+        "away": "Wales",
+        "hs": 31,
+        "as": 17,
+        "comp": "Internationals"
+    },
+    {
+        "home": "England",
+        "away": "France",
+        "hs": 48,
+        "as": 46,
+        "comp": "Internationals"
+    },
+    {
+        "home": "Bulls",
+        "away": "Stormers",
+        "hs": 19,
+        "as": 32,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Brumbies",
+        "away": "Fijian Drua",
+        "hs": 42,
+        "as": 27,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Reds",
+        "away": "Waratahs",
+        "hs": 26,
+        "as": 17,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Crusaders",
+        "away": "Highlanders",
+        "hs": 29,
+        "as": 18,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Kubota Spears",
+        "away": "Saitama Wild Knights",
+        "hs": 30,
+        "as": 32,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Mie Honda Heat",
+        "away": "Yokohama Canon Eagles",
+        "hs": 26,
+        "as": 31,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Blackrams Tokyo",
+        "away": "Shizuoka Bluerevs",
+        "hs": 37,
+        "as": 33,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Kobelco Kobe Steelers",
+        "away": "Mitsubishi Sagamihara Dynaboars",
+        "hs": 61,
+        "as": 10,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "France 7s Mens",
+        "away": "New Zealand 7s Mens",
+        "hs": 24,
+        "as": 26,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Argentina 7s Mens",
+        "away": "Great Britain 7s Mens",
+        "hs": 14,
+        "as": 19,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Japan 7s Womens",
+        "away": "Usa 7s Womens",
+        "hs": 47,
+        "as": 0,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Fiji 7s Womens",
+        "away": "New Zealand 7s Womens",
+        "hs": 31,
+        "as": 10,
+        "comp": "Sevens"
+    },
+    {
+        "home": "France 7s Mens",
+        "away": "South Africa 7s Mens",
+        "hs": 12,
+        "as": 5,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Australia 7s Mens",
+        "away": "New Zealand 7s Mens",
+        "hs": 12,
+        "as": 7,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Argentina 7s Mens",
+        "away": "Spain 7s Mens",
+        "hs": 26,
+        "as": 27,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Fiji 7s Mens",
+        "away": "Great Britain 7s Mens",
+        "hs": 24,
+        "as": 19,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Canada 7s Womens",
+        "away": "Usa 7s Womens",
+        "hs": 24,
+        "as": 0,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Australia 7s Womens",
+        "away": "Japan 7s Womens",
+        "hs": 47,
+        "as": 7,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Great Britain 7s Womens",
+        "away": "New Zealand 7s Womens",
+        "hs": 46,
+        "as": 5,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Fiji 7s Womens",
+        "away": "France 7s Womens",
+        "hs": 17,
+        "as": 22,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Australia 7s Mens",
+        "away": "France 7s Mens",
+        "hs": 24,
+        "as": 0,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Argentina 7s Mens",
+        "away": "Fiji 7s Mens",
+        "hs": 12,
+        "as": 31,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Blues",
+        "away": "Moana Pasifika",
+        "hs": 43,
+        "as": 7,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Toyota Verblitz",
+        "away": "Urayasu D Rocks",
+        "hs": 59,
+        "as": 19,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Tokyo Sungoliath",
+        "away": "Toshiba Brave Lupus Tokyo",
+        "hs": 60,
+        "as": 21,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Ireland U20",
+        "away": "Scotland U20",
+        "hs": 47,
+        "as": 14,
+        "comp": "U20 Six Nations"
+    },
+    {
+        "home": "Italy U20",
+        "away": "Wales U20",
+        "hs": 13,
+        "as": 20,
+        "comp": "U20 Six Nations"
+    },
+    {
+        "home": "England U20",
+        "away": "France U20",
+        "hs": 31,
+        "as": 28,
+        "comp": "U20 Six Nations"
+    },
+    {
+        "home": "Australia 7s Womens",
+        "away": "New Zealand 7s Womens",
+        "hs": 22,
+        "as": 21,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Fiji 7s Mens",
+        "away": "South Africa 7s Mens",
+        "hs": 7,
+        "as": 10,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Fiji 7s Womens",
+        "away": "Usa 7s Womens",
+        "hs": 26,
+        "as": 17,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Argentina 7s Mens",
+        "away": "Australia 7s Mens",
+        "hs": 10,
+        "as": 26,
+        "comp": "Sevens"
+    },
+    {
+        "home": "France 7s Womens",
+        "away": "Japan 7s Womens",
+        "hs": 19,
+        "as": 15,
+        "comp": "Sevens"
+    },
+    {
+        "home": "France 7s Mens",
+        "away": "New Zealand 7s Mens",
+        "hs": 14,
+        "as": 21,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Canada 7s Womens",
+        "away": "Great Britain 7s Womens",
+        "hs": 22,
+        "as": 14,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Great Britain 7s Mens",
+        "away": "Spain 7s Mens",
+        "hs": 12,
+        "as": 24,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Australia 7s Womens",
+        "away": "Fiji 7s Womens",
+        "hs": 22,
+        "as": 14,
+        "comp": "Sevens"
+    },
+    {
+        "home": "New Zealand 7s Womens",
+        "away": "Usa 7s Womens",
+        "hs": 26,
+        "as": 14,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Argentina 7s Mens",
+        "away": "South Africa 7s Mens",
+        "hs": 5,
+        "as": 14,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Australia 7s Mens",
+        "away": "Fiji 7s Mens",
+        "hs": 7,
+        "as": 28,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Great Britain 7s Womens",
+        "away": "Japan 7s Womens",
+        "hs": 31,
+        "as": 14,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Canada 7s Womens",
+        "away": "France 7s Womens",
+        "hs": 24,
+        "as": 19,
+        "comp": "Sevens"
+    },
+    {
+        "home": "France 7s Mens",
+        "away": "Spain 7s Mens",
+        "hs": 5,
+        "as": 36,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Great Britain 7s Mens",
+        "away": "New Zealand 7s Mens",
+        "hs": 31,
+        "as": 24,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Bath",
+        "away": "Saracens",
+        "hs": 62,
+        "as": 15,
+        "comp": "Premiership"
+    },
+    {
+        "home": "Bulls",
+        "away": "Cardiff Blues",
+        "hs": 40,
+        "as": 7,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Connacht",
+        "away": "Ulster",
+        "hs": 19,
+        "as": 26,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Scarlets",
+        "away": "Zebre",
+        "hs": 36,
+        "as": 17,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Highlanders",
+        "away": "Hurricanes",
+        "hs": 7,
+        "as": 50,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Brumbies",
+        "away": "Chiefs",
+        "hs": 33,
+        "as": 24,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Kobelco Kobe Steelers",
+        "away": "Yokohama Canon Eagles",
+        "hs": 29,
+        "as": 38,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Newcastle",
+        "away": "Northampton",
+        "hs": 28,
+        "as": 27,
+        "comp": "Premiership"
+    },
+    {
+        "home": "Gloucester",
+        "away": "Harlequins",
+        "hs": 19,
+        "as": 26,
+        "comp": "Premiership"
+    },
+    {
+        "home": "Exeter Chiefs",
+        "away": "Sale",
+        "hs": 26,
+        "as": 14,
+        "comp": "Premiership"
+    },
+    {
+        "home": "Edinburgh",
+        "away": "Lions",
+        "hs": 54,
+        "as": 17,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Munster",
+        "away": "Sharks",
+        "hs": 45,
+        "as": 0,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Benetton",
+        "away": "Ospreys",
+        "hs": 31,
+        "as": 19,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Glasgow",
+        "away": "Leinster",
+        "hs": 38,
+        "as": 17,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Clermont",
+        "away": "Montpellier",
+        "hs": 17,
+        "as": 20,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Castres",
+        "away": "Racing 92",
+        "hs": 52,
+        "as": 21,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Stade Francais",
+        "away": "Toulon",
+        "hs": 27,
+        "as": 46,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Bayonne",
+        "away": "Us Montauban",
+        "hs": 26,
+        "as": 60,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Lyon",
+        "away": "Perpignan",
+        "hs": 28,
+        "as": 32,
+        "comp": "Top 14"
+    },
+    {
+        "home": "La Rochelle",
+        "away": "Pau",
+        "hs": 20,
+        "as": 6,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Fijian Drua",
+        "away": "Reds",
+        "hs": 6,
+        "as": 21,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Crusaders",
+        "away": "Moana Pasifika",
+        "hs": 21,
+        "as": 50,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Blues",
+        "away": "Waratahs",
+        "hs": 20,
+        "as": 35,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Mitsubishi Sagamihara Dynaboars",
+        "away": "Tokyo Sungoliath",
+        "hs": 35,
+        "as": 32,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Blackrams Tokyo",
+        "away": "Saitama Wild Knights",
+        "hs": 31,
+        "as": 7,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Kubota Spears",
+        "away": "Urayasu D Rocks",
+        "hs": 35,
+        "as": 59,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Germany 7s Mens",
+        "away": "Uruguay 7s Mens",
+        "hs": 31,
+        "as": 26,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Belgium 7s Mens",
+        "away": "Kenya 7s Mens",
+        "hs": 20,
+        "as": 0,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Canada 7s Mens",
+        "away": "Usa 7s Mens",
+        "hs": 22,
+        "as": 14,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Argentina 7s Womens",
+        "away": "China 7s Womens",
+        "hs": 22,
+        "as": 17,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Kenya 7s Womens",
+        "away": "Spain 7s Womens",
+        "hs": 19,
+        "as": 14,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Brazil 7s Womens",
+        "away": "South Africa 7s Womens",
+        "hs": 26,
+        "as": 0,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Belgium 7s Mens",
+        "away": "Germany 7s Mens",
+        "hs": 31,
+        "as": 5,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Canada 7s Mens",
+        "away": "Kenya 7s Mens",
+        "hs": 19,
+        "as": 5,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Argentina 7s Womens",
+        "away": "Kenya 7s Womens",
+        "hs": 10,
+        "as": 12,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Usa 7s Mens",
+        "away": "Uruguay 7s Mens",
+        "hs": 29,
+        "as": 14,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Brazil 7s Womens",
+        "away": "Spain 7s Womens",
+        "hs": 10,
+        "as": 15,
+        "comp": "Sevens"
+    },
+    {
+        "home": "China 7s Womens",
+        "away": "South Africa 7s Womens",
+        "hs": 38,
+        "as": 0,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Canada 7s Mens",
+        "away": "Germany 7s Mens",
+        "hs": 21,
+        "as": 14,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Belgium 7s Mens",
+        "away": "Uruguay 7s Mens",
+        "hs": 26,
+        "as": 7,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Kenya 7s Mens",
+        "away": "Usa 7s Mens",
+        "hs": 14,
+        "as": 10,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Argentina 7s Womens",
+        "away": "Brazil 7s Womens",
+        "hs": 12,
+        "as": 7,
+        "comp": "Sevens"
+    },
+    {
+        "home": "South Africa 7s Womens",
+        "away": "Spain 7s Womens",
+        "hs": 14,
+        "as": 15,
+        "comp": "Sevens"
+    },
+    {
+        "home": "China 7s Womens",
+        "away": "Kenya 7s Womens",
+        "hs": 19,
+        "as": 5,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Bristol",
+        "away": "Leicester",
+        "hs": 33,
+        "as": 19,
+        "comp": "Premiership"
+    },
+    {
+        "home": "Gwent Dragons",
+        "away": "Stormers",
+        "hs": 29,
+        "as": 21,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Mie Honda Heat",
+        "away": "Toshiba Brave Lupus Tokyo",
+        "hs": 22,
+        "as": 24,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Bordeaux",
+        "away": "Toulouse",
+        "hs": 44,
+        "as": 20,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Shizuoka Bluerevs",
+        "away": "Toyota Verblitz",
+        "hs": 24,
+        "as": 34,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Kenya 7s Mens",
+        "away": "Uruguay 7s Mens",
+        "hs": 22,
+        "as": 14,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Germany 7s Mens",
+        "away": "Usa 7s Mens",
+        "hs": 5,
+        "as": 29,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Belgium 7s Mens",
+        "away": "Canada 7s Mens",
+        "hs": 14,
+        "as": 41,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Argentina 7s Womens",
+        "away": "South Africa 7s Womens",
+        "hs": 22,
+        "as": 10,
+        "comp": "Sevens"
+    },
+    {
+        "home": "China 7s Womens",
+        "away": "Spain 7s Womens",
+        "hs": 19,
+        "as": 12,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Brazil 7s Womens",
+        "away": "Kenya 7s Womens",
+        "hs": 12,
+        "as": 19,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Germany 7s Mens",
+        "away": "Kenya 7s Mens",
+        "hs": 12,
+        "as": 7,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Canada 7s Mens",
+        "away": "Uruguay 7s Mens",
+        "hs": 33,
+        "as": 22,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Belgium 7s Mens",
+        "away": "Usa 7s Mens",
+        "hs": 17,
+        "as": 5,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Argentina 7s Womens",
+        "away": "Spain 7s Womens",
+        "hs": 14,
+        "as": 12,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Kenya 7s Womens",
+        "away": "South Africa 7s Womens",
+        "hs": 27,
+        "as": 14,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Brazil 7s Womens",
+        "away": "China 7s Womens",
+        "hs": 22,
+        "as": 15,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Colomiers",
+        "away": "Provence Rugby",
+        "hs": 20,
+        "as": 25,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Exeter Chiefs",
+        "away": "Newcastle",
+        "hs": 14,
+        "as": 38,
+        "comp": "Premiership"
+    },
+    {
+        "home": "Cardiff Blues",
+        "away": "Sharks",
+        "hs": 21,
+        "as": 15,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Benetton",
+        "away": "Glasgow",
+        "hs": 31,
+        "as": 10,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Leinster",
+        "away": "Scarlets",
+        "hs": 36,
+        "as": 19,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Oyonnax",
+        "away": "Valence Romans",
+        "hs": 40,
+        "as": 21,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Uso Nevers",
+        "away": "Vannes",
+        "hs": 52,
+        "as": 7,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Agen",
+        "away": "Beziers",
+        "hs": 32,
+        "as": 13,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Aurillac",
+        "away": "Biarritz",
+        "hs": 24,
+        "as": 27,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Carcassonne",
+        "away": "Mont De Marsan",
+        "hs": 28,
+        "as": 29,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Dax",
+        "away": "Grenoble",
+        "hs": 50,
+        "as": 26,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Brumbies",
+        "away": "Waratahs",
+        "hs": 28,
+        "as": 30,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Highlanders",
+        "away": "Moana Pasifika",
+        "hs": 19,
+        "as": 39,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Brive",
+        "away": "Soyaux Angouleme",
+        "hs": 9,
+        "as": 28,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Australia Women",
+        "away": "Fiji Women",
+        "hs": 33,
+        "as": 15,
+        "comp": "Womens Internationals"
+    },
+    {
+        "home": "Gloucester",
+        "away": "Leicester",
+        "hs": 17,
+        "as": 36,
+        "comp": "Premiership"
+    },
+    {
+        "home": "Bristol",
+        "away": "Harlequins",
+        "hs": 14,
+        "as": 18,
+        "comp": "Premiership"
+    },
+    {
+        "home": "Northampton",
+        "away": "Saracens",
+        "hs": 17,
+        "as": 21,
+        "comp": "Premiership"
+    },
+    {
+        "home": "Bulls",
+        "away": "Munster",
+        "hs": 34,
+        "as": 31,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Connacht",
+        "away": "Ospreys",
+        "hs": 21,
+        "as": 14,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Gwent Dragons",
+        "away": "Lions",
+        "hs": 42,
+        "as": 26,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Edinburgh",
+        "away": "Stormers",
+        "hs": 33,
+        "as": 14,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Ulster",
+        "away": "Zebre",
+        "hs": 12,
+        "as": 28,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Montpellier",
+        "away": "Toulouse",
+        "hs": 45,
+        "as": 29,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Castres",
+        "away": "Us Montauban",
+        "hs": 49,
+        "as": 17,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Bordeaux",
+        "away": "Lyon",
+        "hs": 17,
+        "as": 21,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Pau",
+        "away": "Racing 92",
+        "hs": 27,
+        "as": 17,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Perpignan",
+        "away": "Toulon",
+        "hs": 36,
+        "as": 20,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Bayonne",
+        "away": "La Rochelle",
+        "hs": 26,
+        "as": 15,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Hurricanes",
+        "away": "Reds",
+        "hs": 52,
+        "as": 14,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Blues",
+        "away": "Fijian Drua",
+        "hs": 40,
+        "as": 15,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Chiefs",
+        "away": "Force",
+        "hs": 14,
+        "as": 24,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Kubota Spears",
+        "away": "Toshiba Brave Lupus Tokyo",
+        "hs": 51,
+        "as": 7,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Kobelco Kobe Steelers",
+        "away": "Shizuoka Bluerevs",
+        "hs": 20,
+        "as": 41,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Saitama Wild Knights",
+        "away": "Tokyo Sungoliath",
+        "hs": 34,
+        "as": 36,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Toyota Verblitz",
+        "away": "Yokohama Canon Eagles",
+        "hs": 27,
+        "as": 33,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Brazil 7s Womens",
+        "away": "South Africa 7s Womens",
+        "hs": 26,
+        "as": 12,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Argentina 7s Womens",
+        "away": "China 7s Womens",
+        "hs": 19,
+        "as": 12,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Kenya 7s Womens",
+        "away": "Spain 7s Womens",
+        "hs": 17,
+        "as": 24,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Usa 7s Mens",
+        "away": "Uruguay 7s Mens",
+        "hs": 19,
+        "as": 14,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Canada 7s Mens",
+        "away": "Kenya 7s Mens",
+        "hs": 40,
+        "as": 0,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Belgium 7s Mens",
+        "away": "Germany 7s Mens",
+        "hs": 17,
+        "as": 28,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Argentina 7s Womens",
+        "away": "Brazil 7s Womens",
+        "hs": 0,
+        "as": 17,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Canada 7s Mens",
+        "away": "Usa 7s Mens",
+        "hs": 26,
+        "as": 12,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Germany 7s Mens",
+        "away": "Uruguay 7s Mens",
+        "hs": 19,
+        "as": 26,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Argentina 7s Womens",
+        "away": "Kenya 7s Womens",
+        "hs": 19,
+        "as": 12,
+        "comp": "Sevens"
+    },
+    {
+        "home": "South Africa 7s Womens",
+        "away": "Spain 7s Womens",
+        "hs": 19,
+        "as": 5,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Belgium 7s Mens",
+        "away": "Kenya 7s Mens",
+        "hs": 12,
+        "as": 14,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Bath",
+        "away": "Sale",
+        "hs": 26,
+        "as": 31,
+        "comp": "Premiership"
+    },
+    {
+        "home": "Clermont",
+        "away": "Stade Francais",
+        "hs": 64,
+        "as": 20,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Mie Honda Heat",
+        "away": "Urayasu D Rocks",
+        "hs": 17,
+        "as": 43,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Blackrams Tokyo",
+        "away": "Mitsubishi Sagamihara Dynaboars",
+        "hs": 33,
+        "as": 7,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "China 7s Womens",
+        "away": "South Africa 7s Womens",
+        "hs": 14,
+        "as": 10,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Brazil 7s Womens",
+        "away": "Spain 7s Womens",
+        "hs": 7,
+        "as": 38,
+        "comp": "Sevens"
+    },
+    {
+        "home": "China 7s Womens",
+        "away": "Kenya 7s Womens",
+        "hs": 0,
+        "as": 46,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Kenya 7s Mens",
+        "away": "Usa 7s Mens",
+        "hs": 14,
+        "as": 31,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Canada 7s Mens",
+        "away": "Germany 7s Mens",
+        "hs": 21,
+        "as": 26,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Belgium 7s Mens",
+        "away": "Uruguay 7s Mens",
+        "hs": 24,
+        "as": 19,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Grenoble",
+        "away": "Valence Romans",
+        "hs": 19,
+        "as": 25,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Colomiers",
+        "away": "Dax",
+        "hs": 66,
+        "as": 21,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Agen",
+        "away": "Vannes",
+        "hs": 22,
+        "as": 49,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Carcassonne",
+        "away": "Soyaux Angouleme",
+        "hs": 52,
+        "as": 13,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Biarritz",
+        "away": "Oyonnax",
+        "hs": 48,
+        "as": 14,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Aurillac",
+        "away": "Mont De Marsan",
+        "hs": 35,
+        "as": 25,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Brive",
+        "away": "Provence Rugby",
+        "hs": 53,
+        "as": 13,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Beziers",
+        "away": "Uso Nevers",
+        "hs": 44,
+        "as": 41,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Castres",
+        "away": "Northampton",
+        "hs": 49,
+        "as": 41,
+        "comp": "European Champions Cup"
+    },
+    {
+        "home": "Connacht",
+        "away": "Sharks",
+        "hs": 29,
+        "as": 12,
+        "comp": "Challenge Cup"
+    },
+    {
+        "home": "Crusaders",
+        "away": "Fijian Drua",
+        "hs": 69,
+        "as": 26,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Bath",
+        "away": "Saracens",
+        "hs": 31,
+        "as": 22,
+        "comp": "European Champions Cup"
+    },
+    {
+        "home": "Stormers",
+        "away": "Toulon",
+        "hs": 28,
+        "as": 27,
+        "comp": "European Champions Cup"
+    },
+    {
+        "home": "Bulls",
+        "away": "Glasgow",
+        "hs": 25,
+        "as": 21,
+        "comp": "European Champions Cup"
+    },
+    {
+        "home": "Harlequins",
+        "away": "Sale",
+        "hs": 17,
+        "as": 26,
+        "comp": "European Champions Cup"
+    },
+    {
+        "home": "Bristol",
+        "away": "Toulouse",
+        "hs": 59,
+        "as": 26,
+        "comp": "European Champions Cup"
+    },
+    {
+        "home": "Exeter Chiefs",
+        "away": "Munster",
+        "hs": 31,
+        "as": 21,
+        "comp": "Challenge Cup"
+    },
+    {
+        "home": "Montpellier",
+        "away": "Perpignan",
+        "hs": 53,
+        "as": 13,
+        "comp": "Challenge Cup"
+    },
+    {
+        "home": "Benetton",
+        "away": "Cardiff Blues",
+        "hs": 38,
+        "as": 35,
+        "comp": "Challenge Cup"
+    },
+    {
+        "home": "Ospreys",
+        "away": "Ulster",
+        "hs": 28,
+        "as": 24,
+        "comp": "Challenge Cup"
+    },
+    {
+        "home": "Chiefs",
+        "away": "Waratahs",
+        "hs": 42,
+        "as": 14,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Force",
+        "away": "Reds",
+        "hs": 19,
+        "as": 42,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Mie Honda Heat",
+        "away": "Tokyo Sungoliath",
+        "hs": 24,
+        "as": 17,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Mitsubishi Sagamihara Dynaboars",
+        "away": "Shizuoka Bluerevs",
+        "hs": 41,
+        "as": 45,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Saitama Wild Knights",
+        "away": "Yokohama Canon Eagles",
+        "hs": 42,
+        "as": 15,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Kubota Spears",
+        "away": "Toyota Verblitz",
+        "hs": 24,
+        "as": 7,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "La Rochelle",
+        "away": "Newcastle",
+        "hs": 18,
+        "as": 26,
+        "comp": "Challenge Cup"
+    },
+    {
+        "home": "Bordeaux",
+        "away": "Leicester",
+        "hs": 64,
+        "as": 14,
+        "comp": "European Champions Cup"
+    },
+    {
+        "home": "Edinburgh",
+        "away": "Leinster",
+        "hs": 49,
+        "as": 31,
+        "comp": "European Champions Cup"
+    },
+    {
+        "home": "Gwent Dragons",
+        "away": "Stade Francais",
+        "hs": 31,
+        "as": 36,
+        "comp": "Challenge Cup"
+    },
+    {
+        "home": "Pau",
+        "away": "Zebre",
+        "hs": 31,
+        "as": 15,
+        "comp": "Challenge Cup"
+    },
+    {
+        "home": "Toshiba Brave Lupus Tokyo",
+        "away": "Urayasu D Rocks",
+        "hs": 40,
+        "as": 24,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Blackrams Tokyo",
+        "away": "Kobelco Kobe Steelers",
+        "hs": 19,
+        "as": 40,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Agen",
+        "away": "Aurillac",
+        "hs": 21,
+        "as": 38,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Biarritz",
+        "away": "Uso Nevers",
+        "hs": 38,
+        "as": 41,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Mont De Marsan",
+        "away": "Provence Rugby",
+        "hs": 42,
+        "as": 33,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Beziers",
+        "away": "Vannes",
+        "hs": 71,
+        "as": 0,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Carcassonne",
+        "away": "Grenoble",
+        "hs": 25,
+        "as": 22,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Dax",
+        "away": "Soyaux Angouleme",
+        "hs": 22,
+        "as": 17,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Colomiers",
+        "away": "Valence Romans",
+        "hs": 32,
+        "as": 25,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Bath",
+        "away": "Northampton",
+        "hs": 43,
+        "as": 41,
+        "comp": "European Champions Cup"
+    },
+    {
+        "home": "Brumbies",
+        "away": "Highlanders",
+        "hs": 10,
+        "as": 14,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "La Rochelle",
+        "away": "Ulster",
+        "hs": 41,
+        "as": 24,
+        "comp": "Challenge Cup"
+    },
+    {
+        "home": "Brive",
+        "away": "Oyonnax",
+        "hs": 26,
+        "as": 11,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Glasgow",
+        "away": "Toulon",
+        "hs": 19,
+        "as": 22,
+        "comp": "European Champions Cup"
+    },
+    {
+        "home": "Leinster",
+        "away": "Sale",
+        "hs": 43,
+        "as": 13,
+        "comp": "European Champions Cup"
+    },
+    {
+        "home": "Gwent Dragons",
+        "away": "Zebre",
+        "hs": 32,
+        "as": 35,
+        "comp": "Challenge Cup"
+    },
+    {
+        "home": "Connacht",
+        "away": "Montpellier",
+        "hs": 45,
+        "as": 22,
+        "comp": "Challenge Cup"
+    },
+    {
+        "home": "Chiefs",
+        "away": "Moana Pasifika",
+        "hs": 17,
+        "as": 62,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Fijian Drua",
+        "away": "Force",
+        "hs": 24,
+        "as": 22,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Blues",
+        "away": "Hurricanes",
+        "hs": 42,
+        "as": 19,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Crusaders",
+        "away": "Reds",
+        "hs": 31,
+        "as": 26,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Bordeaux",
+        "away": "Toulouse",
+        "hs": 30,
+        "as": 15,
+        "comp": "European Champions Cup"
+    },
+    {
+        "home": "Benetton",
+        "away": "Exeter Chiefs",
+        "hs": 41,
+        "as": 44,
+        "comp": "Challenge Cup"
+    },
+    {
+        "home": "Agen",
+        "away": "Biarritz",
+        "hs": 26,
+        "as": 7,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Bristol",
+        "away": "Gloucester",
+        "hs": 53,
+        "as": 12,
+        "comp": "Premiership"
+    },
+    {
+        "home": "Edinburgh",
+        "away": "Zebre",
+        "hs": 31,
+        "as": 30,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Leinster",
+        "away": "Ulster",
+        "hs": 21,
+        "as": 29,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Bulls",
+        "away": "Gwent Dragons",
+        "hs": 7,
+        "as": 47,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Dax",
+        "away": "Mont De Marsan",
+        "hs": 21,
+        "as": 35,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Beziers",
+        "away": "Provence Rugby",
+        "hs": 30,
+        "as": 31,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Aurillac",
+        "away": "Brive",
+        "hs": 75,
+        "as": 9,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Carcassonne",
+        "away": "Colomiers",
+        "hs": 59,
+        "as": 28,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Soyaux Angouleme",
+        "away": "Vannes",
+        "hs": 29,
+        "as": 26,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Uso Nevers",
+        "away": "Valence Romans",
+        "hs": 36,
+        "as": 35,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Grenoble",
+        "away": "Oyonnax",
+        "hs": 31,
+        "as": 26,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Blues",
+        "away": "Highlanders",
+        "hs": 47,
+        "as": 40,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Moana Pasifika",
+        "away": "Waratahs",
+        "hs": 29,
+        "as": 14,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Blackrams Tokyo",
+        "away": "Mie Honda Heat",
+        "hs": 5,
+        "as": 49,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Australia 7s Mens",
+        "away": "Usa 7s Mens",
+        "hs": 38,
+        "as": 5,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Kenya 7s Mens",
+        "away": "New Zealand 7s Mens",
+        "hs": 28,
+        "as": 12,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Japan 7s Womens",
+        "away": "New Zealand 7s Womens",
+        "hs": 38,
+        "as": 7,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Brazil 7s Womens",
+        "away": "Fiji 7s Womens",
+        "hs": 15,
+        "as": 12,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Australia 7s Mens",
+        "away": "Kenya 7s Mens",
+        "hs": 14,
+        "as": 5,
+        "comp": "Sevens"
+    },
+    {
+        "home": "New Zealand 7s Mens",
+        "away": "Usa 7s Mens",
+        "hs": 19,
+        "as": 12,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Brazil 7s Womens",
+        "away": "New Zealand 7s Womens",
+        "hs": 29,
+        "as": 12,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Fiji 7s Womens",
+        "away": "Japan 7s Womens",
+        "hs": 5,
+        "as": 12,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Fiji 7s Mens",
+        "away": "Great Britain 7s Mens",
+        "hs": 24,
+        "as": 10,
+        "comp": "Sevens"
+    },
+    {
+        "home": "France 7s Mens",
+        "away": "Germany 7s Mens",
+        "hs": 35,
+        "as": 0,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Australia 7s Womens",
+        "away": "Great Britain 7s Womens",
+        "hs": 34,
+        "as": 7,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Canada 7s Womens",
+        "away": "South Africa 7s Womens",
+        "hs": 31,
+        "as": 0,
+        "comp": "Sevens"
+    },
+    {
+        "home": "South Africa 7s Mens",
+        "away": "Spain 7s Mens",
+        "hs": 12,
+        "as": 31,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Argentina 7s Mens",
+        "away": "Uruguay 7s Mens",
+        "hs": 40,
+        "as": 19,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Argentina 7s Womens",
+        "away": "Usa 7s Womens",
+        "hs": 27,
+        "as": 5,
+        "comp": "Sevens"
+    },
+    {
+        "home": "France 7s Womens",
+        "away": "Spain 7s Womens",
+        "hs": 31,
+        "as": 14,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Fiji 7s Mens",
+        "away": "Germany 7s Mens",
+        "hs": 42,
+        "as": 5,
+        "comp": "Sevens"
+    },
+    {
+        "home": "France 7s Mens",
+        "away": "Great Britain 7s Mens",
+        "hs": 22,
+        "as": 7,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Australia 7s Womens",
+        "away": "South Africa 7s Womens",
+        "hs": 33,
+        "as": 0,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Canada 7s Womens",
+        "away": "Great Britain 7s Womens",
+        "hs": 41,
+        "as": 7,
+        "comp": "Sevens"
+    },
+    {
+        "home": "South Africa 7s Mens",
+        "away": "Uruguay 7s Mens",
+        "hs": 12,
+        "as": 7,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Argentina 7s Mens",
+        "away": "Spain 7s Mens",
+        "hs": 38,
+        "as": 14,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Spain 7s Womens",
+        "away": "Usa 7s Womens",
+        "hs": 24,
+        "as": 7,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Argentina 7s Womens",
+        "away": "France 7s Womens",
+        "hs": 29,
+        "as": 14,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Leicester",
+        "away": "Newcastle",
+        "hs": 62,
+        "as": 3,
+        "comp": "Premiership"
+    },
+    {
+        "home": "Exeter Chiefs",
+        "away": "Northampton",
+        "hs": 28,
+        "as": 35,
+        "comp": "Premiership"
+    },
+    {
+        "home": "Bath",
+        "away": "Harlequins",
+        "hs": 48,
+        "as": 15,
+        "comp": "Premiership"
+    },
+    {
+        "home": "Connacht",
+        "away": "Stormers",
+        "hs": 24,
+        "as": 33,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Glasgow",
+        "away": "Lions",
+        "hs": 54,
+        "as": 12,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Cardiff Blues",
+        "away": "Scarlets",
+        "hs": 24,
+        "as": 28,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Benetton",
+        "away": "Munster",
+        "hs": 15,
+        "as": 45,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Ospreys",
+        "away": "Sharks",
+        "hs": 21,
+        "as": 17,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Bordeaux",
+        "away": "La Rochelle",
+        "hs": 45,
+        "as": 15,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Clermont",
+        "away": "Lyon",
+        "hs": 41,
+        "as": 23,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Bayonne",
+        "away": "Pau",
+        "hs": 22,
+        "as": 54,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Montpellier",
+        "away": "Perpignan",
+        "hs": 42,
+        "as": 31,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Toulon",
+        "away": "Us Montauban",
+        "hs": 22,
+        "as": 47,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Castres",
+        "away": "Toulouse",
+        "hs": 25,
+        "as": 42,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Chiefs",
+        "away": "Hurricanes",
+        "hs": 22,
+        "as": 17,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Brumbies",
+        "away": "Fijian Drua",
+        "hs": 28,
+        "as": 33,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Crusaders",
+        "away": "Force",
+        "hs": 31,
+        "as": 26,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Urayasu D Rocks",
+        "away": "Yokohama Canon Eagles",
+        "hs": 33,
+        "as": 15,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Kubota Spears",
+        "away": "Tokyo Sungoliath",
+        "hs": 22,
+        "as": 27,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Saitama Wild Knights",
+        "away": "Shizuoka Bluerevs",
+        "hs": 24,
+        "as": 34,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Kobelco Kobe Steelers",
+        "away": "Toyota Verblitz",
+        "hs": 24,
+        "as": 38,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Mitsubishi Sagamihara Dynaboars",
+        "away": "Toshiba Brave Lupus Tokyo",
+        "hs": 26,
+        "as": 45,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Argentina 7s Mens",
+        "away": "Fiji 7s Mens",
+        "hs": 17,
+        "as": 24,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Australia 7s Mens",
+        "away": "Spain 7s Mens",
+        "hs": 5,
+        "as": 19,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Australia 7s Womens",
+        "away": "Fiji 7s Womens",
+        "hs": 45,
+        "as": 5,
+        "comp": "Sevens"
+    },
+    {
+        "home": "France 7s Womens",
+        "away": "Japan 7s Womens",
+        "hs": 22,
+        "as": 12,
+        "comp": "Sevens"
+    },
+    {
+        "home": "France 7s Mens",
+        "away": "New Zealand 7s Mens",
+        "hs": 10,
+        "as": 19,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Kenya 7s Mens",
+        "away": "South Africa 7s Mens",
+        "hs": 26,
+        "as": 22,
+        "comp": "Sevens"
+    },
+    {
+        "home": "New Zealand 7s Womens",
+        "away": "Spain 7s Womens",
+        "hs": 32,
+        "as": 5,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Canada 7s Womens",
+        "away": "Usa 7s Womens",
+        "hs": 19,
+        "as": 7,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Germany 7s Mens",
+        "away": "Uruguay 7s Mens",
+        "hs": 12,
+        "as": 35,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Great Britain 7s Mens",
+        "away": "Usa 7s Mens",
+        "hs": 12,
+        "as": 17,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Great Britain 7s Womens",
+        "away": "South Africa 7s Womens",
+        "hs": 14,
+        "as": 19,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Argentina 7s Womens",
+        "away": "Brazil 7s Womens",
+        "hs": 17,
+        "as": 19,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Australia 7s Mens",
+        "away": "New Zealand 7s Mens",
+        "hs": 12,
+        "as": 5,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Fiji 7s Womens",
+        "away": "New Zealand 7s Womens",
+        "hs": 38,
+        "as": 0,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Kenya 7s Mens",
+        "away": "Usa 7s Mens",
+        "hs": 10,
+        "as": 17,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Brazil 7s Womens",
+        "away": "Japan 7s Womens",
+        "hs": 34,
+        "as": 7,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Fiji 7s Mens",
+        "away": "France 7s Mens",
+        "hs": 26,
+        "as": 24,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Germany 7s Mens",
+        "away": "Great Britain 7s Mens",
+        "hs": 14,
+        "as": 17,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Australia 7s Womens",
+        "away": "Canada 7s Womens",
+        "hs": 19,
+        "as": 17,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Argentina 7s Mens",
+        "away": "South Africa 7s Mens",
+        "hs": 38,
+        "as": 7,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Spain 7s Mens",
+        "away": "Uruguay 7s Mens",
+        "hs": 21,
+        "as": 0,
+        "comp": "Sevens"
+    },
+    {
+        "home": "France 7s Womens",
+        "away": "Usa 7s Womens",
+        "hs": 14,
+        "as": 19,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Argentina 7s Womens",
+        "away": "Spain 7s Womens",
+        "hs": 12,
+        "as": 17,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Sale",
+        "away": "Saracens",
+        "hs": 19,
+        "as": 85,
+        "comp": "Premiership"
+    },
+    {
+        "home": "Racing 92",
+        "away": "Stade Francais",
+        "hs": 47,
+        "as": 20,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Australia 7s Womens",
+        "away": "New Zealand 7s Womens",
+        "hs": 19,
+        "as": 14,
+        "comp": "Sevens"
+    },
+    {
+        "home": "New Zealand 7s Mens",
+        "away": "Spain 7s Mens",
+        "hs": 28,
+        "as": 32,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Canada 7s Womens",
+        "away": "France 7s Womens",
+        "hs": 7,
+        "as": 31,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Australia 7s Mens",
+        "away": "Fiji 7s Mens",
+        "hs": 26,
+        "as": 10,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Japan 7s Womens",
+        "away": "Usa 7s Womens",
+        "hs": 24,
+        "as": 19,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Argentina 7s Mens",
+        "away": "Spain 7s Mens",
+        "hs": 12,
+        "as": 19,
+        "comp": "Sevens"
+    },
+    {
+        "home": "New Zealand 7s Mens",
+        "away": "South Africa 7s Mens",
+        "hs": 14,
+        "as": 26,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Australia 7s Womens",
+        "away": "France 7s Womens",
+        "hs": 5,
+        "as": 26,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Canada 7s Womens",
+        "away": "New Zealand 7s Womens",
+        "hs": 12,
+        "as": 31,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Fiji 7s Womens",
+        "away": "Spain 7s Womens",
+        "hs": 31,
+        "as": 12,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Great Britain 7s Mens",
+        "away": "Uruguay 7s Mens",
+        "hs": 14,
+        "as": 26,
+        "comp": "Sevens"
+    },
+    {
+        "home": "France 7s Mens",
+        "away": "Kenya 7s Mens",
+        "hs": 7,
+        "as": 21,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Brazil 7s Womens",
+        "away": "Great Britain 7s Womens",
+        "hs": 17,
+        "as": 12,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Germany 7s Mens",
+        "away": "Usa 7s Mens",
+        "hs": 15,
+        "as": 19,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Argentina 7s Womens",
+        "away": "South Africa 7s Womens",
+        "hs": 25,
+        "as": 10,
+        "comp": "Sevens"
+    },
+    {
+        "home": "Brive",
+        "away": "Valence Romans",
+        "hs": 33,
+        "as": 27,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Bristol",
+        "away": "Newcastle",
+        "hs": 19,
+        "as": 52,
+        "comp": "Premiership"
+    },
+    {
+        "home": "Cardiff Blues",
+        "away": "Ospreys",
+        "hs": 24,
+        "as": 21,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Edinburgh",
+        "away": "Sharks",
+        "hs": 33,
+        "as": 28,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Gwent Dragons",
+        "away": "Zebre",
+        "hs": 18,
+        "as": 19,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Biarritz",
+        "away": "Colomiers",
+        "hs": 31,
+        "as": 14,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Grenoble",
+        "away": "Mont De Marsan",
+        "hs": 22,
+        "as": 21,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Provence Rugby",
+        "away": "Soyaux Angouleme",
+        "hs": 51,
+        "as": 20,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Aurillac",
+        "away": "Vannes",
+        "hs": 61,
+        "as": 24,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Beziers",
+        "away": "Carcassonne",
+        "hs": 20,
+        "as": 30,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Dax",
+        "away": "Uso Nevers",
+        "hs": 36,
+        "as": 10,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Agen",
+        "away": "Oyonnax",
+        "hs": 39,
+        "as": 12,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Crusaders",
+        "away": "Waratahs",
+        "hs": 35,
+        "as": 20,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Shizuoka Bluerevs",
+        "away": "Urayasu D Rocks",
+        "hs": 26,
+        "as": 49,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Harlequins",
+        "away": "Sale",
+        "hs": 33,
+        "as": 52,
+        "comp": "Premiership"
+    },
+    {
+        "home": "Leicester",
+        "away": "Saracens",
+        "hs": 19,
+        "as": 15,
+        "comp": "Premiership"
+    },
+    {
+        "home": "Bath",
+        "away": "Northampton",
+        "hs": 41,
+        "as": 38,
+        "comp": "Premiership"
+    },
+    {
+        "home": "Glasgow",
+        "away": "Stormers",
+        "hs": 48,
+        "as": 12,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Connacht",
+        "away": "Lions",
+        "hs": 33,
+        "as": 21,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Munster",
+        "away": "Ulster",
+        "hs": 41,
+        "as": 14,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Bulls",
+        "away": "Scarlets",
+        "hs": 21,
+        "as": 23,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Benetton",
+        "away": "Leinster",
+        "hs": 29,
+        "as": 26,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Pau",
+        "away": "Stade Francais",
+        "hs": 34,
+        "as": 32,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Castres",
+        "away": "Lyon",
+        "hs": 26,
+        "as": 21,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Bayonne",
+        "away": "Toulon",
+        "hs": 52,
+        "as": 26,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Racing 92",
+        "away": "Us Montauban",
+        "hs": 10,
+        "as": 59,
+        "comp": "Top 14"
+    },
+    {
+        "home": "La Rochelle",
+        "away": "Perpignan",
+        "hs": 29,
+        "as": 31,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Bordeaux",
+        "away": "Montpellier",
+        "hs": 21,
+        "as": 23,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Brumbies",
+        "away": "Hurricanes",
+        "hs": 45,
+        "as": 12,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Blues",
+        "away": "Reds",
+        "hs": 36,
+        "as": 33,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Mitsubishi Sagamihara Dynaboars",
+        "away": "Saitama Wild Knights",
+        "hs": 57,
+        "as": 19,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Toshiba Brave Lupus Tokyo",
+        "away": "Yokohama Canon Eagles",
+        "hs": 26,
+        "as": 50,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Kobelco Kobe Steelers",
+        "away": "Tokyo Sungoliath",
+        "hs": 49,
+        "as": 28,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Kubota Spears",
+        "away": "Mie Honda Heat",
+        "hs": 54,
+        "as": 21,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Exeter Chiefs",
+        "away": "Gloucester",
+        "hs": 34,
+        "as": 31,
+        "comp": "Premiership"
+    },
+    {
+        "home": "Clermont",
+        "away": "Toulouse",
+        "hs": 24,
+        "as": 27,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Highlanders",
+        "away": "Moana Pasifika",
+        "hs": 27,
+        "as": 17,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Chiefs",
+        "away": "Fijian Drua",
+        "hs": 42,
+        "as": 22,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Blackrams Tokyo",
+        "away": "Toyota Verblitz",
+        "hs": 28,
+        "as": 40,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Crusaders",
+        "away": "Hurricanes",
+        "hs": 38,
+        "as": 31,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Force",
+        "away": "Waratahs",
+        "hs": 17,
+        "as": 20,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Saitama Wild Knights",
+        "away": "Urayasu D Rocks",
+        "hs": 27,
+        "as": 24,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Leinster",
+        "away": "Toulon",
+        "hs": 29,
+        "as": 25,
+        "comp": "European Champions Cup"
+    },
+    {
+        "home": "Exeter Chiefs",
+        "away": "Ulster",
+        "hs": 29,
+        "as": 12,
+        "comp": "Challenge Cup"
+    },
+    {
+        "home": "Fijian Drua",
+        "away": "Highlanders",
+        "hs": 24,
+        "as": 14,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Blues",
+        "away": "Moana Pasifika",
+        "hs": 19,
+        "as": 45,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Brumbies",
+        "away": "Reds",
+        "hs": 30,
+        "as": 21,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Tokyo Sungoliath",
+        "away": "Toyota Verblitz",
+        "hs": 38,
+        "as": 54,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Shizuoka Bluerevs",
+        "away": "Toshiba Brave Lupus Tokyo",
+        "hs": 35,
+        "as": 29,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Kobelco Kobe Steelers",
+        "away": "Mie Honda Heat",
+        "hs": 24,
+        "as": 19,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Bath",
+        "away": "Bordeaux",
+        "hs": 38,
+        "as": 26,
+        "comp": "European Champions Cup"
+    },
+    {
+        "home": "Gwent Dragons",
+        "away": "Montpellier",
+        "hs": 18,
+        "as": 12,
+        "comp": "Challenge Cup"
+    },
+    {
+        "home": "Blackrams Tokyo",
+        "away": "Kubota Spears",
+        "hs": 8,
+        "as": 52,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Mitsubishi Sagamihara Dynaboars",
+        "away": "Yokohama Canon Eagles",
+        "hs": 31,
+        "as": 22,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Provence Rugby",
+        "away": "Vannes",
+        "hs": 34,
+        "as": 31,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Gloucester",
+        "away": "Sale",
+        "hs": 21,
+        "as": 15,
+        "comp": "Premiership"
+    },
+    {
+        "home": "Cardiff Blues",
+        "away": "Glasgow",
+        "hs": 40,
+        "as": 17,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Stormers",
+        "away": "Ulster",
+        "hs": 38,
+        "as": 38,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Agen",
+        "away": "Soyaux Angouleme",
+        "hs": 45,
+        "as": 14,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Colomiers",
+        "away": "Mont De Marsan",
+        "hs": 19,
+        "as": 13,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Aurillac",
+        "away": "Grenoble",
+        "hs": 36,
+        "as": 38,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Brive",
+        "away": "Carcassonne",
+        "hs": 28,
+        "as": 44,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Dax",
+        "away": "Valence Romans",
+        "hs": 31,
+        "as": 33,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Oyonnax",
+        "away": "Uso Nevers",
+        "hs": 26,
+        "as": 47,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Beziers",
+        "away": "Biarritz",
+        "hs": 43,
+        "as": 17,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Blues",
+        "away": "Crusaders",
+        "hs": 36,
+        "as": 20,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Chiefs",
+        "away": "Reds",
+        "hs": 21,
+        "as": 31,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Leicester",
+        "away": "Northampton",
+        "hs": 41,
+        "as": 17,
+        "comp": "Premiership"
+    },
+    {
+        "home": "Bristol",
+        "away": "Saracens",
+        "hs": 26,
+        "as": 41,
+        "comp": "Premiership"
+    },
+    {
+        "home": "Bulls",
+        "away": "Zebre",
+        "hs": 54,
+        "as": 19,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Benetton",
+        "away": "Sharks",
+        "hs": 46,
+        "as": 7,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Ospreys",
+        "away": "Scarlets",
+        "hs": 27,
+        "as": 20,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Leinster",
+        "away": "Lions",
+        "hs": 31,
+        "as": 7,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Edinburgh",
+        "away": "Gwent Dragons",
+        "hs": 15,
+        "as": 24,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Connacht",
+        "away": "Munster",
+        "hs": 26,
+        "as": 7,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Castres",
+        "away": "Pau",
+        "hs": 27,
+        "as": 15,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Clermont",
+        "away": "Perpignan",
+        "hs": 45,
+        "as": 14,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Bayonne",
+        "away": "Bordeaux",
+        "hs": 38,
+        "as": 40,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Montpellier",
+        "away": "Us Montauban",
+        "hs": 59,
+        "as": 7,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Lyon",
+        "away": "Stade Francais",
+        "hs": 59,
+        "as": 17,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Toulon",
+        "away": "Toulouse",
+        "hs": 27,
+        "as": 51,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Highlanders",
+        "away": "Waratahs",
+        "hs": 31,
+        "as": 26,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Hurricanes",
+        "away": "Moana Pasifika",
+        "hs": 17,
+        "as": 50,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Brumbies",
+        "away": "Force",
+        "hs": 32,
+        "as": 15,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Saitama Wild Knights",
+        "away": "Toshiba Brave Lupus Tokyo",
+        "hs": 45,
+        "as": 0,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Shizuoka Bluerevs",
+        "away": "Yokohama Canon Eagles",
+        "hs": 42,
+        "as": 15,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Mie Honda Heat",
+        "away": "Toyota Verblitz",
+        "hs": 38,
+        "as": 26,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "La Rochelle",
+        "away": "Racing 92",
+        "hs": 24,
+        "as": 26,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Harlequins",
+        "away": "Newcastle",
+        "hs": 17,
+        "as": 76,
+        "comp": "Premiership"
+    },
+    {
+        "home": "Bath",
+        "away": "Exeter Chiefs",
+        "hs": 35,
+        "as": 12,
+        "comp": "Premiership"
+    },
+    {
+        "home": "Kobelco Kobe Steelers",
+        "away": "Kubota Spears",
+        "hs": 19,
+        "as": 24,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Blackrams Tokyo",
+        "away": "Tokyo Sungoliath",
+        "hs": 39,
+        "as": 22,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Mitsubishi Sagamihara Dynaboars",
+        "away": "Urayasu D Rocks",
+        "hs": 22,
+        "as": 29,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Bristol",
+        "away": "Northampton",
+        "hs": 94,
+        "as": 33,
+        "comp": "Premiership"
+    },
+    {
+        "home": "Cardiff Blues",
+        "away": "Stormers",
+        "hs": 22,
+        "as": 16,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Glasgow",
+        "away": "Ulster",
+        "hs": 22,
+        "as": 26,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Connacht",
+        "away": "Edinburgh",
+        "hs": 5,
+        "as": 26,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Biarritz",
+        "away": "Carcassonne",
+        "hs": 41,
+        "as": 15,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Brive",
+        "away": "Uso Nevers",
+        "hs": 31,
+        "as": 29,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Colomiers",
+        "away": "Grenoble",
+        "hs": 17,
+        "as": 39,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Aurillac",
+        "away": "Oyonnax",
+        "hs": 36,
+        "as": 25,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Dax",
+        "away": "Vannes",
+        "hs": 47,
+        "as": 0,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Beziers",
+        "away": "Soyaux Angouleme",
+        "hs": 18,
+        "as": 15,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Agen",
+        "away": "Mont De Marsan",
+        "hs": 50,
+        "as": 28,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Provence Rugby",
+        "away": "Valence Romans",
+        "hs": 21,
+        "as": 34,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Chiefs",
+        "away": "Highlanders",
+        "hs": 42,
+        "as": 12,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Bath",
+        "away": "Newcastle",
+        "hs": 69,
+        "as": 12,
+        "comp": "Premiership"
+    },
+    {
+        "home": "Exeter Chiefs",
+        "away": "Harlequins",
+        "hs": 41,
+        "as": 24,
+        "comp": "Premiership"
+    },
+    {
+        "home": "Gloucester",
+        "away": "Saracens",
+        "hs": 30,
+        "as": 14,
+        "comp": "Premiership"
+    },
+    {
+        "home": "Sharks",
+        "away": "Zebre",
+        "hs": 54,
+        "as": 19,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Benetton",
+        "away": "Bulls",
+        "hs": 45,
+        "as": 19,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Leinster",
+        "away": "Ospreys",
+        "hs": 68,
+        "as": 14,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Gwent Dragons",
+        "away": "Scarlets",
+        "hs": 35,
+        "as": 35,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Lions",
+        "away": "Munster",
+        "hs": 24,
+        "as": 17,
+        "comp": "United Rugby Championship"
+    },
+    {
+        "home": "Clermont",
+        "away": "Pau",
+        "hs": 24,
+        "as": 19,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Castres",
+        "away": "Montpellier",
+        "hs": 33,
+        "as": 36,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Bayonne",
+        "away": "Lyon",
+        "hs": 42,
+        "as": 35,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Bordeaux",
+        "away": "Perpignan",
+        "hs": 37,
+        "as": 32,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Stade Francais",
+        "away": "Us Montauban",
+        "hs": 25,
+        "as": 73,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Racing 92",
+        "away": "Toulon",
+        "hs": 43,
+        "as": 28,
+        "comp": "Top 14"
+    },
+    {
+        "home": "Fijian Drua",
+        "away": "Waratahs",
+        "hs": 35,
+        "as": 50,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Blues",
+        "away": "Hurricanes",
+        "hs": 24,
+        "as": 47,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Force",
+        "away": "Reds",
+        "hs": 19,
+        "as": 14,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Leicester",
+        "away": "Sale",
+        "hs": 33,
+        "as": 47,
+        "comp": "Premiership"
+    },
+    {
+        "home": "La Rochelle",
+        "away": "Toulouse",
+        "hs": 38,
+        "as": 10,
+        "comp": "Top 14"
+    },
+    {
+        "home": "England Women",
+        "away": "France Women",
+        "hs": 28,
+        "as": 43,
+        "comp": "Currie Cup"
+    },
+    {
+        "home": "Ireland Women",
+        "away": "Scotland Women",
+        "hs": 54,
+        "as": 5,
+        "comp": "Currie Cup"
+    },
+    {
+        "home": "Italy Women",
+        "away": "Wales Women",
+        "hs": 24,
+        "as": 43,
+        "comp": "Currie Cup"
+    },
+    {
+        "home": "Oyonnax",
+        "away": "Valence Romans",
+        "hs": 39,
+        "as": 14,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Montpellier",
+        "away": "Ulster",
+        "hs": 59,
+        "as": 26,
+        "comp": "Challenge Cup"
+    },
+    {
+        "home": "Chiefs",
+        "away": "Crusaders",
+        "hs": 36,
+        "as": 32,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Brumbies",
+        "away": "Waratahs",
+        "hs": 14,
+        "as": 21,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Brive",
+        "away": "Provence Rugby",
+        "hs": 39,
+        "as": 21,
+        "comp": "Pro D2"
+    },
+    {
+        "home": "Bordeaux",
+        "away": "Leinster",
+        "hs": 19,
+        "as": 41,
+        "comp": "European Champions Cup"
+    },
+    {
+        "home": "Moana Pasifika",
+        "away": "Reds",
+        "hs": 31,
+        "as": 33,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Highlanders",
+        "away": "Hurricanes",
+        "hs": 45,
+        "as": 28,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Fijian Drua",
+        "away": "Force",
+        "hs": 19,
+        "as": 15,
+        "comp": "Super Rugby"
+    },
+    {
+        "home": "Blackrams Tokyo",
+        "away": "Tokyo Sungoliath",
+        "hs": 40,
+        "as": 35,
+        "comp": "Japan Rugby League One"
+    },
+    {
+        "home": "Kubota Spears",
+        "away": "Toshiba Brave Lupus Tokyo",
+        "hs": 26,
+        "as": 3,
+        "comp": "Japan Rugby League One"
+    }
+]
