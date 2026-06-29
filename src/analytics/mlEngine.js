@@ -483,12 +483,12 @@ async function onnxPredict(teamAKey, teamBKey, teams, venue = "neutral") {
   const confidence = Math.round(Math.min(95, Math.max(50, 50 + Math.abs(winProb - 50) * 0.9)));
 
   // ML-driven key factors: perturb each feature and measure ONNX prediction change
-  // This is a local SHAP-like approach - shows which stats matter most for THIS matchup
+  // This is a local SHAP-like approach — shows which stats matter most for THIS matchup
   const MODEL_IMPORTANCES = [0.212, 0.020, 0.044, 0.037, 0.049, 0.051, 0.197, 0.067, 0.084, 0.055, 0.064, 0.068, 0.053];
   let factors = [];
   try {
     const baseProb = winProb / 100;
-    const perturbResults = [];
+    const contributions = [];
     for (let i = 0; i < 12; i++) {
       // Zero out this feature to see how much prediction drops
       const perturbed = [...features];
@@ -497,31 +497,38 @@ async function onnxPredict(teamAKey, teamBKey, teams, venue = "neutral") {
       const pResult = await onnxClassifier.run({ features: pTensor });
       const pProbs = pResult.probabilities?.data;
       const pProb = pProbs ? pProbs[1] : baseProb;
-      // Impact = how much removing this feature changes the prediction
-      const impact = Math.abs(baseProb - pProb);
-      perturbResults.push({
+      // Contribution = how much this feature moves the prediction from neutral
+      contributions.push({
         name: FEATURE_NAMES[i],
-        // Combine: ONNX sensitivity (60%) + trained importance (20%) + feature magnitude (20%)
-        importance: Math.round((impact * 600 + MODEL_IMPORTANCES[i] * 200 + Math.abs(features[i]) * 200)),
+        rawContribution: Math.abs(baseProb - pProb),
         value: features[i],
         impact: features[i] > 0.05 ? "favours" : features[i] < -0.05 ? "risk" : "neutral",
       });
     }
-    factors = perturbResults
-      .filter(f => f.importance > 2)
+    // Convert to percentage share: each factor's contribution / total contributions * 100
+    const totalContribution = contributions.reduce((sum, c) => sum + c.rawContribution, 0) || 1;
+    factors = contributions
+      .map(c => ({ ...c, importance: Math.round((c.rawContribution / totalContribution) * 100) }))
+      .filter(f => f.importance > 3)
       .sort((a, b) => b.importance - a.importance)
       .slice(0, 5);
   } catch (e) {
-    // Fallback: use trained model importances * feature values
+    // Fallback: use trained model importances as proportional shares
+    const totalImp = MODEL_IMPORTANCES.slice(0, 12).reduce((s, v) => s + v, 0);
     factors = FEATURE_NAMES.map((name, i) => ({
       name,
-      importance: Math.round(Math.abs(features[i]) * MODEL_IMPORTANCES[i] * 500),
+      importance: Math.round((MODEL_IMPORTANCES[i] / totalImp) * Math.abs(features[i]) * 300),
       value: features[i],
       impact: features[i] > 0.05 ? "favours" : features[i] < -0.05 ? "risk" : "neutral",
     }))
       .filter(f => f.importance > 1)
       .sort((a, b) => b.importance - a.importance)
       .slice(0, 5);
+    // Normalize fallback to sum to ~100
+    if (factors.length > 0) {
+      const total = factors.reduce((s, f) => s + f.importance, 0) || 1;
+      factors = factors.map(f => ({ ...f, importance: Math.round((f.importance / total) * 100) }));
+    }
   }
 
   const result = {
