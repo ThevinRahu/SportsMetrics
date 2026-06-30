@@ -483,7 +483,7 @@ async function onnxPredict(teamAKey, teamBKey, teams, venue = "neutral") {
   const confidence = Math.round(Math.min(95, Math.max(50, 50 + Math.abs(winProb - 50) * 0.9)));
 
   // ML-driven key factors: perturb each feature and measure ONNX prediction change
-  // This is a local SHAP-like approach — shows which stats matter most for THIS matchup
+  // This is a local SHAP-like approach - shows which stats matter most for THIS matchup
   const MODEL_IMPORTANCES = [0.212, 0.020, 0.044, 0.037, 0.049, 0.051, 0.197, 0.067, 0.084, 0.055, 0.064, 0.068, 0.053];
   let factors = [];
   try {
