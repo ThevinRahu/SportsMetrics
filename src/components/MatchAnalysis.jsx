@@ -238,7 +238,7 @@ export default function MatchAnalysis({ myKey, oppKey, teams, tournamentName, ve
             <div style={{ fontSize: 9, color: theme.textDim }}>ONNX Gradient Boosted Trees • {mlFinal.trainingSamples || 0} samples • {mlFinal.modelAccuracy || 0}% accuracy</div>
           </div>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
           <div style={{ background: theme.surface, borderRadius: 10, padding: 14, textAlign: "center", border: `1px solid ${theme.border}` }}>
             <div style={{ fontSize: 9, color: theme.textDim, marginBottom: 4 }}>{myKey} Win Probability</div>
             <div style={{ fontSize: 26, fontWeight: 800, color: winColor(mlFinal.winProbability || 50) }}>{mlFinal.winProbability || 50}%</div>
@@ -247,6 +247,15 @@ export default function MatchAnalysis({ myKey, oppKey, teams, tournamentName, ve
             <div style={{ fontSize: 9, color: theme.textDim, marginBottom: 4 }}>Expected Margin</div>
             <div style={{ fontSize: 26, fontWeight: 800, color: (mlFinal.expectedMargin || 0) > 0 ? theme.green : (mlFinal.expectedMargin || 0) < 0 ? theme.red : theme.textSecondary }}>{(mlFinal.expectedMargin || 0) > 0 ? "+" : ""}{mlFinal.expectedMargin || 0}</div>
             <div style={{ fontSize: 9, color: theme.textDim }}>points</div>
+          </div>
+          <div style={{ background: theme.surface, borderRadius: 10, padding: 14, textAlign: "center", border: `1px solid ${theme.border}` }}>
+            <div style={{ fontSize: 9, color: theme.textDim, marginBottom: 4 }}>ML Predicted Score</div>
+            <div style={{ fontSize: 22, fontWeight: 800 }}>
+              <span style={{ color: (mlFinal.expectedMargin || 0) >= 0 ? theme.green : theme.textSecondary }}>{mlFinal.scoreA || "-"}</span>
+              <span style={{ color: theme.textDim, fontSize: 14, margin: "0 4px" }}>-</span>
+              <span style={{ color: (mlFinal.expectedMargin || 0) < 0 ? theme.green : theme.textSecondary }}>{mlFinal.scoreB || "-"}</span>
+            </div>
+            <div style={{ fontSize: 9, color: theme.textDim }}>{myKey} vs {oppKey}</div>
           </div>
           <div style={{ background: theme.surface, borderRadius: 10, padding: 14, textAlign: "center", border: `1px solid ${theme.border}` }}>
             <div style={{ fontSize: 9, color: theme.textDim, marginBottom: 4 }}>Model Confidence</div>
