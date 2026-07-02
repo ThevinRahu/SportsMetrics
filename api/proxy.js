@@ -22,6 +22,7 @@ export default async function handler(req, res) {
     'sofascore.com',
     'world.rugby',
     'rugbychampionship.com',
+    'nationschampionshiprugby.com',
   ];
 
   try {
