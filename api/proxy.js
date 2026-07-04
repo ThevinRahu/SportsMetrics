@@ -6,6 +6,10 @@
  * Fetches the target URL server-side (no CORS issues) and returns the content.
  */
 
+export const config = {
+  maxDuration: 30, // Allow up to 30 seconds for slow sites
+};
+
 export default async function handler(req, res) {
   const { url } = req.query;
 
@@ -33,12 +37,19 @@ export default async function handler(req, res) {
       return res.status(403).json({ error: 'Domain not allowed' });
     }
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 25000);
+
     const response = await fetch(url, {
+      signal: controller.signal,
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
       },
     });
+
+    clearTimeout(timeout);
 
     if (!response.ok) {
       return res.status(response.status).json({ error: `Upstream returned ${response.status}` });
@@ -51,6 +62,9 @@ export default async function handler(req, res) {
     res.setHeader('Content-Type', contentType);
     res.status(200).send(body);
   } catch (e) {
+    if (e.name === 'AbortError') {
+      return res.status(504).json({ error: 'Upstream timeout (25s)' });
+    }
     res.status(500).json({ error: e.message });
   }
 }
