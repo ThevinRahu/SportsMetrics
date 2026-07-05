@@ -33,7 +33,7 @@ import json
 import numpy as np
 import os
 from collections import defaultdict
-from sklearn.ensemble import GradientBoostingClassifier, RandomForestRegressor
+from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
 from sklearn.model_selection import cross_val_score
 from skl2onnx import convert_sklearn
 from skl2onnx.common.data_types import FloatTensorType
@@ -421,14 +421,18 @@ def train_and_export(X, y_win, y_margin):
     print(f"\n  Classifier train accuracy: {train_acc:.1%}")
     print(f"  Classifier CV accuracy:    {cv_acc:.1%} (+/- {cv_scores.std():.1%})")
 
-    # --- Margin Regressor ---
-    reg = RandomForestRegressor(
-        n_estimators=100,
-        max_depth=8,
-        min_samples_leaf=5,
+    # --- Margin Regressor (use GBT same as classifier for consistency) ---
+    from sklearn.ensemble import GradientBoostingRegressor
+    reg = GradientBoostingRegressor(
+        n_estimators=200,
+        max_depth=4,
+        learning_rate=0.08,
+        subsample=0.85,
+        min_samples_leaf=10,
+        max_features=0.8,
         random_state=42
     )
-    reg.fit(X, y_margin)
+    reg.fit(X, y_margin, sample_weight=sample_weights)
     reg_score = reg.score(X, y_margin)
     print(f"  Regressor R^2: {reg_score:.3f}")
 
