@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import { Routes, Route, Navigate, useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
 import { theme } from './styles/theme';
 import Sidebar from './components/Sidebar';
@@ -9,10 +10,10 @@ import AnalyticsTheory from './pages/AnalyticsTheory';
 import { SUPER_RUGBY_2026 } from './data/superRugby2026';
 import { NATIONS_CHAMPIONSHIP_2026 } from './data/nationsChampionship2026';
 import { RUGBY_CHAMPIONSHIP_2026 } from './data/rugbyChampionship2026';
-import db, { 
+import { 
   saveTournament, getAllTournaments,
   saveCustomTournament, getAllCustomTournaments, updateCustomTournament,
-  logRefresh, saveMatches, seedMatchHistory, getAllMatchesFromDB
+  logRefresh, saveMatches, seedMatchHistory
 } from './db';
 import { refreshTournamentData } from './services/dataFetcher';
 import { retrainModel } from './analytics/mlEngine';
@@ -26,10 +27,7 @@ const DEFAULT_TOURNAMENTS = {
 };
 
 export default function App() {
-  const [activeTournament, setActiveTournament] = useState("nc2026");
-  const [activeView, setActiveView] = useState("tournament");
   const [domesticTournaments, setDomesticTournaments] = useState([]);
-  const [activeDomesticId, setActiveDomesticId] = useState(null);
   const [tournamentData, setTournamentData] = useState(DEFAULT_TOURNAMENTS);
   const [refreshing, setRefreshing] = useState(false);
   const [refreshStatus, setRefreshStatus] = useState(null);
@@ -37,42 +35,43 @@ export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
 
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Derive active tournament from URL
+  const getActiveTournamentId = () => {
+    const match = location.pathname.match(/^\/tournament\/([^/]+)/);
+    return match ? match[1] : "nc2026";
+  };
+
   // ===== DATABASE INITIALIZATION =====
-  // On first load, seed DB with defaults if empty, then load from DB
   useEffect(() => {
     async function initDB() {
       try {
-        // Check if DB has tournament data
         const stored = await getAllTournaments();
         
         if (stored.length === 0) {
-          // First run: seed database with default data
           for (const [id, data] of Object.entries(DEFAULT_TOURNAMENTS)) {
             await saveTournament({ ...data, id });
           }
           setTournamentData(DEFAULT_TOURNAMENTS);
         } else {
-          // Load from DB- but merge with code defaults to pick up corrections
           const fromDB = {};
           for (const t of stored) {
             const codeDefault = DEFAULT_TOURNAMENTS[t.id];
             if (codeDefault) {
-              // Compare data versions: if code is newer, re-seed DB
               const codeVersion = codeDefault.dataVersion || 0;
               const dbVersion = t.dataVersion || 0;
               if (codeVersion > dbVersion) {
-                // Code has newer data (e.g. we deployed Round 1 results) — re-seed
                 fromDB[t.id] = { ...codeDefault, id: t.id };
                 await saveTournament({ ...codeDefault, id: t.id });
               } else {
-                // DB has current or refreshed data — keep it
                 fromDB[t.id] = t;
               }
             } else {
               fromDB[t.id] = t;
             }
           }
-          // Add any new tournaments from code that aren't in DB yet
           for (const [id, data] of Object.entries(DEFAULT_TOURNAMENTS)) {
             if (!fromDB[id]) {
               fromDB[id] = data;
@@ -82,13 +81,11 @@ export default function App() {
           setTournamentData(fromDB);
         }
 
-        // Load custom tournaments
         const customStored = await getAllCustomTournaments();
         if (customStored.length > 0) {
           setDomesticTournaments(customStored);
         }
 
-        // Seed match history from static file (first load only)
         const staticMatches = getAllMatches().map(([home, away, hs, as, year, comp]) => ({
           homeTeam: home, awayTeam: away, homeScore: hs, awayScore: as,
           date: year + "-01-01", competition: comp, tournamentId: comp === "SRP" ? "srp2026" : "nc2026"
@@ -111,62 +108,30 @@ export default function App() {
     setRefreshStatus(null);
 
     const existing = tournamentData[tournamentId];
-    if (!existing) {
-      setRefreshing(false);
-      return;
-    }
+    if (!existing) { setRefreshing(false); return; }
 
     try {
-      // Call real data fetcher (fetches from live URLs)
       const result = await refreshTournamentData(tournamentId, existing);
       
       if (result.data) {
-        const updatedData = {
-          ...result.data,
-          id: tournamentId,
-          lastRefresh: new Date().toISOString(),
-        };
-
-        // Update state
-        setTournamentData(prev => ({
-          ...prev,
-          [tournamentId]: updatedData
-        }));
-
-        // Persist to IndexedDB
+        const updatedData = { ...result.data, id: tournamentId, lastRefresh: new Date().toISOString() };
+        setTournamentData(prev => ({ ...prev, [tournamentId]: updatedData }));
         await saveTournament(updatedData);
-        
-        // Retrain ML model on updated data
-        if (updatedData.teams) {
-          retrainModel(updatedData.teams);
-        }
-
-        // Save extracted match results to DB
-        if (result.matches && result.matches.length > 0) {
-          await saveMatches(result.matches);
-        }
-
-        // Log the refresh
+        if (updatedData.teams) retrainModel(updatedData.teams);
+        if (result.matches && result.matches.length > 0) await saveMatches(result.matches);
         await logRefresh(tournamentId, result.success, result.source, result.error || "");
 
         setRefreshStatus({
           success: result.success,
           message: result.error || (result.success ? `Data refreshed from ${result.source}` : "Refresh failed"),
-          source: result.source,
         });
       }
     } catch (error) {
-      setRefreshStatus({
-        success: false,
-        message: `Refresh error: ${error.message}`,
-        source: "",
-      });
+      setRefreshStatus({ success: false, message: `Refresh error: ${error.message}` });
       await logRefresh(tournamentId, false, "", error.message);
     }
 
     setRefreshing(false);
-    
-    // Clear status after 5 seconds
     setTimeout(() => setRefreshStatus(null), 5000);
   }, [tournamentData]);
 
@@ -174,24 +139,15 @@ export default function App() {
   const handleCreateDomestic = useCallback(async (tournament) => {
     const id = `domestic_${Date.now()}`;
     const newTournament = { ...tournament, id, createdAt: new Date().toISOString() };
-    
     setDomesticTournaments(prev => [...prev, newTournament]);
-    setActiveDomesticId(id);
-    setActiveView("domestic");
-
-    // Persist
     await saveCustomTournament(newTournament);
-  }, []);
+    navigate(`/domestic/${id}`);
+  }, [navigate]);
 
   const handleUpdateDomestic = useCallback(async (id, data) => {
-    setDomesticTournaments(prev => 
-      prev.map(t => t.id === id ? { ...t, ...data } : t)
-    );
-    // Persist
+    setDomesticTournaments(prev => prev.map(t => t.id === id ? { ...t, ...data } : t));
     await updateCustomTournament(id, data);
   }, []);
-
-  const currentTournament = tournamentData[activeTournament];
 
   // Show loading state while DB initializes
   if (!dbReady) {
@@ -212,11 +168,8 @@ export default function App() {
 
   return (
     <div style={{ 
-      display: "flex", 
-      minHeight: "100vh", 
-      background: theme.bg, 
-      color: theme.textPrimary,
-      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
+      display: "flex", minHeight: "100vh", background: theme.bg, 
+      color: theme.textPrimary, fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
     }}>
       {/* Mobile menu button */}
       {!sidebarOpen && (
@@ -232,7 +185,7 @@ export default function App() {
         >☰</button>
       )}
 
-      {/* Sidebar with overlay on mobile */}
+      {/* Sidebar */}
       {sidebarOpen && (
         <>
           <div
@@ -244,14 +197,14 @@ export default function App() {
           />
           <Sidebar
             tournaments={tournamentData}
-            activeTournament={activeTournament}
-            activeView={activeView}
+            activeTournament={getActiveTournamentId()}
+            activeView={location.pathname.startsWith('/domestic') ? 'domestic' : location.pathname.startsWith('/analytics') ? 'theory' : 'tournament'}
             domesticTournaments={domesticTournaments}
-            activeDomesticId={activeDomesticId}
-            onSelectTournament={(id) => { setActiveTournament(id); setActiveView("tournament"); if(window.innerWidth<=768) setSidebarOpen(false); }}
-            onSelectDomestic={(id) => { setActiveDomesticId(id); setActiveView("domestic"); if(window.innerWidth<=768) setSidebarOpen(false); }}
-            onCreateDomestic={() => { setActiveView("domestic-create"); if(window.innerWidth<=768) setSidebarOpen(false); }}
-            onSelectTheory={() => { setActiveView("theory"); if(window.innerWidth<=768) setSidebarOpen(false); }}
+            activeDomesticId={null}
+            onSelectTournament={(id) => { navigate(`/tournament/${id}`); if(window.innerWidth<=768) setSidebarOpen(false); }}
+            onSelectDomestic={(id) => { navigate(`/domestic/${id}`); if(window.innerWidth<=768) setSidebarOpen(false); }}
+            onCreateDomestic={() => { navigate('/domestic/new'); if(window.innerWidth<=768) setSidebarOpen(false); }}
+            onSelectTheory={() => { navigate('/analytics'); if(window.innerWidth<=768) setSidebarOpen(false); }}
             onOpenSettings={() => setSettingsOpen(true)}
             onClose={() => setSidebarOpen(false)}
           />
@@ -274,33 +227,51 @@ export default function App() {
           </div>
         )}
 
-        {activeView === "tournament" && currentTournament && (
-          <TournamentDashboard
-            tournament={currentTournament}
-            onRefresh={() => handleRefresh(activeTournament)}
-            refreshing={refreshing}
-          />
-        )}
-        
-        {(activeView === "domestic" || activeView === "domestic-create") && (
-          <DomesticTournament
-            tournaments={domesticTournaments}
-            activeId={activeDomesticId}
-            onCreate={handleCreateDomestic}
-            onUpdate={handleUpdateDomestic}
-            onSelect={(id) => setActiveDomesticId(id)}
-            isCreating={activeView === "domestic-create"}
-          />
-        )}
-        
-        {activeView === "theory" && <AnalyticsTheory />}
+        <Routes>
+          <Route path="/" element={<Navigate to="/tournament/nc2026" replace />} />
+          <Route path="/tournament/:id/:tab?" element={
+            <TournamentRoute 
+              tournamentData={tournamentData} 
+              onRefresh={handleRefresh} 
+              refreshing={refreshing} 
+            />
+          } />
+          <Route path="/domestic/:id?" element={
+            <DomesticTournament
+              tournaments={domesticTournaments}
+              activeId={location.pathname.split('/domestic/')[1] || null}
+              onCreate={handleCreateDomestic}
+              onUpdate={handleUpdateDomestic}
+              onSelect={(id) => navigate(`/domestic/${id}`)}
+              isCreating={location.pathname === '/domestic/new'}
+            />
+          } />
+          <Route path="/analytics" element={<AnalyticsTheory />} />
+          <Route path="*" element={<Navigate to="/tournament/nc2026" replace />} />
+        </Routes>
       </main>
 
-      {/* Settings Modal */}
       <Settings open={settingsOpen} onClose={() => setSettingsOpen(false)} />
-
-      {/* Vercel Analytics */}
       <Analytics />
     </div>
+  );
+}
+
+// Tournament route component — reads :id and :tab from URL
+function TournamentRoute({ tournamentData, onRefresh, refreshing }) {
+  const { id, tab } = useParams();
+  const tournament = tournamentData[id];
+
+  if (!tournament) {
+    return <Navigate to="/tournament/nc2026" replace />;
+  }
+
+  return (
+    <TournamentDashboard
+      tournament={tournament}
+      onRefresh={() => onRefresh(id)}
+      refreshing={refreshing}
+      initialTab={tab || "standings"}
+    />
   );
 }

@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { theme, ratingColor, injuryColor, winColor } from '../styles/theme';
 import { advancedWinProbability, generateGamePlan, improvementImpact } from '../analytics/gamePlan';
 import { momentumScore, injuryRiskEstimate } from '../analytics/bayesian';
@@ -9,11 +10,30 @@ import MatchAnalysis from '../components/MatchAnalysis';
 import SeasonSimulator from '../components/SeasonSimulator';
 import TeamSelector from '../components/TeamSelector';
 
-export default function TournamentDashboard({ tournament, onRefresh, refreshing }) {
+export default function TournamentDashboard({ tournament, onRefresh, refreshing, initialTab }) {
+  const navigate = useNavigate();
+  const { id } = useParams();
   const [myTeam, setMyTeam] = useState("");
   const [opponent, setOpponent] = useState("");
-  const [activeTab, setActiveTab] = useState("standings");
-  const [venue, setVenue] = useState("neutral"); // "home" | "away" | "neutral"
+  const [activeTab, setActiveTab] = useState(initialTab || "standings");
+  const [venue, setVenue] = useState("neutral");
+
+  // Sync tab with URL when initialTab changes (e.g. direct navigation)
+  useEffect(() => {
+    if (initialTab && initialTab !== activeTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
+
+  // Update URL when tab changes
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+    if (tabId === "standings") {
+      navigate(`/tournament/${id}`, { replace: true });
+    } else {
+      navigate(`/tournament/${id}/${tabId}`, { replace: true });
+    }
+  };
 
   const teams = tournament.teams;
   const teamKeys = Object.keys(teams);
@@ -138,7 +158,7 @@ export default function TournamentDashboard({ tournament, onRefresh, refreshing 
         {tabs.map(tab => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
+            onClick={() => handleTabChange(tab.id)}
             style={{
               padding: "10px 18px", fontSize: 12, fontWeight: 600,
               background: "transparent",
