@@ -17,6 +17,7 @@ import {
 } from './db';
 import { refreshTournamentData } from './services/dataFetcher';
 import { retrainModel } from './analytics/mlEngine';
+import { updateRatings } from './analytics/elo';
 import { getAllMatches } from './data/matchHistory';
 
 // Default tournament data (used for initial seeding only)
@@ -119,6 +120,26 @@ export default function App() {
         await saveTournament(updatedData);
         if (updatedData.teams) retrainModel(updatedData.teams);
         if (result.matches && result.matches.length > 0) await saveMatches(result.matches);
+
+        // Recalculate Elo ratings from new match results
+        if (result.matches && result.matches.length > 0 && updatedData.teams) {
+          const teams = updatedData.teams;
+          for (const match of result.matches) {
+            const homeTeam = teams[match.homeTeam];
+            const awayTeam = teams[match.awayTeam];
+            if (homeTeam && awayTeam && match.homeScore != null && match.awayScore != null) {
+              const { newRatingA, newRatingB } = updateRatings(
+                homeTeam.elo || 1400, awayTeam.elo || 1400,
+                match.homeScore, match.awayScore, 32, true
+              );
+              homeTeam.elo = newRatingA;
+              awayTeam.elo = newRatingB;
+            }
+          }
+          // Save updated Elo to state and DB
+          setTournamentData(prev => ({ ...prev, [tournamentId]: { ...updatedData, teams } }));
+          await saveTournament({ ...updatedData, teams });
+        }
         await logRefresh(tournamentId, result.success, result.source, result.error || "");
 
         setRefreshStatus({
