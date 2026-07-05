@@ -27,6 +27,7 @@ export const SUPER_RUGBY_2026 = {
   round: 14,
   totalRounds: 14,
   status: "completed",
+  dataVersion: 1,
   source: "all.rugby + rugbypass.com verified June 2026",
   dataUrl: "https://super.rugby/superrugby/competition-stats/",
   format: "Round robin (14 rounds) + Top 4 playoffs",

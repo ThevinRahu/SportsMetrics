@@ -67,7 +67,7 @@ async function fetchWithProxy(url) {
       });
       if (response.ok) {
         const text = await response.text();
-        return truncateContent(text, 12000);
+        return truncateContent(text, 6000);
       }
     } catch (e) {
       console.warn(`Proxy failed for ${url}:`, e.message);
@@ -85,6 +85,12 @@ function truncateContent(html, maxChars) {
     .replace(/<footer[\s\S]*?<\/footer>/gi, '')
     .replace(/<header[\s\S]*?<\/header>/gi, '')
     .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/<img[^>]*>/gi, '')
+    .replace(/<svg[\s\S]*?<\/svg>/gi, '')
+    .replace(/<link[^>]*>/gi, '')
+    .replace(/<meta[^>]*>/gi, '')
+    .replace(/class="[^"]*"/gi, '')
+    .replace(/style="[^"]*"/gi, '')
     .replace(/\s+/g, ' ');
   
   if (cleaned.length > maxChars) {
@@ -155,7 +161,54 @@ CONTENT:
 ${content}`;
 }
 
-async function callAI(prompt) {
+/**
+ * Knowledge-based prompt: Ask AI directly for tournament data using its training knowledge.
+ * No web scraping needed — the AI knows recent results if they're within its training cutoff.
+ */
+function getKnowledgePrompt(tournamentName, teamNames, existingData) {
+  const currentDate = new Date().toISOString().split('T')[0];
+  const existingSeason = Object.entries(existingData.teams || {}).map(([name, t]) => 
+    `${name}: P${t.season?.played || 0} W${t.season?.won || 0} L${t.season?.lost || 0} PF${t.season?.pf || 0} PA${t.season?.pa || 0}`
+  ).join(', ');
+
+  return `You are a rugby statistics AI. Provide the LATEST available data for "${tournamentName}" as of ${currentDate}.
+
+TEAMS: ${teamNames.join(", ")}
+
+CURRENT DATA WE HAVE: ${existingSeason}
+
+Your job: Return updated stats with any NEW match results and updated standings you know about. If the tournament has started and you know results, include them. If you don't have newer data than what we already have, return the existing data unchanged.
+
+Return ONLY valid JSON with this structure:
+{
+  "teams": {
+    "Team Name": {
+      "season": { "played": N, "won": N, "lost": N, "drawn": N, "pts": N, "pf": N, "pa": N, "tries_for": N, "tries_against": N, "try_bonus": N, "loss_bonus": N },
+      "attack": { "pts_pg": N, "tries_pg": N, "gl": N, "lb": N, "rs": N, "c22": N, "e22": N, "off": N },
+      "defense": { "tr": N, "missed": N, "to": N, "dom": N, "steals": N, "ob": N },
+      "setpiece": { "so": N, "ss": N, "lo": N, "ls": N, "ps": N, "maul": N },
+      "kicking": { "km": N, "goal": N },
+      "discipline": { "pen": N, "idx": N },
+      "form": { "last5": ["W","L",...], "streak": "W1", "rating": N },
+      "elo": N
+    }
+  },
+  "matches": [
+    { "home": "Team A", "away": "Team B", "homeScore": 35, "awayScore": 21, "date": "2026-07-04", "round": 1 }
+  ],
+  "meta": { "round": N, "source": "AI knowledge" }
+}
+
+IMPORTANT:
+- Include ALL match results you know about for this tournament
+- Update season stats (played, won, lost, pts, pf, pa) based on results
+- Update form.last5 arrays based on recent results
+- Use NULL for any stat you genuinely don't know
+- Team names must EXACTLY match: ${teamNames.join(", ")}
+- Return ONLY JSON, no other text`;
+}
+
+async function callAI(prompt, retries = 1) {
   const { provider, apiKey } = getAIConfig();
   
   if (!apiKey) {
@@ -181,6 +234,11 @@ async function callAI(prompt) {
   });
 
   if (!response.ok) {
+    if (response.status === 429 && retries > 0) {
+      // Rate limited — wait and retry
+      await new Promise(r => setTimeout(r, 20000));
+      return callAI(prompt, retries - 1);
+    }
     const err = await response.text();
     throw new Error(`AI API error (${response.status}): ${err.slice(0, 200)}`);
   }
@@ -270,11 +328,6 @@ export async function refreshTournamentData(tournamentId, existingData) {
   const { apiKey } = getAIConfig();
   
   const dataUrl = existingData.dataUrl;
-  if (!dataUrl) {
-    results.error = "No data URL configured for this tournament.";
-    results.data = existingData;
-    return results;
-  }
 
   if (!apiKey) {
     results.error = "Configure an AI API key (Groq is free) in Settings to enable live data refresh.";
@@ -282,83 +335,100 @@ export async function refreshTournamentData(tournamentId, existingData) {
     return results;
   }
 
-  try {
-    results.source = dataUrl;
-    const content = await fetchWithProxy(dataUrl);
-    
-    if (!content || content.length < 100) {
-      throw new Error("Fetched content too short- site may be blocking requests.");
-    }
+  const teamNames = Object.keys(existingData.teams || {});
+  let aiResult = null;
 
-    const teamNames = Object.keys(existingData.teams || {});
-    const prompt = getExtractionPrompt(existingData.name || tournamentId, content, teamNames);
-    const aiResult = await callAI(prompt);
-    
-    if (!aiResult || !aiResult.teams) {
-      throw new Error("AI did not return valid team data structure.");
-    }
-
-    // Merge with existing- only overwrite where AI found real data
-    const updatedTeams = JSON.parse(JSON.stringify(existingData.teams));
-    let teamsUpdated = 0;
-    
-    for (const [teamName, extractedData] of Object.entries(aiResult.teams)) {
-      const matchKey = teamNames.find(k => 
-        k === teamName ||
-        k.toLowerCase() === teamName.toLowerCase() ||
-        k.toLowerCase().includes(teamName.toLowerCase()) ||
-        teamName.toLowerCase().includes(k.toLowerCase())
-      );
+  // Strategy 1: Fetch URL and have AI extract data from HTML
+  if (dataUrl) {
+    try {
+      results.source = dataUrl;
+      const content = await fetchWithProxy(dataUrl);
       
-      if (matchKey) {
-        const before = JSON.stringify(updatedTeams[matchKey]);
-        updatedTeams[matchKey] = mergeTeamData(updatedTeams[matchKey], extractedData);
-        if (JSON.stringify(updatedTeams[matchKey]) !== before) {
-          teamsUpdated++;
-        }
+      if (content && content.length >= 100) {
+        const prompt = getExtractionPrompt(existingData.name || tournamentId, content, teamNames);
+        aiResult = await callAI(prompt);
+      }
+    } catch (e) {
+      console.warn("URL fetch failed, falling back to AI knowledge:", e.message);
+    }
+  }
+
+  // Strategy 2: If URL fetch failed or AI found nothing, ask AI directly from its knowledge
+  if (!aiResult || !aiResult.teams || Object.keys(aiResult.teams).length === 0 ||
+      (aiResult.matches && aiResult.matches.length === 0 && Object.values(aiResult.teams).every(t => !t.season?.played))) {
+    try {
+      results.source = "AI Knowledge (Groq)";
+      const knowledgePrompt = getKnowledgePrompt(existingData.name || tournamentId, teamNames, existingData);
+      aiResult = await callAI(knowledgePrompt);
+    } catch (e) {
+      results.error = e.message;
+      results.data = { ...existingData, lastRefresh: new Date().toISOString() };
+      return results;
+    }
+  }
+
+  if (!aiResult || !aiResult.teams) {
+    results.error = "AI did not return valid team data.";
+    results.data = { ...existingData, lastRefresh: new Date().toISOString() };
+    return results;
+  }
+
+  // Merge with existing — only overwrite where AI found real data
+  const updatedTeams = JSON.parse(JSON.stringify(existingData.teams));
+  let teamsUpdated = 0;
+  
+  for (const [teamName, extractedData] of Object.entries(aiResult.teams)) {
+    const matchKey = teamNames.find(k => 
+      k === teamName ||
+      k.toLowerCase() === teamName.toLowerCase() ||
+      k.toLowerCase().includes(teamName.toLowerCase()) ||
+      teamName.toLowerCase().includes(k.toLowerCase())
+    );
+    
+    if (matchKey) {
+      const before = JSON.stringify(updatedTeams[matchKey]);
+      updatedTeams[matchKey] = mergeTeamData(updatedTeams[matchKey], extractedData);
+      if (JSON.stringify(updatedTeams[matchKey]) !== before) {
+        teamsUpdated++;
       }
     }
+  }
 
-    const updatedRound = (typeof aiResult.meta?.round === "number" && aiResult.meta.round > 0) 
-      ? aiResult.meta.round 
-      : existingData.round;
-    
-    results.success = true;
-    results.data = {
-      ...existingData,
-      teams: updatedTeams,
-      round: updatedRound,
-      lastRefresh: new Date().toISOString(),
-      lastRefreshSource: dataUrl,
-      teamsUpdated,
-    };
+  const updatedRound = (typeof aiResult.meta?.round === "number" && aiResult.meta.round > 0) 
+    ? aiResult.meta.round 
+    : existingData.round;
+  
+  results.success = true;
+  results.data = {
+    ...existingData,
+    teams: updatedTeams,
+    round: updatedRound,
+    lastRefresh: new Date().toISOString(),
+    lastRefreshSource: results.source,
+    teamsUpdated,
+  };
 
-    // Extract match results from AI response
-    results.matches = [];
-    if (Array.isArray(aiResult.matches)) {
-      results.matches = aiResult.matches
-        .filter(m => m && m.home && m.away && m.homeScore != null && m.awayScore != null)
-        .map(m => ({
-          homeTeam: m.home,
-          awayTeam: m.away,
-          homeScore: m.homeScore,
-          awayScore: m.awayScore,
-          date: m.date || new Date().toISOString().split('T')[0],
-          round: m.round || null,
-          competition: existingData.name || tournamentId,
-          tournamentId,
-        }));
-    }
-    
-    if (teamsUpdated === 0 && results.matches.length === 0) {
-      results.error = "AI processed content but no new data was found. Source may not have detailed stats.";
-    } else {
-      results.error = null;
-    }
-    
-  } catch (error) {
-    results.error = error.message;
-    results.data = { ...existingData, lastRefresh: new Date().toISOString() };
+  // Extract match results from AI response
+  results.matches = [];
+  if (Array.isArray(aiResult.matches)) {
+    results.matches = aiResult.matches
+      .filter(m => m && m.home && m.away && m.homeScore != null && m.awayScore != null)
+      .map(m => ({
+        homeTeam: m.home,
+        awayTeam: m.away,
+        homeScore: m.homeScore,
+        awayScore: m.awayScore,
+        date: m.date || new Date().toISOString().split('T')[0],
+        round: m.round || null,
+        competition: existingData.name || tournamentId,
+        tournamentId,
+      }));
+  }
+  
+  if (teamsUpdated === 0 && results.matches.length === 0) {
+    results.error = "AI processed but no new data found. The AI may not have recent results for this tournament.";
+  } else {
+    results.error = null;
   }
   
   return results;
@@ -384,4 +454,157 @@ export function getAvailableProviders() {
   return Object.entries(AI_PROVIDERS).map(([id, config]) => ({ id, name: config.name, model: config.model }));
 }
 
-export default { refreshTournamentData, refreshFromCustomUrl, getAIConfig, setAIConfig, getAvailableProviders };
+/**
+ * Fetch match stats from rugbypass and save to DB.
+ * 
+ * URL format: https://www.rugbypass.com/live/{team-a}-vs-{team-b}/stats/
+ * Parses the stats page directly (no AI needed — structured text).
+ * 
+ * Returns: { success, matchStats, error }
+ */
+export async function fetchRugbypassMatchStats(matchUrl) {
+  try {
+    // Ensure URL ends with /stats/
+    let url = matchUrl;
+    if (!url.includes('/stats')) {
+      url = url.replace(/\/?$/, '/stats/');
+    }
+
+    const content = await fetchWithProxy(url);
+    if (!content || content.length < 200) {
+      throw new Error("Could not fetch stats page");
+    }
+
+    // Parse stats from the text content
+    const stats = parseRugbypassStats(content);
+    if (!stats) {
+      throw new Error("Could not parse stats from page");
+    }
+
+    return { success: true, matchStats: stats, error: null };
+  } catch (e) {
+    return { success: false, matchStats: null, error: e.message };
+  }
+}
+
+/**
+ * Parse rugbypass stats page content into structured match stats.
+ * The page has format like: "153 Tackles Made 173" (home value | label | away value)
+ */
+function parseRugbypassStats(content) {
+  // Extract team names from the score line: "Australia 31 - 33 Ireland" or similar
+  const scoreMatch = content.match(/(\w[\w\s]+?)\s+(\d+)\s*-\s*(\d+)\s*(?:Full\s*Time|FT|HT)?\s*(\w[\w\s]+)/i);
+  if (!scoreMatch) return null;
+
+  const homeTeam = scoreMatch[1].trim();
+  const homeScore = parseInt(scoreMatch[2]);
+  const awayScore = parseInt(scoreMatch[3]);
+  const awayTeam = scoreMatch[4].trim();
+
+  // Helper: extract a stat pair "X Label Y" where X is home, Y is away
+  function extractStat(label) {
+    // Pattern: number(s) then label then number(s)
+    const patterns = [
+      new RegExp(`(\\d+\\.?\\d*)\\s*${label}\\s*(\\d+\\.?\\d*)`, 'i'),
+      new RegExp(`(\\d+\\.?\\d*)m?\\s*${label}\\s*(\\d+\\.?\\d*)m?`, 'i'),
+    ];
+    for (const re of patterns) {
+      const m = content.match(re);
+      if (m) return [parseFloat(m[1]), parseFloat(m[2])];
+    }
+    return null;
+  }
+
+  function extractPctStat(label) {
+    const re = new RegExp(`(\\d+)%\\s*${label}\\s*(\\d+)%`, 'i');
+    const m = content.match(re);
+    if (m) return [parseInt(m[1]), parseInt(m[2])];
+    return null;
+  }
+
+  const tackles = extractStat('Tackles Made');
+  const missedTackles = extractStat('Tackles Missed');
+  const tackleRate = extractPctStat('Tackle Completion');
+  const carries = extractStat('Ball Carries') || extractStat('Carries');
+  const lineBreaks = extractStat('Line Breaks');
+  const turnoversWon = extractStat('Turnovers Won');
+  const turnoversLost = extractStat('Turnovers Lost');
+  const penalties = extractStat('Penalties Conceded');
+  const passes = extractStat('Passes');
+  const kicks = extractStat('Total Kicks') || extractStat('Kicks');
+  const scrums = extractStat('Scrums');
+  const scrumWin = extractPctStat('Scrum Win');
+  const lineouts = extractStat('Lineout') || extractStat('Lineouts');
+  const lineoutWin = extractPctStat('Lineout Win');
+  const postContact = extractStat('Post Contact Metres');
+  const tries = extractStat('Tries');
+  const conversions = extractStat('Conversions');
+  const penaltyGoals = extractStat('Penalty Goals');
+  const yellowCards = extractStat('Yellow Cards');
+  const redCards = extractStat('Red Cards');
+
+  // Territory/possession
+  const territory = extractPctStat('Territory');
+  const possession = extractPctStat('Possession');
+
+  return {
+    homeTeam,
+    awayTeam,
+    homeScore,
+    awayScore,
+    date: new Date().toISOString().split('T')[0],
+    source: 'rugbypass',
+    stats: {
+      home: {
+        tackles_made: tackles?.[0] || null,
+        tackles_missed: missedTackles?.[0] || null,
+        tackle_rate: tackleRate?.[0] || null,
+        carries: carries?.[0] || null,
+        line_breaks: lineBreaks?.[0] || null,
+        turnovers_won: turnoversWon?.[0] || null,
+        turnovers_lost: turnoversLost?.[0] || null,
+        penalties: penalties?.[0] || null,
+        passes: passes?.[0] || null,
+        kicks: kicks?.[0] || null,
+        scrums: scrums?.[0] || null,
+        scrum_win_pct: scrumWin?.[0] || null,
+        lineouts: lineouts?.[0] || null,
+        lineout_win_pct: lineoutWin?.[0] || null,
+        post_contact_metres: postContact?.[0] || null,
+        tries: tries?.[0] || null,
+        conversions: conversions?.[0] || null,
+        penalty_goals: penaltyGoals?.[0] || null,
+        yellow_cards: yellowCards?.[0] || null,
+        red_cards: redCards?.[0] || null,
+        territory_pct: territory?.[0] || null,
+        possession_pct: possession?.[0] || null,
+      },
+      away: {
+        tackles_made: tackles?.[1] || null,
+        tackles_missed: missedTackles?.[1] || null,
+        tackle_rate: tackleRate?.[1] || null,
+        carries: carries?.[1] || null,
+        line_breaks: lineBreaks?.[1] || null,
+        turnovers_won: turnoversWon?.[1] || null,
+        turnovers_lost: turnoversLost?.[1] || null,
+        penalties: penalties?.[1] || null,
+        passes: passes?.[1] || null,
+        kicks: kicks?.[1] || null,
+        scrums: scrums?.[1] || null,
+        scrum_win_pct: scrumWin?.[1] || null,
+        lineouts: lineouts?.[1] || null,
+        lineout_win_pct: lineoutWin?.[1] || null,
+        post_contact_metres: postContact?.[1] || null,
+        tries: tries?.[1] || null,
+        conversions: conversions?.[1] || null,
+        penalty_goals: penaltyGoals?.[1] || null,
+        yellow_cards: yellowCards?.[1] || null,
+        red_cards: redCards?.[1] || null,
+        territory_pct: territory?.[1] || null,
+        possession_pct: possession?.[1] || null,
+      },
+    },
+  };
+}
+
+export default { refreshTournamentData, refreshFromCustomUrl, fetchRugbypassMatchStats, getAIConfig, setAIConfig, getAvailableProviders };

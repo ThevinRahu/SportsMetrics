@@ -110,11 +110,21 @@ export const SIX_NATIONS_2026_MATCHES = [
   ["France","England",48,46,"2026","6N"],
 ];
 
+// Nations Championship 2026 - Round 1 (4 July 2026, from rugbypass.com verified)
+export const NATIONS_CHAMPIONSHIP_2026_MATCHES = [
+  ["New Zealand","France",34,32,"2026","NC"],
+  ["Australia","Ireland",31,33,"2026","NC"],
+  ["South Africa","England",45,21,"2026","NC"],
+  ["Argentina","Scotland",38,47,"2026","NC"],
+  ["Fiji","Wales",24,39,"2026","NC"],
+  ["Japan","Italy",27,10,"2026","NC"],
+];
+
 /**
  * Get all historical matches as a flat array
  */
 export function getAllMatches() {
-  return [...SUPER_RUGBY_2026_MATCHES, ...SIX_NATIONS_2026_MATCHES];
+  return [...SUPER_RUGBY_2026_MATCHES, ...SIX_NATIONS_2026_MATCHES, ...NATIONS_CHAMPIONSHIP_2026_MATCHES];
 }
 
 /**
@@ -133,4 +143,4 @@ export function getH2H(teamA, teamB) {
   );
 }
 
-export default { getAllMatches, getTeamMatches, getH2H, SUPER_RUGBY_2026_MATCHES, SIX_NATIONS_2026_MATCHES };
+export default { getAllMatches, getTeamMatches, getH2H, SUPER_RUGBY_2026_MATCHES, SIX_NATIONS_2026_MATCHES, NATIONS_CHAMPIONSHIP_2026_MATCHES };

@@ -26,7 +26,7 @@ const DEFAULT_TOURNAMENTS = {
 };
 
 export default function App() {
-  const [activeTournament, setActiveTournament] = useState("srp2026");
+  const [activeTournament, setActiveTournament] = useState("nc2026");
   const [activeView, setActiveView] = useState("tournament");
   const [domesticTournaments, setDomesticTournaments] = useState([]);
   const [activeDomesticId, setActiveDomesticId] = useState(null);
@@ -56,12 +56,19 @@ export default function App() {
           const fromDB = {};
           for (const t of stored) {
             const codeDefault = DEFAULT_TOURNAMENTS[t.id];
-            if (codeDefault && (!t.lastRefreshSource)) {
-              // No manual refresh has happened- use latest code data (it has corrections)
-              fromDB[t.id] = { ...codeDefault, id: t.id, lastRefresh: t.lastRefresh };
-              await saveTournament({ ...codeDefault, id: t.id, lastRefresh: t.lastRefresh });
+            if (codeDefault) {
+              // Compare data versions: if code is newer, re-seed DB
+              const codeVersion = codeDefault.dataVersion || 0;
+              const dbVersion = t.dataVersion || 0;
+              if (codeVersion > dbVersion) {
+                // Code has newer data (e.g. we deployed Round 1 results) — re-seed
+                fromDB[t.id] = { ...codeDefault, id: t.id };
+                await saveTournament({ ...codeDefault, id: t.id });
+              } else {
+                // DB has current or refreshed data — keep it
+                fromDB[t.id] = t;
+              }
             } else {
-              // User has refreshed this tournament- keep their refreshed data
               fromDB[t.id] = t;
             }
           }

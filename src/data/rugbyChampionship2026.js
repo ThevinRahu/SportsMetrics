@@ -17,6 +17,7 @@ export const RUGBY_CHAMPIONSHIP_2026 = {
   round: 0,
   totalRounds: 6,
   status: "pre-tournament",
+  dataVersion: 1,
   source: "World Rugby Rankings | 2025 TRC baseline",
   dataUrl: "https://www.rugbychampionship.rugby/",
   format: "4 teams double round-robin (home and away)",
