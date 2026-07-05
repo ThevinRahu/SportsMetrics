@@ -524,13 +524,13 @@ if __name__ == '__main__':
         b_stats = mapped_teams[b_name]
 
         # Home perspective
-        feats = extract_features(a_stats, b_stats, venue=0.5)
+        feats = extract_features(a_stats, b_stats, venue=0.0)
         X_r.append(feats)
         yw_r.append(1 if a_record['score'] > b_record['score'] else 0)
         ym_r.append((a_record['score'] - b_record['score']) / 20.0)
 
         # Away perspective
-        feats_rev = extract_features(b_stats, a_stats, venue=-0.5)
+        feats_rev = extract_features(b_stats, a_stats, venue=0.0)
         X_r.append(feats_rev)
         yw_r.append(1 if b_record['score'] > a_record['score'] else 0)
         ym_r.append((b_record['score'] - a_record['score']) / 20.0)
