@@ -24,7 +24,7 @@ export const NATIONS_CHAMPIONSHIP_2026 = {
   round: 1,
   totalRounds: 6,
   status: "in-progress",
-  dataVersion: 6,  // Bump this when hardcoded data changes to re-seed DB
+  dataVersion: 7,  // Bump this when hardcoded data changes to re-seed DB
   source: "all.rugby | rugbypass.com | Verified 5 Jul 2026",
   dataUrl: "https://all.rugby/tournament/nations-championship/table",
   format: "2 pools × 6 teams, cross-pool matches, top teams to final",
