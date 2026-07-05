@@ -120,11 +120,33 @@ export const NATIONS_CHAMPIONSHIP_2026_MATCHES = [
   ["Japan","Italy",27,10,"2026","NC"],
 ];
 
+// Rugby Championship 2025 - All 12 matches (from Wikipedia, verified)
+export const RUGBY_CHAMPIONSHIP_2025_MATCHES = [
+  // Round 1
+  ["South Africa","Australia",22,38,"2025","RC"],
+  ["Argentina","New Zealand",24,41,"2025","RC"],
+  // Round 2
+  ["South Africa","Australia",30,22,"2025","RC"],
+  ["Argentina","New Zealand",29,23,"2025","RC"],
+  // Round 3
+  ["Australia","Argentina",28,24,"2025","RC"],
+  ["New Zealand","South Africa",24,17,"2025","RC"],
+  // Round 4
+  ["Australia","Argentina",26,28,"2025","RC"],
+  ["New Zealand","South Africa",10,43,"2025","RC"],
+  // Round 5
+  ["New Zealand","Australia",33,24,"2025","RC"],
+  ["South Africa","Argentina",67,30,"2025","RC"],
+  // Round 6
+  ["Australia","New Zealand",14,28,"2025","RC"],
+  ["Argentina","South Africa",27,29,"2025","RC"],
+];
+
 /**
  * Get all historical matches as a flat array
  */
 export function getAllMatches() {
-  return [...SUPER_RUGBY_2026_MATCHES, ...SIX_NATIONS_2026_MATCHES, ...NATIONS_CHAMPIONSHIP_2026_MATCHES];
+  return [...SUPER_RUGBY_2026_MATCHES, ...SIX_NATIONS_2026_MATCHES, ...NATIONS_CHAMPIONSHIP_2026_MATCHES, ...RUGBY_CHAMPIONSHIP_2025_MATCHES];
 }
 
 /**
@@ -143,4 +165,4 @@ export function getH2H(teamA, teamB) {
   );
 }
 
-export default { getAllMatches, getTeamMatches, getH2H, SUPER_RUGBY_2026_MATCHES, SIX_NATIONS_2026_MATCHES, NATIONS_CHAMPIONSHIP_2026_MATCHES };
+export default { getAllMatches, getTeamMatches, getH2H, SUPER_RUGBY_2026_MATCHES, SIX_NATIONS_2026_MATCHES, NATIONS_CHAMPIONSHIP_2026_MATCHES, RUGBY_CHAMPIONSHIP_2025_MATCHES };

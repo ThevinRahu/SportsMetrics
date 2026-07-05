@@ -278,7 +278,7 @@ export default function App() {
   );
 }
 
-// Tournament route component — reads :id and :tab from URL
+// Tournament route component - reads :id and :tab from URL
 function TournamentRoute({ tournamentData, onRefresh, refreshing }) {
   const { id, tab } = useParams();
   const tournament = tournamentData[id];

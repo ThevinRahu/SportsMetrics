@@ -163,7 +163,7 @@ ${content}`;
 
 /**
  * Knowledge-based prompt: Ask AI directly for tournament data using its training knowledge.
- * No web scraping needed — the AI knows recent results if they're within its training cutoff.
+ * No web scraping needed - the AI knows recent results if they're within its training cutoff.
  */
 function getKnowledgePrompt(tournamentName, teamNames, existingData) {
   const currentDate = new Date().toISOString().split('T')[0];
@@ -235,7 +235,7 @@ async function callAI(prompt, retries = 1) {
 
   if (!response.ok) {
     if (response.status === 429 && retries > 0) {
-      // Rate limited — wait and retry
+      // Rate limited - wait and retry
       await new Promise(r => setTimeout(r, 20000));
       return callAI(prompt, retries - 1);
     }
@@ -373,7 +373,7 @@ export async function refreshTournamentData(tournamentId, existingData) {
     return results;
   }
 
-  // Merge with existing — only overwrite where AI found real data
+  // Merge with existing - only overwrite where AI found real data
   const updatedTeams = JSON.parse(JSON.stringify(existingData.teams));
   let teamsUpdated = 0;
   
@@ -458,7 +458,7 @@ export function getAvailableProviders() {
  * Fetch match stats from rugbypass and save to DB.
  * 
  * URL format: https://www.rugbypass.com/live/{team-a}-vs-{team-b}/stats/
- * Parses the stats page directly (no AI needed — structured text).
+ * Parses the stats page directly (no AI needed - structured text).
  * 
  * Returns: { success, matchStats, error }
  */

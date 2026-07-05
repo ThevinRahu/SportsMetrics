@@ -24,7 +24,7 @@ export const NATIONS_CHAMPIONSHIP_2026 = {
   round: 1,
   totalRounds: 6,
   status: "in-progress",
-  dataVersion: 4,  // Bump this when hardcoded data changes to re-seed DB
+  dataVersion: 6,  // Bump this when hardcoded data changes to re-seed DB
   source: "all.rugby | rugbypass.com | Verified 5 Jul 2026",
   dataUrl: "https://all.rugby/tournament/nations-championship/table",
   format: "2 pools × 6 teams, cross-pool matches, top teams to final",
@@ -65,11 +65,11 @@ export const NATIONS_CHAMPIONSHIP_2026 = {
     "South Africa": createTeam({
       name: "South Africa", abbr: "RSA", color: "#007749", country: "ZA", elo: 1971,
       season: { played: 1, won: 1, lost: 0, pts: 5, pf: 45, pa: 21, tries_for: 7, tries_against: 3, try_bonus: 1, loss_bonus: 0 },
-      attack: { pts_pg: 45, tries_pg: 7, gl: 65, lb: 10, rs: 2.8, c22: 54, e22: 17, off: 5.9 },
-      defense: { tr: 86, missed: 29, to: 4, dom: 14, steals: 4, ob: 12 },
-      setpiece: { so: 100, ss: 25, lo: 89, ls: 0, ps: 4.1, maul: 88 },
-      kicking: { km: 900, goal: 85 },
-      discipline: { pen: 36, idx: 70 },
+      attack: { pts_pg: 35, tries_pg: 4.5, gl: 65, lb: 9.2, rs: 2.7, c22: 40, e22: 12, off: 9.3 },
+      defense: { tr: 81, missed: 28.2, to: 4, dom: 14, steals: 4, ob: 12 },
+      setpiece: { so: 94, ss: 17, lo: 78, ls: 10, ps: 4.1, maul: 88 },
+      kicking: { km: 840, goal: 82 },
+      discipline: { pen: 50, idx: 60 },
       form: { last5: ["W", "W", "L", "W", "W"], streak: "W3", rating: 92 },
       players: [
         { name: "Eben Etzebeth", pos: "LK", num: 4, rating: 92, injury: "Low", note: "Set piece titan - World #1 lock" },
@@ -82,11 +82,11 @@ export const NATIONS_CHAMPIONSHIP_2026 = {
     "New Zealand": createTeam({
       name: "New Zealand", abbr: "NZL", color: "#1a1a1a", country: "NZ", elo: 1893,
       season: { played: 1, won: 1, lost: 0, pts: 5, pf: 34, pa: 32, tries_for: 5, tries_against: 4, try_bonus: 1, loss_bonus: 0 },
-      attack: { pts_pg: 34, tries_pg: 5, gl: 62, lb: 11, rs: 2.8, c22: 42, e22: 9, off: 8 },
-      defense: { tr: 87, missed: 25, to: 3, dom: 13, steals: 3, ob: 15 },
-      setpiece: { so: 92, ss: 14, lo: 86, ls: 17, ps: 3.6, maul: 82 },
-      kicking: { km: 510, goal: 75 },
-      discipline: { pen: 54, idx: 55 },
+      attack: { pts_pg: 25.2, tries_pg: 3.5, gl: 62, lb: 7, rs: 2.5, c22: 38, e22: 9, off: 8 },
+      defense: { tr: 85, missed: 26, to: 3, dom: 13, steals: 3, ob: 15 },
+      setpiece: { so: 83, ss: 14, lo: 84, ls: 17, ps: 3.6, maul: 82 },
+      kicking: { km: 750, goal: 75 },
+      discipline: { pen: 57, idx: 52 },
       form: { last5: ["L", "W", "W", "W", "W"], streak: "W4", rating: 72 },
       players: [
         { name: "Ardie Savea", pos: "No.8", num: 8, rating: 94, injury: "Low", note: "Best No.8 in world rugby" },
@@ -99,10 +99,10 @@ export const NATIONS_CHAMPIONSHIP_2026 = {
     Ireland: createTeam({
       name: "Ireland", abbr: "IRE", color: "#1b8841", country: "IE", elo: 1867,
       season: { played: 1, won: 1, lost: 0, pts: 5, pf: 33, pa: 31, tries_for: 5, tries_against: 5, try_bonus: 1, loss_bonus: 0 },
-      attack: { pts_pg: 33, tries_pg: 5, gl: 45, lb: 4, rs: 3.2, c22: 53, e22: 9, off: 6.3 },
-      defense: { tr: 85, missed: 31, to: 2, dom: 14, steals: 2, ob: 9 },
+      attack: { pts_pg: 30, tries_pg: 5, gl: 55, lb: 6.4, rs: 3.1, c22: 33, e22: 8.7, off: 13.3 },
+      defense: { tr: 88, missed: 25.2, to: 5.8, dom: 8.2, steals: 5.8, ob: 13.3 },
       setpiece: { so: 100, ss: 0, lo: 82, ls: 8, ps: 2.4, maul: 72 },
-      kicking: { km: 660, goal: 80 },
+      kicking: { km: 810, goal: 75 },
       discipline: { pen: 60, idx: 50 },
       form: { last5: ["W", "W", "W", "W", "W"], streak: "W5", rating: 72 },
       players: [
@@ -116,11 +116,11 @@ export const NATIONS_CHAMPIONSHIP_2026 = {
     France: createTeam({
       name: "France", abbr: "FRA", color: "#0055a4", country: "FR", elo: 1812,
       season: { played: 1, won: 0, lost: 1, pts: 2, pf: 32, pa: 34, tries_for: 4, tries_against: 5, try_bonus: 0, loss_bonus: 2 },
-      attack: { pts_pg: 32, tries_pg: 4, gl: 57, lb: 12, rs: 3.0, c22: 36, e22: 9, off: 15 },
-      defense: { tr: 87, missed: 27, to: 2, dom: 16, steals: 2, ob: 8 },
-      setpiece: { so: 86, ss: 8, lo: 83, ls: 14, ps: 3.0, maul: 76 },
-      kicking: { km: 630, goal: 75 },
-      discipline: { pen: 54, idx: 55 },
+      attack: { pts_pg: 34.7, tries_pg: 4, gl: 67, lb: 9, rs: 3.1, c22: 37, e22: 9, off: 15.4 },
+      defense: { tr: 87, missed: 23, to: 4.6, dom: 11.2, steals: 4.6, ob: 15.4 },
+      setpiece: { so: 86, ss: 14, lo: 83, ls: 14, ps: 3.0, maul: 76 },
+      kicking: { km: 810, goal: 90 },
+      discipline: { pen: 66, idx: 45 },
       form: { last5: ["W", "W", "L", "W", "L"], streak: "L1", rating: 45 },
       players: [
         { name: "Antoine Dupont", pos: "SH", num: 9, rating: 96, injury: "Low", note: "Best player in world rugby" },
@@ -133,11 +133,11 @@ export const NATIONS_CHAMPIONSHIP_2026 = {
     Argentina: createTeam({
       name: "Argentina", abbr: "ARG", color: "#74acdf", country: "AR", elo: 1730,
       season: { played: 1, won: 0, lost: 1, pts: 2, pf: 38, pa: 47, tries_for: 5, tries_against: 7, try_bonus: 1, loss_bonus: 0 },
-      attack: { pts_pg: 38, tries_pg: 5, gl: 49, lb: 6, rs: 3.3, c22: 46, e22: 11, off: 6.7 },
-      defense: { tr: 89, missed: 23, to: 7, dom: 14, steals: 7, ob: 9.5 },
-      setpiece: { so: 100, ss: 0, lo: 100, ls: 0, ps: 2.8, maul: 78 },
-      kicking: { km: 540, goal: 76 },
-      discipline: { pen: 48, idx: 60 },
+      attack: { pts_pg: 29.2, tries_pg: 2.7, gl: 49, lb: 6, rs: 3.1, c22: 35, e22: 10, off: 10 },
+      defense: { tr: 87, missed: 23, to: 7, dom: 14, steals: 7, ob: 10 },
+      setpiece: { so: 100, ss: 12, lo: 100, ls: 8, ps: 2.8, maul: 78 },
+      kicking: { km: 570, goal: 76 },
+      discipline: { pen: 56, idx: 53 },
       form: { last5: ["W", "L", "L", "W", "L"], streak: "L1", rating: 42 },
       players: [
         { name: "Julián Montoya", pos: "HK", num: 2, rating: 88, injury: "Low", note: "World class hooker - captain" },
@@ -150,10 +150,10 @@ export const NATIONS_CHAMPIONSHIP_2026 = {
     England: createTeam({
       name: "England", abbr: "ENG", color: "#c8102e", country: "GB", elo: 1734,
       season: { played: 1, won: 0, lost: 1, pts: 0, pf: 21, pa: 45, tries_for: 3, tries_against: 7, try_bonus: 0, loss_bonus: 0 },
-      attack: { pts_pg: 21, tries_pg: 3, gl: 56, lb: 5, rs: 3.4, c22: 50, e22: 8, off: 5.9 },
-      defense: { tr: 84, missed: 30, to: 1, dom: 13, steals: 1, ob: 12 },
+      attack: { pts_pg: 31.6, tries_pg: 3, gl: 55, lb: 8.7, rs: 3.2, c22: 30, e22: 9.9, off: 8.5 },
+      defense: { tr: 85, missed: 24.9, to: 4.4, dom: 11.1, steals: 4.4, ob: 8.5 },
       setpiece: { so: 75, ss: 0, lo: 100, ls: 11, ps: 1.9, maul: 68 },
-      kicking: { km: 750, goal: 67 },
+      kicking: { km: 870, goal: 80 },
       discipline: { pen: 78, idx: 35 },
       form: { last5: ["L", "L", "L", "L", "L"], streak: "L5", rating: 28 },
       players: [
@@ -167,10 +167,10 @@ export const NATIONS_CHAMPIONSHIP_2026 = {
     Scotland: createTeam({
       name: "Scotland", abbr: "SCO", color: "#0065bd", country: "GB", elo: 1780,
       season: { played: 1, won: 1, lost: 0, pts: 5, pf: 47, pa: 38, tries_for: 7, tries_against: 5, try_bonus: 1, loss_bonus: 0 },
-      attack: { pts_pg: 47, tries_pg: 7, gl: 56, lb: 10, rs: 3.0, c22: 52, e22: 17, off: 6.7 },
-      defense: { tr: 90, missed: 19, to: 9, dom: 14, steals: 9, ob: 9.5 },
+      attack: { pts_pg: 28.4, tries_pg: 7, gl: 51, lb: 5.5, rs: 3.1, c22: 27, e22: 10.1, off: 9 },
+      defense: { tr: 88, missed: 21.4, to: 4.2, dom: 11.1, steals: 4.2, ob: 9 },
       setpiece: { so: 100, ss: 0, lo: 100, ls: 0, ps: 1.6, maul: 64 },
-      kicking: { km: 630, goal: 86 },
+      kicking: { km: 720, goal: 77 },
       discipline: { pen: 54, idx: 55 },
       form: { last5: ["W", "W", "W", "L", "W"], streak: "W1", rating: 78 },
       players: [
@@ -184,11 +184,11 @@ export const NATIONS_CHAMPIONSHIP_2026 = {
     Australia: createTeam({
       name: "Australia", abbr: "AUS", color: "#b8860b", country: "AU", elo: 1693,
       season: { played: 1, won: 0, lost: 1, pts: 2, pf: 31, pa: 33, tries_for: 5, tries_against: 5, try_bonus: 1, loss_bonus: 1 },
-      attack: { pts_pg: 31, tries_pg: 5, gl: 74, lb: 10, rs: 2.6, c22: 26, e22: 14, off: 8.7 },
-      defense: { tr: 89, missed: 18, to: 3, dom: 15, steals: 3, ob: 6.3 },
-      setpiece: { so: 100, ss: 0, lo: 92, ls: 18, ps: 2.1, maul: 70 },
-      kicking: { km: 660, goal: 60 },
-      discipline: { pen: 72, idx: 40 },
+      attack: { pts_pg: 31, tries_pg: 3.5, gl: 62, lb: 7.3, rs: 2.8, c22: 37, e22: 11, off: 7 },
+      defense: { tr: 87, missed: 26.7, to: 3, dom: 15, steals: 3, ob: 10 },
+      setpiece: { so: 81, ss: 12, lo: 86, ls: 14, ps: 2.1, maul: 70 },
+      kicking: { km: 630, goal: 71 },
+      discipline: { pen: 62, idx: 48 },
       form: { last5: ["W", "L", "W", "L", "L"], streak: "L1", rating: 48 },
       players: [
         { name: "Tate McDermott", pos: "SH", num: 9, rating: 86, injury: "Low", note: "Explosive halfback" },
@@ -201,11 +201,11 @@ export const NATIONS_CHAMPIONSHIP_2026 = {
     Fiji: createTeam({
       name: "Fiji", abbr: "FIJ", color: "#62b5e5", country: "FJ", elo: 1637,
       season: { played: 1, won: 0, lost: 1, pts: 0, pf: 24, pa: 39, tries_for: 3, tries_against: 5, try_bonus: 0, loss_bonus: 0 },
-      attack: { pts_pg: 24, tries_pg: 3, gl: 81, lb: 9, rs: 2.7, c22: 44, e22: 12, off: 7.4 },
-      defense: { tr: 87, missed: 11, to: 8, dom: 6, steals: 8, ob: 39 },
-      setpiece: { so: 100, ss: 0, lo: 89, ls: 6, ps: 1.0, maul: 55 },
-      kicking: { km: 450, goal: 64 },
-      discipline: { pen: 78, idx: 35 },
+      attack: { pts_pg: 25.7, tries_pg: 3.5, gl: 53, lb: 19.4, rs: 3.5, c22: 29, e22: 6.8, off: 17.7 },
+      defense: { tr: 78, missed: 32.6, to: 8.5, dom: 10, steals: 4.1, ob: 34.2 },
+      setpiece: { so: 81, ss: 46, lo: 72, ls: 25, ps: 1.0, maul: 55 },
+      kicking: { km: 328, goal: 67 },
+      discipline: { pen: 96, idx: 40 },
       form: { last5: ["L", "L", "W", "W", "L"], streak: "L1", rating: 30 },
       players: [
         { name: "Levani Botia", pos: "FL", num: 6, rating: 87, injury: "Low", note: "World class enforcer" },
@@ -218,10 +218,10 @@ export const NATIONS_CHAMPIONSHIP_2026 = {
     Italy: createTeam({
       name: "Italy", abbr: "ITA", color: "#0c4da2", country: "IT", elo: 1615,
       season: { played: 1, won: 0, lost: 1, pts: 0, pf: 10, pa: 27, tries_for: 1, tries_against: 3, try_bonus: 0, loss_bonus: 0 },
-      attack: { pts_pg: 10, tries_pg: 1, gl: 48, lb: 3, rs: 3.2, c22: 50, e22: 4, off: 8.5 },
-      defense: { tr: 93, missed: 13, to: 1, dom: 14, steals: 1, ob: 7.6 },
+      attack: { pts_pg: 16.1, tries_pg: 1, gl: 46, lb: 4.9, rs: 3.3, c22: 16, e22: 8.6, off: 11 },
+      defense: { tr: 88, missed: 21.6, to: 6.3, dom: 13.7, steals: 6.3, ob: 11 },
       setpiece: { so: 100, ss: 11, lo: 90, ls: 0, ps: 1.4, maul: 58 },
-      kicking: { km: 780, goal: 50 },
+      kicking: { km: 840, goal: 90 },
       discipline: { pen: 36, idx: 70 },
       form: { last5: ["L", "L", "W", "L", "L"], streak: "L1", rating: 25 },
       players: [
@@ -235,10 +235,10 @@ export const NATIONS_CHAMPIONSHIP_2026 = {
     Wales: createTeam({
       name: "Wales", abbr: "WAL", color: "#d4213d", country: "GB", elo: 1643,
       season: { played: 1, won: 1, lost: 0, pts: 5, pf: 39, pa: 24, tries_for: 5, tries_against: 3, try_bonus: 1, loss_bonus: 0 },
-      attack: { pts_pg: 39, tries_pg: 5, gl: 31, lb: 3, rs: 4.0, c22: 45, e22: 8, off: 5.5 },
-      defense: { tr: 81, missed: 39, to: 7, dom: 13, steals: 7, ob: 11 },
-      setpiece: { so: 100, ss: 0, lo: 94, ls: 11, ps: 0.6, maul: 46 },
-      kicking: { km: 630, goal: 78 },
+      attack: { pts_pg: 27.2, tries_pg: 6, gl: 50, lb: 7, rs: 3.0, c22: 27, e22: 9.4, off: 11.8 },
+      defense: { tr: 87, missed: 26.8, to: 6, dom: 11.1, steals: 6, ob: 11.8 },
+      setpiece: { so: 100, ss: 0, lo: 94, ls: 6, ps: 0.6, maul: 46 },
+      kicking: { km: 750, goal: 74 },
       discipline: { pen: 36, idx: 70 },
       form: { last5: ["L", "L", "L", "W", "W"], streak: "W2", rating: 78 },
       players: [
@@ -252,11 +252,11 @@ export const NATIONS_CHAMPIONSHIP_2026 = {
     Japan: createTeam({
       name: "Japan", abbr: "JPN", color: "#bc002d", country: "JP", elo: 1615,
       season: { played: 1, won: 1, lost: 0, pts: 5, pf: 27, pa: 10, tries_for: 3, tries_against: 1, try_bonus: 0, loss_bonus: 0 },
-      attack: { pts_pg: 27, tries_pg: 3, gl: 50, lb: 3, rs: 3.0, c22: 39, e22: 6, off: 6.4 },
-      defense: { tr: 90, missed: 17, to: 4, dom: 12, steals: 4, ob: 8.5 },
-      setpiece: { so: 89, ss: 0, lo: 100, ls: 10, ps: 0.8, maul: 42 },
-      kicking: { km: 1050, goal: 80 },
-      discipline: { pen: 54, idx: 55 },
+      attack: { pts_pg: 22.5, tries_pg: 2.8, gl: 47, lb: 12.6, rs: 3.8, c22: 26, e22: 5.8, off: 9.1 },
+      defense: { tr: 78, missed: 35.4, to: 6.6, dom: 9.6, steals: 2.1, ob: 30.2 },
+      setpiece: { so: 73, ss: 38, lo: 70, ls: 22, ps: 0.8, maul: 42 },
+      kicking: { km: 462, goal: 63 },
+      discipline: { pen: 97, idx: 38 },
       form: { last5: ["L", "W", "L", "L", "W"], streak: "W1", rating: 85 },
       players: [
         { name: "Michael Leitch", pos: "FL", num: 6, rating: 81, injury: "Low", note: "Veteran leader and captain" },
