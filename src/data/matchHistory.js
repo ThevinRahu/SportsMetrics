@@ -110,14 +110,22 @@ export const SIX_NATIONS_2026_MATCHES = [
   ["France","England",48,46,"2026","6N"],
 ];
 
-// Nations Championship 2026 - Round 1 (4 July 2026, from rugbypass.com verified)
+// Nations Championship 2026 - Round 1 & 2 (from rugbypass.com verified)
 export const NATIONS_CHAMPIONSHIP_2026_MATCHES = [
+  // Round 1 (4 July 2026)
   ["New Zealand","France",34,32,"2026","NC"],
   ["Australia","Ireland",31,33,"2026","NC"],
   ["South Africa","England",45,21,"2026","NC"],
   ["Argentina","Scotland",38,47,"2026","NC"],
   ["Fiji","Wales",24,39,"2026","NC"],
   ["Japan","Italy",27,10,"2026","NC"],
+  // Round 2 (11 July 2026)
+  ["New Zealand","Italy",47,17,"2026","NC"],
+  ["Australia","France",26,42,"2026","NC"],
+  ["Japan","Ireland",20,36,"2026","NC"],
+  ["Fiji","England",8,73,"2026","NC"],
+  ["South Africa","Scotland",42,28,"2026","NC"],
+  ["Argentina","Wales",35,21,"2026","NC"],
 ];
 
 // Rugby Championship 2025 - All 12 matches (from Wikipedia, verified)

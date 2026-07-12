@@ -21,7 +21,7 @@ export const NATIONS_CHAMPIONSHIP_2026 = {
   id: "nc2026",
   name: "Nations Championship",
   season: 2026,
-  round: 1,
+  round: 2,
   totalRounds: 6,
   status: "in-progress",
   dataVersion: 7,  // Bump this when hardcoded data changes to re-seed DB
@@ -30,7 +30,7 @@ export const NATIONS_CHAMPIONSHIP_2026 = {
   format: "2 pools × 6 teams, cross-pool matches, top teams to final",
   playoffSpots: 2,
   lastRefresh: new Date().toISOString(),
-  highlights: "Round 1 complete: SA 45-21 ENG | IRE 33-31 AUS | NZ 34-32 FRA | SCO 47-38 ARG | WAL 39-24 FIJ | JPN 27-10 ITA",
+  highlights: "Round 2 complete: NZ 47-17 ITA | FRA 42-26 AUS | IRE 36-20 JPN | ENG 73-8 FIJ | SA 42-28 SCO | ARG 35-21 WAL",
   pools: {
     A: ["South Africa", "New Zealand", "Australia", "Argentina", "Fiji", "Japan"],
     B: ["Ireland", "France", "England", "Scotland", "Italy", "Wales"]
@@ -40,9 +40,9 @@ export const NATIONS_CHAMPIONSHIP_2026 = {
       ["New Zealand", "France"], ["Australia", "Ireland"], ["South Africa", "England"],
       ["Argentina", "Scotland"], ["Fiji", "Wales"], ["Japan", "Italy"]
     ]},
-    { round: 2, date: "2026-07-12", matches: [
-      ["New Zealand", "Ireland"], ["South Africa", "Scotland"], ["Australia", "France"],
-      ["Argentina", "England"], ["Fiji", "Italy"], ["Japan", "Wales"]
+    { round: 2, date: "2026-07-11", matches: [
+      ["New Zealand", "Italy"], ["Australia", "France"], ["Japan", "Ireland"],
+      ["Fiji", "England"], ["South Africa", "Scotland"], ["Argentina", "Wales"]
     ]},
     { round: 3, date: "2026-07-19", matches: [
       ["South Africa", "France"], ["New Zealand", "England"], ["Australia", "Scotland"],
