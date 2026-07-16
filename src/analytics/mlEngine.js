@@ -96,6 +96,10 @@ function extractFeatures(teamA, teamB) {
     ((teamA.defense?.to || 10) - (teamB.defense?.to || 10)) / 10,
     ((teamA.attack?.lb || 5) - (teamB.attack?.lb || 5)) / 10,
     ((teamB.defense?.missed || 25) - (teamA.defense?.missed || 25)) / 30,
+    ((teamA.setpiece?.maul || 65) - (teamB.setpiece?.maul || 65)) / 30,
+    ((teamA.kicking?.km || 500) - (teamB.kicking?.km || 500)) / 400,
+    ((teamA.attack?.rs || 3.0) - (teamB.attack?.rs || 3.0)) / 2,
+    ((teamA.setpiece?.ps || 2.0) - (teamB.setpiece?.ps || 2.0)) / 4,
   ];
 }
 

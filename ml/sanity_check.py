@@ -6,19 +6,21 @@ clf = InferenceSession('public/model/win_classifier.onnx')
 reg = InferenceSession('public/model/margin_regressor.onnx')
 
 teams = {
-    'Hurricanes': {'elo':1574,'gl':64,'tr':86,'so':90,'lo':82,'goal':82,'form':92,'pen':137,'pts_pg':40.1,'to':14.2,'lb':9.7,'missed':22},
-    'Chiefs': {'elo':1549,'gl':62,'tr':87,'so':91,'lo':84,'goal':84,'form':85,'pen':139,'pts_pg':38.4,'to':13.8,'lb':9.2,'missed':25.5},
-    'Moana Pasifika': {'elo':1318,'gl':38,'tr':74,'so':70,'lo':60,'goal':58,'form':15,'pen':170,'pts_pg':19.7,'to':6.4,'lb':4.0,'missed':48},
-    'Ireland': {'elo':1855,'gl':58,'tr':87,'so':87,'lo':82,'goal':80,'form':88,'pen':68,'pts_pg':27.4,'to':12.8,'lb':7.0,'missed':19},
-    'Wales': {'elo':1580,'gl':42,'tr':74,'so':68,'lo':60,'goal':58,'form':25,'pen':112,'pts_pg':19.8,'to':6.8,'lb':3.5,'missed':42},
-    'Crusaders': {'elo':1487,'gl':56,'tr':88,'so':89,'lo':81,'goal':78,'form':78,'pen':148,'pts_pg':34.5,'to':12.8,'lb':8.4,'missed':20},
+    'Hurricanes': {'elo':1574,'gl':64,'tr':86,'so':90,'lo':82,'goal':82,'form':92,'pen':137,'pts_pg':40.1,'to':14.2,'lb':9.7,'missed':22,'maul':82,'km':680,'rs':3.4,'ps':2.1},
+    'Chiefs': {'elo':1549,'gl':62,'tr':87,'so':91,'lo':84,'goal':84,'form':85,'pen':139,'pts_pg':38.4,'to':13.8,'lb':9.2,'missed':25.5,'maul':78,'km':640,'rs':3.2,'ps':2.3},
+    'Moana Pasifika': {'elo':1318,'gl':38,'tr':74,'so':70,'lo':60,'goal':58,'form':15,'pen':170,'pts_pg':19.7,'to':6.4,'lb':4.0,'missed':48,'maul':45,'km':380,'rs':2.4,'ps':3.2},
+    'Ireland': {'elo':1855,'gl':58,'tr':87,'so':87,'lo':82,'goal':80,'form':88,'pen':68,'pts_pg':27.4,'to':12.8,'lb':7.0,'missed':19,'maul':72,'km':810,'rs':3.1,'ps':2.4},
+    'Wales': {'elo':1580,'gl':42,'tr':74,'so':68,'lo':60,'goal':58,'form':25,'pen':112,'pts_pg':19.8,'to':6.8,'lb':3.5,'missed':42,'maul':46,'km':750,'rs':3.0,'ps':0.6},
+    'Crusaders': {'elo':1487,'gl':56,'tr':88,'so':89,'lo':81,'goal':78,'form':78,'pen':148,'pts_pg':34.5,'to':12.8,'lb':8.4,'missed':20,'maul':75,'km':620,'rs':3.1,'ps':2.0},
 }
 
 def feat(a, b, v=0.0):
     return np.array([[(a['elo']-b['elo'])/400,(a['gl']-b['gl'])/50,(a['tr']-b['tr'])/20,
         (a['so']-b['so'])/20,(a['lo']-b['lo'])/20,(a['goal']-b['goal'])/30,
         (a['form']-b['form'])/50,(b['pen']-a['pen'])/100,(a['pts_pg']-b['pts_pg'])/30,
-        (a['to']-b['to'])/10,(a['lb']-b['lb'])/10,(b['missed']-a['missed'])/30, v]], dtype=np.float32)
+        (a['to']-b['to'])/10,(a['lb']-b['lb'])/10,(b['missed']-a['missed'])/30,
+        (a['maul']-b['maul'])/30,(a['km']-b['km'])/400,(a['rs']-b['rs'])/2,
+        (a['ps']-b['ps'])/4, v]], dtype=np.float32)
 
 def predict(a_name, b_name, venue='neutral'):
     a, b = teams[a_name], teams[b_name]

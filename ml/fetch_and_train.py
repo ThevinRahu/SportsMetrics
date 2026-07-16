@@ -16,7 +16,11 @@ that the browser's extractFeatures() uses at inference time:
   Feature 10: (to_A - to_B) / 10          to = turnovers won per game
   Feature 11: (lb_A - lb_B) / 10          lb = line breaks per game
   Feature 12: (missed_B - missed_A) / 30  missed = missed tackles per game
-  Feature 13: venue                        0.5 home, -0.5 away, 0 neutral
+  Feature 13: (maul_A - maul_B) / 30     maul = maul success %
+  Feature 14: (km_A - km_B) / 400        km = kick metres per game
+  Feature 15: (rs_A - rs_B) / 2          rs = ruck speed (seconds)
+  Feature 16: (ps_A - ps_B) / 4          ps = scrum penalties per game
+  Feature 17: venue                        0.5 home, -0.5 away, 0 neutral
 
 This script:
   1. Loads rugbypy per-match stats (1363 records across 120 teams)
@@ -167,7 +171,7 @@ def convert_to_app_format(records):
 def extract_features(team_a_stats, team_b_stats, venue=0.0):
     """
     This is EXACTLY what the browser's extractFeatures() does.
-    Must produce identical feature vectors.
+    Must produce identical feature vectors. 17 features total.
     """
     a = team_a_stats
     b = team_b_stats
@@ -184,7 +188,11 @@ def extract_features(team_a_stats, team_b_stats, venue=0.0):
         (a['to'] - b['to']) / 10,               # 10. Turnover Threat
         (a['lb'] - b['lb']) / 10,               # 11. Line Break Power
         (b['missed'] - a['missed']) / 30,       # 12. Defensive Pressure
-        venue,                                   # 13. Venue
+        (a.get('maul', 65) - b.get('maul', 65)) / 30,  # 13. Maul Dominance
+        (a.get('km', 500) - b.get('km', 500)) / 400,   # 14. Kick Metres Edge
+        (a.get('rs', 3.0) - b.get('rs', 3.0)) / 2,    # 15. Ruck Speed
+        (a.get('ps', 2.0) - b.get('ps', 2.0)) / 4,    # 16. Scrum Pens Advantage (inverted - fewer is better)
+        venue,                                   # 17. Venue
     ]
 
 
@@ -410,7 +418,7 @@ NAME_MAP = {
 
 def train_and_export(X, y_win, y_margin):
     """Train GBT + RF and export to ONNX"""
-    print(f"\nTraining on {len(X)} samples, 13 features...")
+    print(f"\nTraining on {len(X)} samples, 17 features...")
     print(f"  Class balance: {y_win.sum()}/{len(y_win)} wins ({y_win.mean():.1%})")
 
     # --- Win Classifier ---
@@ -479,7 +487,7 @@ def train_and_export(X, y_win, y_margin):
     output_dir = os.path.join(os.path.dirname(__file__), '..', 'public', 'model')
     os.makedirs(output_dir, exist_ok=True)
 
-    initial_type = [('features', FloatTensorType([None, 13]))]
+    initial_type = [('features', FloatTensorType([None, 17]))]
 
     onnx_clf = convert_sklearn(
         clf, initial_types=initial_type, target_opset=13,
