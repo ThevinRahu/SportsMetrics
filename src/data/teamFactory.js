@@ -55,6 +55,7 @@ export function createTeam({
     },
     form: {
       last5: form.last5 || ["W", "L", "W", "L", "W"],
+      last12: form.last12 || form.last5 || ["W", "L", "W", "L", "W"],
       streak: form.streak || "W1",
       rating: form.rating || 60
     },
