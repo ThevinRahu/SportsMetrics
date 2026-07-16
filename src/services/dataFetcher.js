@@ -388,48 +388,75 @@ export async function refreshTournamentData(tournamentId, existingData) {
 function blendMatchStatsIntoProfile(team, matchStats) {
   if (!team || !matchStats) return;
   
-  // Blend tackle rate
-  if (matchStats.tackle_rate != null && team.defense) {
-    team.defense.tr = Math.round((team.defense.tr + matchStats.tackle_rate) / 2);
+  // === ATTACK ===
+  if (matchStats.territory_pct != null && team.attack) {
+    team.attack.gl = Math.round((team.attack.gl + matchStats.territory_pct) / 2);
   }
-  // Blend missed tackles
-  if (matchStats.tackles_missed != null && team.defense) {
-    team.defense.missed = parseFloat(((team.defense.missed + matchStats.tackles_missed) / 2).toFixed(1));
-  }
-  // Blend scrum win %
-  if (matchStats.scrum_win_pct != null && team.setpiece) {
-    team.setpiece.so = Math.round((team.setpiece.so + matchStats.scrum_win_pct) / 2);
-  }
-  // Blend lineout win %
-  if (matchStats.lineout_win_pct != null && team.setpiece) {
-    team.setpiece.lo = Math.round((team.setpiece.lo + matchStats.lineout_win_pct) / 2);
-  }
-  // Blend line breaks
   if (matchStats.line_breaks != null && team.attack) {
     team.attack.lb = parseFloat(((team.attack.lb + matchStats.line_breaks) / 2).toFixed(1));
   }
-  // Blend gainline % (derived from territory + possession if available)
-  if (matchStats.territory_pct != null && team.attack) {
-    // Territory is a proxy for gainline success in rugbypass data
-    team.attack.gl = Math.round((team.attack.gl + matchStats.territory_pct) / 2);
-  }
-  // Blend carries into ruck speed proxy (more carries = faster ruck generally)
   if (matchStats.carries != null && team.attack) {
-    // Normalize: 130 carries/game is average, scale to ruck speed 2.5-4.0
-    const ruckProxy = Math.min(4.0, Math.max(2.0, matchStats.carries / 50));
+    const ruckProxy = Math.min(4.0, Math.max(2.0, matchStats.carries / 45));
     team.attack.rs = parseFloat(((team.attack.rs + ruckProxy) / 2).toFixed(1));
   }
-  // Blend territory into c22 (22m entries correlate with territory)
-  if (matchStats.territory_pct != null && team.attack) {
-    team.attack.c22 = Math.round((team.attack.c22 + matchStats.territory_pct * 0.7) / 2);
+  if (matchStats.possession_pct != null && team.attack) {
+    team.attack.c22 = Math.round((team.attack.c22 + matchStats.possession_pct * 0.65) / 2);
   }
-  // Blend turnovers won
+  if (matchStats.line_breaks != null && matchStats.tries != null && team.attack) {
+    const entries = (matchStats.line_breaks || 0) + (matchStats.tries || 0);
+    team.attack.e22 = parseFloat(((team.attack.e22 + entries) / 2).toFixed(1));
+  }
+
+  // === DEFENSE ===
+  if (matchStats.tackle_rate != null && team.defense) {
+    team.defense.tr = Math.round((team.defense.tr + matchStats.tackle_rate) / 2);
+  }
+  if (matchStats.tackles_missed != null && team.defense) {
+    team.defense.missed = parseFloat(((team.defense.missed + matchStats.tackles_missed) / 2).toFixed(1));
+  }
   if (matchStats.turnovers_won != null && team.defense) {
     team.defense.to = parseFloat(((team.defense.to + matchStats.turnovers_won) / 2).toFixed(1));
+    team.defense.steals = parseFloat(((team.defense.steals + matchStats.turnovers_won) / 2).toFixed(1));
   }
-  // Blend offloads conceded (turnovers lost as proxy)
+  if (matchStats.tackles_made != null && matchStats.tackle_rate != null && team.defense) {
+    const domProxy = Math.round(matchStats.tackles_made * (matchStats.tackle_rate / 100) * 0.08);
+    team.defense.dom = parseFloat(((team.defense.dom + domProxy) / 2).toFixed(1));
+  }
   if (matchStats.turnovers_lost != null && team.defense) {
     team.defense.ob = parseFloat(((team.defense.ob + matchStats.turnovers_lost) / 2).toFixed(1));
+  }
+
+  // === SET PIECE ===
+  if (matchStats.scrum_win_pct != null && team.setpiece) {
+    team.setpiece.so = Math.round((team.setpiece.so + matchStats.scrum_win_pct) / 2);
+  }
+  if (matchStats.lineout_win_pct != null && team.setpiece) {
+    team.setpiece.lo = Math.round((team.setpiece.lo + matchStats.lineout_win_pct) / 2);
+  }
+  if (matchStats.scrums != null && matchStats.penalties != null && team.setpiece) {
+    const scrumPens = matchStats.penalties * 0.2;
+    team.setpiece.ps = parseFloat(((team.setpiece.ps + scrumPens) / 2).toFixed(1));
+  }
+  if (matchStats.post_contact_metres != null && team.setpiece) {
+    const maulProxy = Math.min(95, Math.max(40, matchStats.post_contact_metres / 4));
+    team.setpiece.maul = Math.round((team.setpiece.maul + maulProxy) / 2);
+  }
+
+  // === KICKING ===
+  if (matchStats.tries != null && matchStats.conversions != null && matchStats.tries > 0 && team.kicking) {
+    const convRate = Math.round((matchStats.conversions / matchStats.tries) * 100);
+    team.kicking.goal = Math.round((team.kicking.goal + convRate) / 2);
+  }
+  if (matchStats.kicks != null && team.kicking) {
+    const kmEstimate = matchStats.kicks * 40;
+    team.kicking.km = Math.round((team.kicking.km + kmEstimate) / 2);
+  }
+
+  // === DISCIPLINE ===
+  if (matchStats.penalties != null && team.discipline) {
+    team.discipline.pen = Math.round((team.discipline.pen + matchStats.penalties) / 2);
+    const idx = Math.max(20, Math.min(80, 100 - matchStats.penalties * 5));
+    team.discipline.idx = Math.round((team.discipline.idx + idx) / 2);
   }
 }
 
