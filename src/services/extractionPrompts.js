@@ -7,28 +7,28 @@
 
 export const FIELD_HINTS = {
   // Attack
-  gl: 'Look for "Gainline %" or "Gainline Success" — a percentage (0-100). May appear near "22m Entries" or "Attack" section.',
-  lb: 'Look for "Line Breaks" — a count, usually home value then away value.',
-  rs: 'Look for "Ruck Speed" — may show as percentage rows "0-3 secs / X%". Use the 0-3 second row percentage as the value.',
-  carries: 'Look for "Ball Carries" or just "Carries" — a count per team.',
-  off: 'Look for "Offloads" — a count per team.',
+  gl: 'Look for "Gainline %" or "Gainline Success" - a percentage (0-100). May appear near "22m Entries" or "Attack" section.',
+  lb: 'Look for "Line Breaks" - a count, usually home value then away value.',
+  rs: 'Look for "Ruck Speed" - may show as percentage rows "0-3 secs / X%". Use the 0-3 second row percentage as the value.',
+  carries: 'Look for "Ball Carries" or just "Carries" - a count per team.',
+  off: 'Look for "Offloads" - a count per team.',
   
   // Defense  
-  tr: 'Look for "Tackle Completion %" or "Tackle Rate" — shown as "XX% Tackle Completion % YY%".',
-  missed: 'Look for "Tackles Missed" — a count per team.',
-  to: 'Look for "Turnovers Won" — a count per team.',
+  tr: 'Look for "Tackle Completion %" or "Tackle Rate" - shown as "XX% Tackle Completion % YY%".',
+  missed: 'Look for "Tackles Missed" - a count per team.',
+  to: 'Look for "Turnovers Won" - a count per team.',
   
   // Set Piece
-  so: 'Look for "Scrum Win %" — shown as "XX% Scrum Win % YY%" or "Scrums Won X/Y".',
+  so: 'Look for "Scrum Win %" - shown as "XX% Scrum Win % YY%" or "Scrums Won X/Y".',
   ss: 'Look for "Scrum Steal" or scrums lost by opposition.',
-  lo: 'Look for "Lineout Win %" — shown as "XX% Lineout Win % YY%".',
+  lo: 'Look for "Lineout Win %" - shown as "XX% Lineout Win % YY%".',
   
   // Discipline
-  pen: 'Look for "Penalties Conceded" — a count per team.',
+  pen: 'Look for "Penalties Conceded" - a count per team.',
   
   // Territory
-  territory: 'Look for "Territory" — shown as "XX% Territory YY%".',
-  possession: 'Look for "Possession" — shown as "XX% Possession YY%".',
+  territory: 'Look for "Territory" - shown as "XX% Territory YY%".',
+  possession: 'Look for "Possession" - shown as "XX% Possession YY%".',
 };
 
 /**
@@ -106,7 +106,7 @@ Return ONLY valid JSON:
   }
 }
 
-Use NULL for anything not found. Look carefully — stats are usually between "Match Summary" section and "Comments" section.
+Use NULL for anything not found. Look carefully - stats are usually between "Match Summary" section and "Comments" section.
 
 PAGE CONTENT:
 ${content}`;

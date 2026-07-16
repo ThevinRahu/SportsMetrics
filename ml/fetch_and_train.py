@@ -426,7 +426,7 @@ def train_and_export(X, y_win, y_margin):
     # Rugbypy matches get gentle decay with high floor to preserve model stability
     reference_date = datetime.now()
     # Verified: keep full 3.0 weight (they're current season, exact format)
-    # Rugbypy: gentle decay, floor 0.7 — still contributes meaningfully
+    # Rugbypy: gentle decay, floor 0.7 - still contributes meaningfully
     sample_weights[n_verified:] *= 0.7
 
     clf = GradientBoostingClassifier(

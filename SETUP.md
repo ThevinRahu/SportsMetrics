@@ -1,4 +1,4 @@
-# SportsMetrics — Server Backend Setup
+# SportsMetrics - Server Backend Setup
 
 ## Architecture (Post-Upgrade)
 

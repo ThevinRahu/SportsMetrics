@@ -1,5 +1,5 @@
 /**
- * Data Fetcher Service — v2 (Extraction Pipeline Architecture)
+ * Data Fetcher Service - v2 (Extraction Pipeline Architecture)
  * 
  * 5-stage pipeline:
  * 1. Source Router → correct URL for the data needed
