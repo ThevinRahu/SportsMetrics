@@ -32,11 +32,29 @@ Usage: python ml/fetch_and_train.py
 import json
 import numpy as np
 import os
+from datetime import datetime
 from collections import defaultdict
 from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
 from sklearn.model_selection import cross_val_score
 from skl2onnx import convert_sklearn
 from skl2onnx.common.data_types import FloatTensorType
+
+
+def recency_weight(match_date_str, reference_date, half_life_days=240):
+    """Weight decays to 0.5 every half_life_days.
+    240 days ~ one full season cycle.
+    A match from 2 seasons ago carries ~25% weight of one from today."""
+    if isinstance(match_date_str, str):
+        try:
+            match_date = datetime.strptime(match_date_str[:10], '%Y-%m-%d')
+        except Exception:
+            return 0.5  # default weight for undated matches
+    else:
+        match_date = match_date_str
+    days_old = (reference_date - match_date).days
+    if days_old < 0:
+        days_old = 0
+    return np.exp(-np.log(2) * days_old / half_life_days)
 
 
 # ============================================================
@@ -402,6 +420,17 @@ def train_and_export(X, y_win, y_margin):
     # Verified samples weighted 3x more (they perfectly match inference format)
     sample_weights = np.ones(len(X))
     sample_weights[:n_verified] = 3.0
+
+    # Apply recency weighting: recent matches matter more than old ones
+    # Verified matches (2025-2026) get full recency weight
+    # Rugbypy matches use default 0.5 weight (dates not consistently available)
+    reference_date = datetime.now()
+    # Verified matches are from 2025-2026 seasons, give them recency boost
+    verified_recency = recency_weight('2026-01-01', reference_date)
+    sample_weights[:n_verified] *= max(verified_recency, 0.8)
+    # Rugbypy matches are older (mixed dates), apply moderate decay
+    rugbypy_recency = recency_weight('2024-06-01', reference_date)
+    sample_weights[n_verified:] *= max(rugbypy_recency, 0.25)
 
     clf = GradientBoostingClassifier(
         n_estimators=200,

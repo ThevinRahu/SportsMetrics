@@ -190,4 +190,29 @@ export function injuryRiskEstimate(player) {
   return Math.round(prior * 100);
 }
 
-export default { predictScore, formEMA, momentumScore, injuryRiskEstimate };
+/**
+ * Extended Form EMA - uses last 10-12 results for smoother signal
+ * The exponential decay naturally handles recency (recent games weight more)
+ * without needing a hard cutoff.
+ */
+export function formEMAExtended(results, alpha = 0.30) {
+  if (!results || results.length === 0) return 50;
+  let ema = 50; // neutral baseline
+  for (const value of results) {
+    ema = alpha * value + (1 - alpha) * ema;
+  }
+  return Math.round(ema * 10) / 10;
+}
+
+/**
+ * Convert W/L/D array to numeric values for EMA computation
+ */
+export function resultsToNumeric(wldArray) {
+  return (wldArray || []).map(r => {
+    if (r === 'W') return 100;
+    if (r === 'D') return 50;
+    return 0; // L
+  });
+}
+
+export default { predictScore, formEMA, formEMAExtended, resultsToNumeric, momentumScore, injuryRiskEstimate };

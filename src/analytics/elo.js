@@ -72,11 +72,23 @@ export function winProbability(ratingA, ratingB, homeA = false) {
   return Math.round(expectedOutcome(ratingA, ratingB, homeA) * 100);
 }
 
+/**
+ * Season-boundary Elo regression
+ * Pulls rating toward competition mean at start of new season.
+ * This captures squad turnover / coaching changes better than a game-count window.
+ * 
+ * Called once per team when first match of new season is detected.
+ */
+export function applySeasonRegression(currentRating, mean = 1500, factor = 0.30) {
+  return Math.round(currentRating + (mean - currentRating) * factor);
+}
+
 export default {
   expectedOutcome,
   marginMultiplier,
   updateRatings,
   winProbability,
+  applySeasonRegression,
   HOME_ADVANTAGE,
   DEFAULT_K
 };
