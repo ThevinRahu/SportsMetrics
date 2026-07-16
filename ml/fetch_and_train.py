@@ -422,15 +422,12 @@ def train_and_export(X, y_win, y_margin):
     sample_weights[:n_verified] = 3.0
 
     # Apply recency weighting: recent matches matter more than old ones
-    # Verified matches (2025-2026) get full recency weight
-    # Rugbypy matches use default 0.5 weight (dates not consistently available)
+    # Verified matches (2025-2026) get full weight (already 3x base)
+    # Rugbypy matches get gentle decay with high floor to preserve model stability
     reference_date = datetime.now()
-    # Verified matches are from 2025-2026 seasons, give them recency boost
-    verified_recency = recency_weight('2026-01-01', reference_date)
-    sample_weights[:n_verified] *= max(verified_recency, 0.8)
-    # Rugbypy matches are older (mixed dates), apply moderate decay
-    rugbypy_recency = recency_weight('2024-06-01', reference_date)
-    sample_weights[n_verified:] *= max(rugbypy_recency, 0.25)
+    # Verified: keep full 3.0 weight (they're current season, exact format)
+    # Rugbypy: gentle decay, floor 0.7 — still contributes meaningfully
+    sample_weights[n_verified:] *= 0.7
 
     clf = GradientBoostingClassifier(
         n_estimators=200,
