@@ -16,11 +16,12 @@ import {
   logRefresh, saveMatches, seedMatchHistory
 } from './db';
 import { refreshTournamentData } from './services/dataFetcher';
+import { fetchFromServer, startLiveSync, onLiveEvent } from './services/liveSync';
 import { retrainModel } from './analytics/mlEngine';
 import { updateRatings } from './analytics/elo';
 import { getAllMatches } from './data/matchHistory';
 
-// Default tournament data (used for initial seeding only)
+// Default tournament data (fallback only if server + IndexedDB are both empty)
 const DEFAULT_TOURNAMENTS = {
   srp2026: SUPER_RUGBY_2026,
   nc2026: NATIONS_CHAMPIONSHIP_2026,
@@ -49,37 +50,91 @@ export default function App() {
   useEffect(() => {
     async function initDB() {
       try {
-        const stored = await getAllTournaments();
-        
-        if (stored.length === 0) {
+        // STRATEGY: Server (Neon Postgres) → IndexedDB cache → Hardcoded fallback
+        let fromServer = {};
+        let usedServer = false;
+
+        // 1. Try fetching from shared server (Neon Postgres via /api/tournaments)
+        try {
+          const serverTournaments = await fetch('/api/tournaments', { signal: AbortSignal.timeout(8000) });
+          if (serverTournaments.ok) {
+            const list = await serverTournaments.json();
+            if (Array.isArray(list) && list.length > 0) {
+              // Fetch full data for each tournament
+              for (const t of list) {
+                if (t.id) {
+                  const full = await fetch(`/api/tournaments?id=${t.id}`, { signal: AbortSignal.timeout(8000) });
+                  if (full.ok) {
+                    const data = await full.json();
+                    if (data && data.teams && Object.keys(data.teams).length > 0) {
+                      // Map Postgres column names to app format
+                      fromServer[data.id] = {
+                        ...data,
+                        dataVersion: data.data_version || data.dataVersion,
+                        totalRounds: data.total_rounds || data.totalRounds,
+                        dataUrl: data.data_url || data.dataUrl,
+                      };
+                    }
+                  }
+                }
+              }
+              if (Object.keys(fromServer).length > 0) {
+                usedServer = true;
+              }
+            }
+          }
+        } catch (e) {
+          console.warn("Server fetch failed, falling back to local:", e.message);
+        }
+
+        if (usedServer) {
+          // Server had data - use it as source of truth
+          // Also fill in any tournaments the server doesn't have yet (from hardcoded)
           for (const [id, data] of Object.entries(DEFAULT_TOURNAMENTS)) {
+            if (!fromServer[id]) {
+              fromServer[id] = data;
+            }
+          }
+          setTournamentData(fromServer);
+          // Cache to IndexedDB for offline access
+          for (const [id, data] of Object.entries(fromServer)) {
             await saveTournament({ ...data, id });
           }
-          setTournamentData(DEFAULT_TOURNAMENTS);
         } else {
-          const fromDB = {};
-          for (const t of stored) {
-            const codeDefault = DEFAULT_TOURNAMENTS[t.id];
-            if (codeDefault) {
-              const codeVersion = codeDefault.dataVersion || 0;
-              const dbVersion = t.dataVersion || 0;
-              if (codeVersion > dbVersion) {
-                fromDB[t.id] = { ...codeDefault, id: t.id };
-                await saveTournament({ ...codeDefault, id: t.id });
+          // 2. Fall back to IndexedDB (local cache)
+          const stored = await getAllTournaments();
+          
+          if (stored.length === 0) {
+            // 3. Last resort: use hardcoded data
+            for (const [id, data] of Object.entries(DEFAULT_TOURNAMENTS)) {
+              await saveTournament({ ...data, id });
+            }
+            setTournamentData(DEFAULT_TOURNAMENTS);
+          } else {
+            const fromDB = {};
+            for (const t of stored) {
+              const codeDefault = DEFAULT_TOURNAMENTS[t.id];
+              if (codeDefault) {
+                const codeVersion = codeDefault.dataVersion || 0;
+                const dbVersion = t.dataVersion || 0;
+                if (codeVersion > dbVersion) {
+                  fromDB[t.id] = { ...codeDefault, id: t.id };
+                  await saveTournament({ ...codeDefault, id: t.id });
+                } else {
+                  fromDB[t.id] = t;
+                }
               } else {
                 fromDB[t.id] = t;
               }
-            } else {
-              fromDB[t.id] = t;
             }
-          }
-          for (const [id, data] of Object.entries(DEFAULT_TOURNAMENTS)) {
-            if (!fromDB[id]) {
-              fromDB[id] = data;
-              await saveTournament({ ...data, id });
+            for (const [id, data] of Object.entries(DEFAULT_TOURNAMENTS)) {
+              if (!fromDB[id]) {
+                fromDB[id] = data;
+                await saveTournament({ ...data, id });
+              }
             }
+            setTournamentData(fromDB);
           }
-          setTournamentData(fromDB);
         }
 
         const customStored = await getAllCustomTournaments();
@@ -94,6 +149,9 @@ export default function App() {
         await seedMatchHistory(staticMatches);
 
         setDbReady(true);
+
+        // Start live sync polling (checks for match_completed events)
+        startLiveSync();
       } catch (e) {
         console.error("DB init failed, using in-memory defaults:", e);
         setTournamentData(DEFAULT_TOURNAMENTS);
@@ -101,6 +159,27 @@ export default function App() {
       }
     }
     initDB();
+  }, []);
+
+  // ===== LIVE EVENT LISTENER =====
+  useEffect(() => {
+    const unsubscribe = onLiveEvent((event) => {
+      if (event.type === 'match_completed' && event.payload?.tournamentId) {
+        // A match completed - refetch that tournament from server
+        const tid = event.payload.tournamentId;
+        fetch(`/api/tournaments?id=${tid}`, { signal: AbortSignal.timeout(8000) })
+          .then(r => r.ok ? r.json() : null)
+          .then(data => {
+            if (data && data.teams) {
+              const mapped = { ...data, dataVersion: data.data_version, totalRounds: data.total_rounds, dataUrl: data.data_url };
+              setTournamentData(prev => ({ ...prev, [tid]: mapped }));
+              saveTournament({ ...mapped, id: tid });
+            }
+          })
+          .catch(() => {});
+      }
+    });
+    return unsubscribe;
   }, []);
 
   // ===== REAL DATA REFRESH =====
