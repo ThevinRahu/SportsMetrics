@@ -140,17 +140,25 @@ export function formEMA(results, alpha = 0.35) {
 export function momentumScore(team) {
   if (!team) return 50;
   
+  // Use last12 with extended EMA if available (smoother, recency-weighted)
+  const last12 = team.form?.last12;
   const last5 = team.form?.last5;
   const streak = team.form?.streak || "";
   
-  // Guard: ensure last5 is actually an array with W/L values
-  if (!Array.isArray(last5) || last5.length === 0) {
-    // Fallback: use form.rating if available
+  // Guard: ensure we have an array with W/L values
+  const formArray = (Array.isArray(last12) && last12.length >= 5) ? last12 
+    : (Array.isArray(last5) && last5.length > 0) ? last5 
+    : null;
+  
+  if (!formArray) {
     return team.form?.rating || 50;
   }
   
-  // Base from EMA
-  let score = formEMA(last5);
+  // Use extended EMA (alpha 0.30) for last12, original EMA for last5
+  const numericResults = resultsToNumeric(formArray);
+  let score = formArray.length >= 8 
+    ? formEMAExtended(numericResults, 0.30) 
+    : formEMA(formArray);
   
   // Streak bonus
   const streakMatch = streak.match(/([WL])(\d+)/);
@@ -161,7 +169,7 @@ export function momentumScore(team) {
     else score -= Math.min(15, n * 4);
   }
   
-  return Math.max(0, Math.min(100, score));
+  return Math.max(0, Math.min(100, Math.round(score)));
 }
 
 /**

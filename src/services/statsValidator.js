@@ -36,6 +36,8 @@ export const MatchTeamStatsSchema = z.object({
   penalties: count,
   territory_pct: pct,
   possession_pct: pct,
+  gainline_pct: pct,
+  ruck_speed_pct: pct,
   post_contact_metres: count,
   yellow_cards: count,
   red_cards: count,

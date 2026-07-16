@@ -408,9 +408,28 @@ function blendMatchStatsIntoProfile(team, matchStats) {
   if (matchStats.line_breaks != null && team.attack) {
     team.attack.lb = parseFloat(((team.attack.lb + matchStats.line_breaks) / 2).toFixed(1));
   }
-  // Blend penalties
-  if (matchStats.penalties != null && team.discipline) {
-    team.discipline.pen = Math.round((team.discipline.pen + matchStats.penalties) / 2);
+  // Blend gainline % (derived from territory + possession if available)
+  if (matchStats.territory_pct != null && team.attack) {
+    // Territory is a proxy for gainline success in rugbypass data
+    team.attack.gl = Math.round((team.attack.gl + matchStats.territory_pct) / 2);
+  }
+  // Blend carries into ruck speed proxy (more carries = faster ruck generally)
+  if (matchStats.carries != null && team.attack) {
+    // Normalize: 130 carries/game is average, scale to ruck speed 2.5-4.0
+    const ruckProxy = Math.min(4.0, Math.max(2.0, matchStats.carries / 50));
+    team.attack.rs = parseFloat(((team.attack.rs + ruckProxy) / 2).toFixed(1));
+  }
+  // Blend territory into c22 (22m entries correlate with territory)
+  if (matchStats.territory_pct != null && team.attack) {
+    team.attack.c22 = Math.round((team.attack.c22 + matchStats.territory_pct * 0.7) / 2);
+  }
+  // Blend turnovers won
+  if (matchStats.turnovers_won != null && team.defense) {
+    team.defense.to = parseFloat(((team.defense.to + matchStats.turnovers_won) / 2).toFixed(1));
+  }
+  // Blend offloads conceded (turnovers lost as proxy)
+  if (matchStats.turnovers_lost != null && team.defense) {
+    team.defense.ob = parseFloat(((team.defense.ob + matchStats.turnovers_lost) / 2).toFixed(1));
   }
 }
 

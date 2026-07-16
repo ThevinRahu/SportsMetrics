@@ -1,13 +1,12 @@
 /**
- * Server-side AI Stats Extraction
+ * Server-side AI Stats Extraction (v2 - uses same pipeline as client)
  * 
  * POST /api/extract-stats
- * Body: { url: "https://rugbypass.com/...", tournamentId: "nc2026", teamNames: [...] }
+ * Body: { url, teamNames, tournamentName, mode: "standings"|"matchStats" }
  * 
- * Moves the Groq API key server-side (env var GROQ_API_KEY).
- * The browser never sees or needs the key.
- * 
- * This also allows central rate-limiting and caching of LLM calls.
+ * Uses GROQ_API_KEY env var (browser never sees it).
+ * Uses the same field hints, non-destructive cleaning, and prompt structure
+ * as the client-side pipeline to avoid drift.
  */
 
 export const config = { maxDuration: 60 };
@@ -15,19 +14,34 @@ export const config = { maxDuration: 60 };
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_MODEL = 'llama-3.3-70b-versatile';
 
-// Allowed domains for fetching
 const ALLOWED_DOMAINS = [
   'super.rugby', 'all.rugby', 'sixnationsrugby.com', 'rugbypass.com',
   'sofascore.com', 'world.rugby', 'rugbychampionship.com', 'nationschampionshiprugby.com',
 ];
 
-function truncateContent(html, maxChars = 6000) {
-  let cleaned = html
+// Same field hints as client (src/services/extractionPrompts.js)
+const FIELD_HINTS = {
+  gl: 'Look for "Gainline %" or "Gainline Success" - a percentage (0-100).',
+  lb: 'Look for "Line Breaks" - a count, home value then away value.',
+  rs: 'Look for "Ruck Speed" - percentage rows "0-3 secs / X%".',
+  carries: 'Look for "Ball Carries" or "Carries" - a count per team.',
+  tr: 'Look for "Tackle Completion %" - shown as "XX% Tackle Completion % YY%".',
+  missed: 'Look for "Tackles Missed" - a count per team.',
+  to: 'Look for "Turnovers Won" - a count per team.',
+  so: 'Look for "Scrum Win %" - shown as "XX% Scrum Win % YY%".',
+  lo: 'Look for "Lineout Win %" - shown as "XX% Lineout Win % YY%".',
+  pen: 'Look for "Penalties Conceded" - a count per team.',
+  territory: 'Look for "Territory" - shown as "XX% Territory YY%".',
+  possession: 'Look for "Possession" - shown as "XX% Possession YY%".',
+};
+
+// Non-destructive cleaning (same as client contentChunker.js)
+function cleanContent(html) {
+  return html
     .replace(/<script[\s\S]*?<\/script>/gi, '')
     .replace(/<style[\s\S]*?<\/style>/gi, '')
     .replace(/<nav[\s\S]*?<\/nav>/gi, '')
     .replace(/<footer[\s\S]*?<\/footer>/gi, '')
-    .replace(/<header[\s\S]*?<\/header>/gi, '')
     .replace(/<!--[\s\S]*?-->/g, '')
     .replace(/<img[^>]*>/gi, '')
     .replace(/<svg[\s\S]*?<\/svg>/gi, '')
@@ -35,30 +49,61 @@ function truncateContent(html, maxChars = 6000) {
     .replace(/<meta[^>]*>/gi, '')
     .replace(/class="[^"]*"/gi, '')
     .replace(/style="[^"]*"/gi, '')
-    .replace(/\s+/g, ' ');
-
-  if (cleaned.length > maxChars) {
-    const tables = cleaned.match(/<table[\s\S]*?<\/table>/gi) || [];
-    if (tables.length > 0) {
-      cleaned = tables.join('\n').slice(0, maxChars);
-    } else {
-      cleaned = cleaned.slice(0, maxChars);
-    }
-  }
-  return cleaned;
+    .replace(/<(header|aside)[^>]*>[\s\S]*?<\/\1>/gi, '')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
-function buildExtractionPrompt(tournamentName, content, teamNames) {
-  return `You are a rugby data extraction AI. Extract team statistics AND match results from this webpage for "${tournamentName}".
+function buildMatchStatsPrompt(homeTeam, awayTeam, content) {
+  const fieldGuide = Object.entries(FIELD_HINTS)
+    .map(([key, hint]) => `  ${key}: ${hint}`)
+    .join('\n');
 
-TEAMS: ${teamNames.join(", ")}
+  return `You are extracting rugby match statistics from a stats page.
+Match: ${homeTeam} vs ${awayTeam}
 
-Return ONLY valid JSON with this structure. Use NULL for any field you cannot find:
+FIELD EXTRACTION GUIDE:
+${fieldGuide}
+
+Format: "HOME_VALUE Label AWAY_VALUE" (e.g. "153 Tackles Made 173")
+Or: "XX% Label YY%" (e.g. "89% Tackle Completion % 87%")
+
+Return ONLY valid JSON:
+{
+  "homeTeam": "${homeTeam}",
+  "awayTeam": "${awayTeam}",
+  "homeScore": null,
+  "awayScore": null,
+  "stats": {
+    "home": {
+      "tries": null, "carries": null, "line_breaks": null, "offloads": null,
+      "tackles_made": null, "tackles_missed": null, "tackle_rate": null,
+      "turnovers_won": null, "turnovers_lost": null,
+      "scrums": null, "scrum_win_pct": null,
+      "lineouts": null, "lineout_win_pct": null,
+      "penalties": null, "territory_pct": null, "possession_pct": null,
+      "post_contact_metres": null, "yellow_cards": null, "red_cards": null
+    },
+    "away": { same fields }
+  }
+}
+
+Use NULL for anything not found. Stats are between "Match Summary" and "Comments".
+
+CONTENT:
+${content}`;
+}
+
+function buildStandingsPrompt(tournamentName, teamNames, content) {
+  return `Extract standings AND match results for "${tournamentName}".
+Teams: ${teamNames.join(', ')}
+
+Return ONLY valid JSON:
 {
   "teams": {
     "Team Name": {
-      "season": { "played": null, "won": null, "lost": null, "pts": null, "pf": null, "pa": null, "tries_for": null, "tries_against": null, "try_bonus": null, "loss_bonus": null },
-      "form": { "last5": null, "streak": null, "rating": null }
+      "season": { "played": null, "won": null, "lost": null, "drawn": null, "pts": null, "pf": null, "pa": null, "tries_for": null, "tries_against": null, "try_bonus": null, "loss_bonus": null },
+      "form": { "last5": null, "last12": null, "streak": null, "rating": null }
     }
   },
   "matches": [
@@ -67,11 +112,7 @@ Return ONLY valid JSON with this structure. Use NULL for any field you cannot fi
   "meta": { "round": null, "source": "url" }
 }
 
-IMPORTANT:
-- Extract ALL match results you can find
-- Use NULL for anything not found
-- Team names must EXACTLY match the names given
-- Return ONLY JSON
+IMPORTANT: Extract ALL match results. Use NULL for unknowns. Team names must EXACTLY match.
 
 CONTENT:
 ${content}`;
@@ -84,16 +125,15 @@ export default async function handler(req, res) {
 
   const groqKey = process.env.GROQ_API_KEY;
   if (!groqKey) {
-    return res.status(500).json({ error: 'GROQ_API_KEY not configured in environment' });
+    return res.status(500).json({ error: 'GROQ_API_KEY not configured' });
   }
 
-  const { url, tournamentId, teamNames, tournamentName } = req.body || {};
+  const { url, teamNames, tournamentName, mode, homeTeam, awayTeam } = req.body || {};
 
   if (!url || !teamNames || !Array.isArray(teamNames)) {
-    return res.status(400).json({ error: 'Required: url, teamNames (array). Optional: tournamentId, tournamentName' });
+    return res.status(400).json({ error: 'Required: url, teamNames (array)' });
   }
 
-  // Validate URL domain
   try {
     const targetUrl = new URL(url);
     const isAllowed = ALLOWED_DOMAINS.some(d => targetUrl.hostname.includes(d));
@@ -107,7 +147,7 @@ export default async function handler(req, res) {
   const startTime = Date.now();
 
   try {
-    // 1. Fetch the page
+    // 1. Fetch page
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 20000);
     
@@ -125,15 +165,20 @@ export default async function handler(req, res) {
     }
 
     const html = await pageRes.text();
-    const content = truncateContent(html);
+    // Non-destructive cleaning (same as client pipeline)
+    const content = cleanContent(html);
 
     if (content.length < 100) {
-      return res.status(422).json({ error: 'Page content too short to extract stats' });
+      return res.status(422).json({ error: 'Page content too short' });
     }
 
-    // 2. Call Groq AI for extraction
-    const prompt = buildExtractionPrompt(tournamentName || tournamentId || 'Tournament', content, teamNames);
+    // 2. Build prompt based on mode
+    const isMatchStats = mode === 'matchStats' || url.includes('/live/') || url.includes('/stats');
+    const prompt = isMatchStats
+      ? buildMatchStatsPrompt(homeTeam || teamNames[0], awayTeam || teamNames[1], content.slice(0, 8000))
+      : buildStandingsPrompt(tournamentName || 'Tournament', teamNames, content.slice(0, 8000));
 
+    // 3. Call Groq
     const aiRes = await fetch(GROQ_URL, {
       method: 'POST',
       headers: {
@@ -143,7 +188,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: GROQ_MODEL,
         messages: [
-          { role: 'system', content: 'You extract data from HTML into JSON. Return ONLY valid JSON. No markdown, no explanation.' },
+          { role: 'system', content: 'Extract data from HTML into JSON. Return ONLY valid JSON. Use null for unknowns.' },
           { role: 'user', content: prompt },
         ],
         temperature: 0.0,
@@ -153,13 +198,11 @@ export default async function handler(req, res) {
 
     if (!aiRes.ok) {
       const err = await aiRes.text();
-      return res.status(502).json({ error: `Groq API error (${aiRes.status}): ${err.slice(0, 200)}` });
+      return res.status(502).json({ error: `Groq error (${aiRes.status}): ${err.slice(0, 200)}` });
     }
 
     const aiData = await aiRes.json();
     let jsonStr = (aiData.choices?.[0]?.message?.content || '').trim();
-    
-    // Strip markdown code fences
     if (jsonStr.startsWith('```')) {
       jsonStr = jsonStr.replace(/^```(?:json)?\s*/, '').replace(/\s*```$/, '');
     }
@@ -169,29 +212,17 @@ export default async function handler(req, res) {
       parsed = JSON.parse(jsonStr);
     } catch {
       const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        parsed = JSON.parse(jsonMatch[0]);
-      } else {
-        return res.status(422).json({ error: 'AI returned invalid JSON', raw: jsonStr.slice(0, 300) });
-      }
+      if (jsonMatch) parsed = JSON.parse(jsonMatch[0]);
+      else return res.status(422).json({ error: 'AI returned invalid JSON', raw: jsonStr.slice(0, 300) });
     }
-
-    const durationMs = Date.now() - startTime;
 
     res.status(200).json({
       success: true,
       data: parsed,
-      meta: {
-        durationMs,
-        source: url,
-        teamsFound: Object.keys(parsed.teams || {}).length,
-        matchesFound: (parsed.matches || []).length,
-      },
+      meta: { durationMs: Date.now() - startTime, source: url, mode: isMatchStats ? 'matchStats' : 'standings' },
     });
   } catch (e) {
-    if (e.name === 'AbortError') {
-      return res.status(504).json({ error: 'Upstream timeout' });
-    }
+    if (e.name === 'AbortError') return res.status(504).json({ error: 'Upstream timeout' });
     res.status(500).json({ error: e.message });
   }
 }

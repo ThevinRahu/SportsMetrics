@@ -139,6 +139,31 @@ export default async function handler(req, res) {
           round: match.round,
         });
 
+        // Apply season regression if this is Round 1 of a new season
+        if (match.round === 1) {
+          const tournament = await getTournament(match.tournament_id);
+          if (tournament && tournament.teams) {
+            const REGRESSION_FACTOR = 0.30;
+            const COMPETITION_MEAN = 1500;
+            let updated = false;
+            
+            const homeTeamData = tournament.teams[match.home_team];
+            if (homeTeamData && homeTeamData.elo) {
+              homeTeamData.elo = Math.round(homeTeamData.elo + (COMPETITION_MEAN - homeTeamData.elo) * REGRESSION_FACTOR);
+              updated = true;
+            }
+            const awayTeamData = tournament.teams[match.away_team];
+            if (awayTeamData && awayTeamData.elo) {
+              awayTeamData.elo = Math.round(awayTeamData.elo + (COMPETITION_MEAN - awayTeamData.elo) * REGRESSION_FACTOR);
+              updated = true;
+            }
+            
+            if (updated) {
+              await upsertTournament(tournament);
+            }
+          }
+        }
+
         completed++;
       }
     }
