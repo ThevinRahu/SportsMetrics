@@ -10,42 +10,65 @@ Currently live with **Rugby Union**. Architecture designed for gradual expansion
 
 ---
 
+## Architecture
+
+```
+Browser (React + ONNX inference)
+    |
+    v
+/api/tournaments (Neon Postgres - shared source of truth)
+/api/extract-stats (server-side Groq AI extraction)
+/api/events (SSE/poll - real-time match updates)
+/api/cron/check-matches (auto-refresh on match completion)
+/api/proxy (CORS relay for rugby data sources)
+    |
+    v
+Neon Postgres (free tier) - tournaments, matches, events, refresh_logs
+```
+
+**Data flow:** Neon Postgres -> `/api/tournaments` -> React state -> IndexedDB (offline cache)
+
+All clients see the same data. Updates propagate automatically when matches complete.
+
+---
+
 ## Machine Learning Models
 
 | Model | Type | Training Data | What it predicts |
 |-------|------|---------------|-----------------|
 | **ONNX GradientBoostingClassifier** | Pre-trained (scikit-learn) | 1642 samples | Win probability |
-| **ONNX RandomForestRegressor** | Pre-trained (scikit-learn) | 1642 samples | Expected margin & score |
+| **ONNX GradientBoostingRegressor** | Pre-trained (scikit-learn) | 1642 samples | Expected margin & score |
 | **JS Gradient Boosted Trees** | Trains at runtime | Tournament data | Win prob + feature importance |
 | **JS Random Forest** | Trains at runtime | Tournament data | Confidence intervals |
 
 ### Training Data Sources
-- **169 verified matches** from Super Rugby Pacific 2025/2026 + Six Nations 2026 (exact team stats from all.rugby, rugbypass.com)
-- **673 matches from rugbypy** across Top 14, URC, Premiership, Japan League One, Sevens, and international competitions - with real per-match stats (tackles, line breaks, 22m entries, ruck speed, turnovers, carries, dominant tackles)
+- **169 verified matches** from Super Rugby Pacific 2025/2026, Six Nations 2026, Nations Championship 2026, Rugby Championship 2025 (exact team stats from all.rugby, rugbypass.com)
+- **673 matches from rugbypy** across Top 14, URC, Premiership, Japan League One, Sevens, and international competitions - with real per-match stats
 - **120 teams** total with real rugby metrics
+- **Recency-weighted training** - recent matches weighted 3-4x more than older data via exponential decay (240-day half-life)
 
 ### 13 Input Features (what drives predictions)
 | # | Feature | Source Stat | Importance |
 |---|---------|-------------|------------|
-| 1 | Elo Rating Gap | Overall team quality | 21.2% |
-| 2 | Gainline Advantage | 22m entries / gainline % | 2.0% |
-| 3 | Tackle Efficiency | Tackle rate % | 4.4% |
-| 4 | Scrum Dominance | Scrum success % | 3.7% |
+| 1 | Elo Rating Gap | Overall team quality | 21.9% |
+| 2 | Gainline Advantage | 22m entries / gainline % | 2.8% |
+| 3 | Tackle Efficiency | Tackle rate % | 3.2% |
+| 4 | Scrum Dominance | Scrum success % | 4.2% |
 | 5 | Lineout Control | Lineout success % | 4.9% |
-| 6 | Kicking Accuracy | Goal kick % | 5.1% |
-| 7 | Form & Momentum | Recent results (0-100) | 19.7% |
-| 8 | Discipline Edge | Penalties conceded | 6.7% |
-| 9 | Scoring Rate | Points per game | 8.4% |
-| 10 | Turnover Threat | Turnovers won/game | 5.5% |
-| 11 | Line Break Power | Line breaks/game | 6.4% |
-| 12 | Defensive Pressure | Missed tackles/game | 6.8% |
-| 13 | Venue | Home (+0.5) / Away (-0.5) / Neutral (0) | 5.3% |
+| 6 | Kicking Accuracy | Goal kick % | 4.9% |
+| 7 | Form & Momentum | EMA over last 10-12 results | 17.4% |
+| 8 | Discipline Edge | Penalties conceded | 6.3% |
+| 9 | Scoring Rate | Points per game | 9.0% |
+| 10 | Turnover Threat | Turnovers won/game | 5.4% |
+| 11 | Line Break Power | Line breaks/game | 5.7% |
+| 12 | Defensive Pressure | Missed tackles/game | 5.2% |
+| 13 | Venue | Home (+0.5) / Away (-0.5) / Neutral (0) | 9.1% |
 
 ### How Prediction Works
 1. User selects two teams + venue
 2. Browser computes 13 feature differences from team stats
 3. ONNX classifier (200-tree GBT) returns win probability
-4. ONNX regressor (100-tree RandomForest) returns expected margin
+4. ONNX regressor (100-tree GBT) returns expected margin
 5. Scores derived from margin + teams' average scoring rates
 
 ### Retrain Models
@@ -60,20 +83,20 @@ python ml/sanity_check.py       # Verify predictions are sane
 
 ## Features
 
-### 🏆 Tournaments
+### Tournaments
+- **Nations Championship 2026** - Live (Round 2 complete, R3 July 19)
 - **Super Rugby Pacific 2026** - Complete verified data
-- **Nations Championship 2026** - Pre-tournament (starts Jul 4)
 - **Rugby Championship 2026** - Pre-tournament (starts Aug)
 - **Domestic/Custom** - Manual data entry for any level
 
-### 🤖 ML Prediction Panel
+### ML Prediction Panel
 - **Win Probability** - From ONNX GradientBoostedTrees (trained on real stats)
-- **Expected Margin** - From ONNX RandomForest regressor
+- **Expected Margin** - From ONNX regressor
 - **Predicted Score** - ML margin + team scoring averages
 - **Key Factors** - Which metrics are driving THIS specific prediction
-- **Model Confidence** - Tree vote variance from Random Forest
+- **Model Confidence** - Tree vote variance
 
-### 📊 Match Analysis
+### Match Analysis
 - Head-to-head metric comparison bars
 - Performance radar chart
 - Predicted score (consistent with win probability)
@@ -82,48 +105,76 @@ python ml/sanity_check.py       # Verify predictions are sane
 - **Momentum charts** - Form trajectory over last 10 matches
 - **H2H history** - Past meetings with win record and scores
 
-### 🎯 Game Plan
+### Game Plan
 - Areas to improve (ranked by priority)
 - Exploitable opponent weaknesses
 - **ML Keys to Win** - Sensitivity analysis showing where improvement matters most
-- Strategic recommendations
-- Risk factors
+- Strategic recommendations and risk factors
 - Drill suggestions
 
-### 📈 Season Simulator
+### Season Simulator
 - Monte Carlo projection (5000 iterations)
 - Playoff odds, championship probability
 - Average projected position
 
-### 🏠 Venue Toggle
+### Venue Toggle
 - Home / Away / Neutral selection
-- ONNX model natively handles venue (~12% prediction swing)
+- ONNX model natively handles venue (up to 50% prediction swing)
 - Affects win probability, margin, and scores
 
-### 🔄 AI Data Refresh
-- Fetches live data from tournament websites
-- AI (Groq Llama 3.3 70B) extracts team stats + match results
-- Saves to IndexedDB (persistent, not hardcoded)
-- ML model retrains automatically on new data
+### Auto-Refresh (Server-Side)
+- Cron job checks rugbypass for match completions daily
+- Publishes `match_completed` events to Postgres
+- Clients poll `/api/events` every 30s and auto-update UI
+- No manual refresh needed on match day
 
-### 💾 Database (IndexedDB)
-- Tournament data, match history, custom teams - all persistent
-- Match results grow with every refresh
-- No server needed - runs entirely in browser
+### AI Data Extraction (5-Stage Pipeline)
+1. **Source Router** - Routes to correct page (match-center for stats, index for standings)
+2. **Content Chunker** - Non-destructive HTML cleaning, section-aware chunking
+3. **LLM Extraction** - Server-side Groq with field-specific hints
+4. **Zod Validation** - Schema validation, quality scoring, fail loudly on bad data
+5. **Merge & Persist** - Write to Neon Postgres with provenance
+
+### Database
+- **Neon Postgres** (shared source of truth) - all clients see same data
+- **IndexedDB** (client cache) - offline access, fast loads
+- Hardcoded JS files as last-resort fallback only
 
 ---
 
 ## Analytics Algorithms
 
-| Algorithm | Used for | Why this one |
-|-----------|----------|--------------|
-| **Gradient Boosted Trees** | Win probability, key factors | #1 for tabular data - beats neural nets, interpretable |
+| Algorithm | Used for | Why |
+|-----------|----------|-----|
+| **Gradient Boosted Trees** | Win probability, key factors | Best for tabular data, interpretable |
 | **Random Forest** | Margin prediction, confidence | Robust, gives uncertainty via tree variance |
-| **ONNX Runtime (WebAssembly)** | Production inference | Real scikit-learn models running in browser at native speed |
-| **Monte Carlo Simulation** | Season projections | Only way to model uncertainty across remaining fixtures |
-| **Sensitivity Analysis** | "Keys to Win" | SHAP-like - shows which improvement gives biggest win% boost |
-| **Exponential Moving Average** | Form / momentum | Captures direction + recency - better than simple win% |
-| **Poisson Distribution** | Try scoring distributions | Statistically correct model for discrete scoring events |
+| **ONNX Runtime (WASM)** | Production inference | Real scikit-learn models in browser at native speed |
+| **Monte Carlo** | Season projections | Models uncertainty across remaining fixtures |
+| **Sensitivity Analysis** | Keys to Win | SHAP-like - shows which improvement gives biggest boost |
+| **Exponential Moving Average** | Form / momentum (last 10-12) | Captures direction + recency without hard cutoffs |
+| **Poisson Distribution** | Try scoring distributions | Statistically correct for discrete scoring events |
+| **Elo with Season Regression** | Team strength baseline | 30% regression-to-mean at season boundaries |
+| **Recency-Weighted Training** | ML model stability | 240-day half-life decay on sample weights |
+
+---
+
+## Recency-Weighted Analytics
+
+The system uses a two-tier data model:
+
+**Tier 1 - Canonical Ledger (Postgres `matches` table)**
+- Immutable, never deleted
+- Full history, all seasons
+- Used for ML training with sample-weight exponential decay
+- Volume improves model stability
+
+**Tier 2 - Live Form Projection (team profiles)**
+- Recomputed on every match completion
+- Rolling EMA over last 10-12 games (alpha = 0.30)
+- Elo with season regression (30% pull-to-mean at season boundaries)
+- This is what predictions read from
+
+Old matches aren't deleted - they're weighted less. This gives the effect of "only use recent games" without starving the ML model of training volume or creating artificial cliff-edges.
 
 ---
 
@@ -136,7 +187,7 @@ npm run dev
 
 ### First-time setup:
 1. Open http://localhost:5173
-2. Click **AI Settings** → add free Groq API key from [console.groq.com](https://console.groq.com)
+2. Click **AI Settings** - add free Groq API key from [console.groq.com](https://console.groq.com)
 3. Click **Refresh Data** to pull live stats
 
 ### Deploy:
@@ -145,51 +196,70 @@ npm run build
 vercel --prod
 ```
 
+### Server Backend Setup:
+See [SETUP.md](./SETUP.md) for Neon Postgres + environment variable configuration.
+
 ---
 
 ## Project Structure
 
 ```
 src/
-├── analytics/           # ML + statistical engine
-│   ├── mlEngine.js      # ONNX + Gradient Boosting + Random Forest
-│   ├── bayesian.js      # Score prediction, Poisson, EMA, momentum
-│   ├── gamePlan.js      # Tactical recommendations + sensitivity analysis
-│   ├── monteCarlo.js    # Season simulator (5000 iterations)
-│   └── elo.js           # Elo rating system
-├── components/          # UI
+├── analytics/               # ML + statistical engine
+│   ├── mlEngine.js          # ONNX + Gradient Boosting + Random Forest
+│   ├── bayesian.js          # Score prediction, Poisson, EMA, formEMAExtended
+│   ├── gamePlan.js          # Tactical recommendations + sensitivity analysis
+│   ├── monteCarlo.js        # Season simulator (5000 iterations)
+│   └── elo.js               # Elo rating + season regression
+├── components/              # UI
 │   ├── MatchAnalysis.jsx    # H2H comparison + ML panel
 │   ├── MatchCharts.jsx      # Momentum chart + H2H history
 │   ├── StandingsTable.jsx   # League table with momentum
 │   ├── SeasonSimulator.jsx  # Monte Carlo projections
 │   ├── RadarChart.jsx       # Performance radar
 │   ├── Settings.jsx         # AI provider config
-│   └── Sidebar.jsx          # Navigation (responsive/collapsible)
+│   └── Sidebar.jsx          # Navigation
 ├── config/
-│   └── sports.js        # Multi-sport metric definitions
+│   └── sports.js            # Multi-sport metric definitions
 ├── data/
-│   ├── matchHistory.js  # Real match results (seeds IndexedDB)
-│   ├── superRugby2026.js        # Verified team data
+│   ├── matchHistory.js      # Real match results (NC, SR, 6N, RC)
+│   ├── teamFactory.js       # Team schema (includes form.last12)
+│   ├── superRugby2026.js    # Verified team data
 │   ├── nationsChampionship2026.js
 │   └── rugbyChampionship2026.js
 ├── db/
-│   └── index.js         # IndexedDB (Dexie) - tournaments + matches
+│   └── index.js             # IndexedDB (Dexie) - client-side cache
 ├── services/
-│   └── dataFetcher.js   # AI-powered refresh (Groq + CORS proxy)
+│   ├── dataFetcher.js       # 5-stage extraction pipeline
+│   ├── sourceRouter.js      # URL routing (match-center vs standings)
+│   ├── contentChunker.js    # Non-destructive HTML chunking
+│   ├── extractionPrompts.js # AI field hints for reliable extraction
+│   ├── statsValidator.js    # Zod schema validation
+│   └── liveSync.js          # SSE/poll client for real-time updates
 ├── pages/
-│   ├── TournamentDashboard.jsx  # Main view (7 tabs)
-│   ├── DomesticTournament.jsx   # Custom tournaments
-│   └── AnalyticsTheory.jsx      # Algorithm explanations
+│   ├── TournamentDashboard.jsx
+│   ├── DomesticTournament.jsx
+│   └── AnalyticsTheory.jsx
+api/
+├── proxy.js                 # CORS proxy (domain allowlist)
+├── tournaments.js           # GET/POST tournament data from Neon
+├── extract-stats.js         # Server-side AI extraction (Groq key safe)
+├── events.js                # SSE/poll endpoint for live updates
+├── seed.js                  # Seed data into Postgres
+├── db-init.js               # Schema initialization
+├── lib/
+│   └── db.js                # Neon Postgres client + queries
+└── cron/
+    └── check-matches.js     # Auto-refresh on match completion
 ml/
 ├── fetch_all_stats.py       # Fetch per-match stats from rugbypy API
-├── fetch_and_train.py       # Feature-aligned training + ONNX export
-├── train_model.py           # Legacy training (verified matches only)
+├── fetch_and_train.py       # Recency-weighted training + ONNX export
 ├── sanity_check.py          # Validate ONNX predictions
-├── rugbypy_matches.json     # 682 match results from rugbypy
-└── rugbypy_team_stats.json  # 1363 per-match stat records (real data)
+├── rugbypy_matches.json     # 682 match results
+└── rugbypy_team_stats.json  # 1363 per-match stat records
 public/model/
-├── win_classifier.onnx      # GBT 200 trees, 82% train accuracy
-└── margin_regressor.onnx    # RF 100 trees, R²=0.448
+├── win_classifier.onnx      # GBT 200 trees, 82% train acc, 61% CV
+└── margin_regressor.onnx    # GBT 100 trees, R²=0.47
 ```
 
 ---
@@ -198,12 +268,12 @@ public/model/
 
 | Source | What | Verified |
 |--------|------|----------|
-| all.rugby | Super Rugby standings + all match results | ✅ |
-| sixnationsrugby.com | Six Nations 2026 all results | ✅ |
-| rugbypass.com | Detailed team stats (tackles, carries, breaks) | ✅ |
-| rugbypy (API) | 1363 per-match stat records across 131 teams | ✅ |
-| sofascore.com | World Rugby rankings | ✅ |
-| super.rugby | Official competition stats | ✅ |
+| rugbypass.com | Per-match stats (tackles, carries, scrums, lineouts) | Yes |
+| all.rugby | Match results + standings | Yes |
+| sixnationsrugby.com | Six Nations 2026 results | Yes |
+| rugbypy (API) | 1363 per-match stat records across 120 teams | Yes |
+| sofascore.com | World Rugby rankings | Yes |
+| super.rugby | Official competition stats | Yes |
 
 ---
 
@@ -211,22 +281,23 @@ public/model/
 
 | Sport | Status |
 |-------|--------|
-| 🏉 Rugby Union | **Live** |
-| ⚽ Football | Config ready |
-| 🏏 Cricket | Config ready |
-| 🏀 Basketball | Config ready |
+| Rugby Union | **Live** |
+| Football | Config ready |
+| Cricket | Config ready |
+| Basketball | Config ready |
 
 ---
 
 ## Technology Stack
 
-- React 19 + Vite
+- React 19 + Vite 8
 - ONNX Runtime Web (WebAssembly ML inference)
-- scikit-learn (model training - GBT + RandomForest)
-- rugbypy (real match data + per-match stats)
-- Dexie.js (IndexedDB)
-- Groq API (AI data extraction)
-- Vercel (hosting)
+- scikit-learn (model training - GBT + recency-weighted)
+- Neon Postgres (shared backend - free tier)
+- Zod (schema validation)
+- Dexie.js (IndexedDB client cache)
+- Groq API (server-side AI extraction)
+- Vercel (hosting + cron + serverless functions)
 
 ---
 
@@ -234,4 +305,4 @@ public/model/
 
 Private - commercial use intended.
 
-*SportsMetrics v1.1 - ML models trained on real rugby stats from 120 teams across 6 competitions.*
+*SportsMetrics v2.0 - Server-backed architecture with recency-weighted ML, auto-refresh, and 5-stage extraction pipeline.*
