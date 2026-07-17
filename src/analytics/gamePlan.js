@@ -30,7 +30,7 @@ export function advancedWinProbability(myKey, oppKey, teams, venue = "neutral") 
   const opp = teams[oppKey];
   if (!my || !opp) return 50;
 
-  // Same feature extraction and weighting as the trained ONNX model
+  // Same feature extraction and weighting as the trained ONNX model (17 features)
   const features = [
     ((my.elo || 1400) - (opp.elo || 1400)) / 400,
     ((my.attack?.gl || 50) - (opp.attack?.gl || 50)) / 50,
@@ -44,10 +44,14 @@ export function advancedWinProbability(myKey, oppKey, teams, venue = "neutral") 
     ((my.defense?.to || 10) - (opp.defense?.to || 10)) / 10,
     ((my.attack?.lb || 5) - (opp.attack?.lb || 5)) / 10,
     ((opp.defense?.missed || 25) - (my.defense?.missed || 25)) / 30,
+    ((my.setpiece?.maul || 65) - (opp.setpiece?.maul || 65)) / 30,
+    ((my.kicking?.km || 500) - (opp.kicking?.km || 500)) / 400,
+    ((my.attack?.rs || 3.0) - (opp.attack?.rs || 3.0)) / 2,
+    ((my.setpiece?.ps || 2.0) - (opp.setpiece?.ps || 2.0)) / 4,
   ];
 
-  // Weights learned by the trained model (from feature importance)
-  const weights = [0.25, 0.15, 0.12, 0.10, 0.08, 0.06, 0.12, 0.04, 0.10, 0.06, 0.05, 0.04];
+  // Weights aligned with ONNX model feature importance
+  const weights = [0.22, 0.03, 0.03, 0.04, 0.05, 0.05, 0.17, 0.06, 0.09, 0.05, 0.06, 0.05, 0.03, 0.03, 0.02, 0.02];
   let rawScore = features.reduce((sum, f, i) => sum + f * weights[i], 0);
   
   // Home advantage: +0.15 raw score (≈ +4% win probability)

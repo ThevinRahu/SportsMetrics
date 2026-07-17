@@ -55,10 +55,14 @@ export function predictScore(teamAKey, teamBKey, teams, venue = "neutral") {
     ((a.defense?.to || 10) - (b.defense?.to || 10)) / 10,
     ((a.attack?.lb || 5) - (b.attack?.lb || 5)) / 10,
     ((b.defense?.missed || 25) - (a.defense?.missed || 25)) / 30,
+    ((a.setpiece?.maul || 65) - (b.setpiece?.maul || 65)) / 30,
+    ((a.kicking?.km || 500) - (b.kicking?.km || 500)) / 400,
+    ((a.attack?.rs || 3.0) - (b.attack?.rs || 3.0)) / 2,
+    ((a.setpiece?.ps || 2.0) - (b.setpiece?.ps || 2.0)) / 4,
   ];
 
-  // Weighted sum using learned-style weights (same logic as the trained model)
-  const weights = [0.25, 0.15, 0.12, 0.10, 0.08, 0.06, 0.12, 0.04, 0.10, 0.06, 0.05, 0.04];
+  // Weighted sum (same relative importance as ONNX model feature importance)
+  const weights = [0.22, 0.03, 0.03, 0.04, 0.05, 0.05, 0.17, 0.06, 0.09, 0.05, 0.06, 0.05, 0.03, 0.03, 0.02, 0.02];
   let rawScore = features.reduce((sum, f, i) => sum + f * weights[i], 0);
   
   // Home advantage adjustment
