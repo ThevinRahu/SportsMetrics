@@ -16,6 +16,14 @@ export const config = { maxDuration: 30 };
 
 import { getLiveOrScheduledMatches, upsertMatch, getTournament, upsertTournament, publishEvent, logRefresh } from '../lib/db.js';
 
+// Season regression - canonical implementation in src/analytics/elo.js
+// Duplicated here because Vercel serverless can't import from src/ client modules
+const REGRESSION_FACTOR = 0.30;
+const COMPETITION_MEAN = 1500;
+function applySeasonRegression(currentRating) {
+  return Math.round(currentRating + (COMPETITION_MEAN - currentRating) * REGRESSION_FACTOR);
+}
+
 // Check rugbypass for match status (Full Time indicator)
 async function checkMatchStatus(match) {
   // Build rugbypass URL from team names
@@ -87,10 +95,15 @@ function extractBasicStats(html) {
   const scrumWin = extractPct(html, 'Scrum Win');
   const lineoutWin = extractPct(html, 'Lineout Win');
   const tries = extractStat(html, 'Tries');
+  const tackleRate = extractPct(html, 'Tackle Completion');
+  const territory = extractPct(html, 'Territory');
+  const possession = extractPct(html, 'Possession');
+  const gainline = extractPct(html, 'Gainline') || extractPct(html, 'Gainline Success');
+  const ruckSpeed = extractPct(html, 'Ruck Speed') || extractStat(html, 'Ruck Speed');
 
   return {
-    home: { tackles: tackles?.[0], missed: missed?.[0], carries: carries?.[0], lineBreaks: lineBreaks?.[0], penalties: penalties?.[0], scrumWin: scrumWin?.[0], lineoutWin: lineoutWin?.[0], tries: tries?.[0] },
-    away: { tackles: tackles?.[1], missed: missed?.[1], carries: carries?.[1], lineBreaks: lineBreaks?.[1], penalties: penalties?.[1], scrumWin: scrumWin?.[1], lineoutWin: lineoutWin?.[1], tries: tries?.[1] },
+    home: { tackles: tackles?.[0], missed: missed?.[0], carries: carries?.[0], lineBreaks: lineBreaks?.[0], penalties: penalties?.[0], scrumWin: scrumWin?.[0], lineoutWin: lineoutWin?.[0], tries: tries?.[0], tackleRate: tackleRate?.[0], territory: territory?.[0], possession: possession?.[0], gainline: gainline?.[0] || null, ruckSpeed: ruckSpeed?.[0] || null },
+    away: { tackles: tackles?.[1], missed: missed?.[1], carries: carries?.[1], lineBreaks: lineBreaks?.[1], penalties: penalties?.[1], scrumWin: scrumWin?.[1], lineoutWin: lineoutWin?.[1], tries: tries?.[1], tackleRate: tackleRate?.[1], territory: territory?.[1], possession: possession?.[1], gainline: gainline?.[1] || null, ruckSpeed: ruckSpeed?.[1] || null },
   };
 }
 
@@ -143,18 +156,16 @@ export default async function handler(req, res) {
         if (match.round === 1) {
           const tournament = await getTournament(match.tournament_id);
           if (tournament && tournament.teams) {
-            const REGRESSION_FACTOR = 0.30;
-            const COMPETITION_MEAN = 1500;
             let updated = false;
             
             const homeTeamData = tournament.teams[match.home_team];
             if (homeTeamData && homeTeamData.elo) {
-              homeTeamData.elo = Math.round(homeTeamData.elo + (COMPETITION_MEAN - homeTeamData.elo) * REGRESSION_FACTOR);
+              homeTeamData.elo = applySeasonRegression(homeTeamData.elo);
               updated = true;
             }
             const awayTeamData = tournament.teams[match.away_team];
             if (awayTeamData && awayTeamData.elo) {
-              awayTeamData.elo = Math.round(awayTeamData.elo + (COMPETITION_MEAN - awayTeamData.elo) * REGRESSION_FACTOR);
+              awayTeamData.elo = applySeasonRegression(awayTeamData.elo);
               updated = true;
             }
             

@@ -389,15 +389,19 @@ function blendMatchStatsIntoProfile(team, matchStats) {
   if (!team || !matchStats) return;
   
   // === ATTACK ===
-  if (matchStats.territory_pct != null && team.attack) {
-    team.attack.gl = Math.round((team.attack.gl + matchStats.territory_pct) / 2);
+  // Gainline % - attempt extraction, only update if source actually has it
+  if (matchStats.gainline_pct != null && team.attack) {
+    team.attack.gl = Math.round((team.attack.gl + matchStats.gainline_pct) / 2);
   }
+  // Ruck speed - attempt extraction, only update if source actually has it
+  if (matchStats.ruck_speed_pct != null && team.attack) {
+    // Convert percentage to seconds (0-3s bucket % -> lower = faster)
+    const rsFromPct = Math.max(2.0, Math.min(4.0, 4.0 - (matchStats.ruck_speed_pct / 50)));
+    team.attack.rs = parseFloat(((team.attack.rs + rsFromPct) / 2).toFixed(1));
+  }
+  
   if (matchStats.line_breaks != null && team.attack) {
     team.attack.lb = parseFloat(((team.attack.lb + matchStats.line_breaks) / 2).toFixed(1));
-  }
-  if (matchStats.carries != null && team.attack) {
-    const ruckProxy = Math.min(4.0, Math.max(2.0, matchStats.carries / 45));
-    team.attack.rs = parseFloat(((team.attack.rs + ruckProxy) / 2).toFixed(1));
   }
   if (matchStats.possession_pct != null && team.attack) {
     team.attack.c22 = Math.round((team.attack.c22 + matchStats.possession_pct * 0.65) / 2);
@@ -514,6 +518,8 @@ function parseRugbypassStats(content) {
   const redCards = extractStat('Red Cards');
   const territory = extractPctStat('Territory');
   const possession = extractPctStat('Possession');
+  const gainline = extractPctStat('Gainline') || extractPctStat('Gainline Success');
+  const ruckSpeed = extractPctStat('Ruck Speed') || extractStat('Ruck Speed');
 
   return {
     homeTeam, awayTeam, homeScore, awayScore,
@@ -532,6 +538,7 @@ function parseRugbypassStats(content) {
         conversions: conversions?.[0] || null, penalty_goals: penaltyGoals?.[0] || null,
         yellow_cards: yellowCards?.[0] || null, red_cards: redCards?.[0] || null,
         territory_pct: territory?.[0] || null, possession_pct: possession?.[0] || null,
+        gainline_pct: gainline?.[0] || null, ruck_speed_pct: ruckSpeed?.[0] || null,
       },
       away: {
         tackles_made: tackles?.[1] || null, tackles_missed: missedTackles?.[1] || null,
@@ -545,6 +552,7 @@ function parseRugbypassStats(content) {
         conversions: conversions?.[1] || null, penalty_goals: penaltyGoals?.[1] || null,
         yellow_cards: yellowCards?.[1] || null, red_cards: redCards?.[1] || null,
         territory_pct: territory?.[1] || null, possession_pct: possession?.[1] || null,
+        gainline_pct: gainline?.[1] || null, ruck_speed_pct: ruckSpeed?.[1] || null,
       },
     },
   };
