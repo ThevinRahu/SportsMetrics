@@ -404,7 +404,7 @@ async function onnxPredict(teamAKey, teamBKey, teams, venue = "neutral") {
   let winProb = 50;
 
   try {
-    const inputTensor = new ort.Tensor('float32', new Float32Array(features), [1, 13]);
+    const inputTensor = new ort.Tensor('float32', new Float32Array(features), [1, features.length]);
     const clfResult = await onnxClassifier.run({ features: inputTensor });
     
     // scikit-learn ONNX outputs: 'label' (0/1) and 'probabilities'
@@ -422,7 +422,7 @@ async function onnxPredict(teamAKey, teamBKey, teams, venue = "neutral") {
       const onnxProb = Math.round(probOutput[1] * 100);
       
       // Validate: if ONNX gives unreasonable results for the feature magnitude, use formula
-      const featureStrength = features.slice(0, 12).reduce((s, f) => s + f, 0);
+      const featureStrength = features.slice(0, 16).reduce((s, f) => s + f, 0);
       const formulaProb = Math.round((1 / (1 + Math.exp(-featureStrength * 2.5))) * 100);
       
       // Blend ONNX with formula: ONNX for venue sensitivity, formula for base accuracy
@@ -434,19 +434,19 @@ async function onnxPredict(teamAKey, teamBKey, teams, venue = "neutral") {
       }
     } else if (labelOutput !== undefined) {
       // Use label + feature-based confidence
-      const rawScore = features.slice(0, 12).reduce((s, f, i) => s + Math.abs(f), 0);
+      const rawScore = features.slice(0, 16).reduce((s, f, i) => s + Math.abs(f), 0);
       const confidence = Math.min(40, rawScore * 20);
       winProb = labelOutput[0] === 1 ? (50 + confidence) : (50 - confidence);
     } else {
       // Final fallback
-      const weights = [0.25, 0.15, 0.12, 0.10, 0.08, 0.06, 0.12, 0.04, 0.10, 0.06, 0.05, 0.04, 0.20];
+      const weights = [0.22, 0.03, 0.03, 0.04, 0.05, 0.05, 0.17, 0.06, 0.09, 0.05, 0.06, 0.05, 0.03, 0.03, 0.02, 0.02, 0.10];
       const rawScore = features.reduce((sum, f, i) => sum + f * (weights[i] || 0), 0);
       winProb = Math.round((1 / (1 + Math.exp(-rawScore * 4))) * 100);
     }
     console.log(`ONNX prediction: ${winProb}% (venue=${venue})`);
   } catch (e) {
     console.warn('ONNX inference error:', e.message, '- using formula fallback');
-    const weights = [0.25, 0.15, 0.12, 0.10, 0.08, 0.06, 0.12, 0.04, 0.10, 0.06, 0.05, 0.04, 0.20];
+    const weights = [0.22, 0.03, 0.03, 0.04, 0.05, 0.05, 0.17, 0.06, 0.09, 0.05, 0.06, 0.05, 0.03, 0.03, 0.02, 0.02, 0.10];
     const rawScore = features.reduce((sum, f, i) => sum + f * (weights[i] || 0), 0);
     winProb = Math.round((1 / (1 + Math.exp(-rawScore * 4))) * 100);
     onnxBusy = false;
@@ -459,7 +459,7 @@ async function onnxPredict(teamAKey, teamBKey, teams, venue = "neutral") {
   let margin = Math.round((winProb - 50) * 0.6); // fallback
   try {
     if (onnxRegressor) {
-      const regTensor = new ort.Tensor('float32', new Float32Array(features), [1, 13]);
+      const regTensor = new ort.Tensor('float32', new Float32Array(features), [1, features.length]);
       const regResult = await onnxRegressor.run({ features: regTensor });
       const regOutput = regResult.variable?.data || Object.values(regResult)[0]?.data;
       if (regOutput && regOutput.length > 0) {
@@ -497,7 +497,7 @@ async function onnxPredict(teamAKey, teamBKey, teams, venue = "neutral") {
       // Zero out this feature to see how much prediction drops
       const perturbed = [...features];
       perturbed[i] = 0;
-      const pTensor = new ort.Tensor('float32', new Float32Array(perturbed), [1, 13]);
+      const pTensor = new ort.Tensor('float32', new Float32Array(perturbed), [1, perturbed.length]);
       const pResult = await onnxClassifier.run({ features: pTensor });
       const pProbs = pResult.probabilities?.data;
       const pProb = pProbs ? pProbs[1] : baseProb;
@@ -765,3 +765,6 @@ function getEmptyPrediction() {
 }
 
 export default { trainModel, mlPredict, mlKeysToWin, getFeatureImportance, getModelInfo, retrainModel };
+
+
+
