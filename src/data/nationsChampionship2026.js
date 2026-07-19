@@ -46,21 +46,21 @@ export const NATIONS_CHAMPIONSHIP_2026 = {
       ["New Zealand", "Italy"], ["Australia", "France"], ["Japan", "Ireland"],
       ["Fiji", "England"], ["South Africa", "Scotland"], ["Argentina", "Wales"]
     ]},
-    { round: 3, date: "2026-07-19", matches: [
-      ["South Africa", "France"], ["New Zealand", "England"], ["Australia", "Scotland"],
-      ["Argentina", "Italy"], ["Fiji", "Ireland"], ["Japan", "Wales"]
+    { round: 3, date: "2026-07-18", matches: [
+      ["New Zealand", "Ireland"], ["Japan", "France"], ["Australia", "Italy"],
+      ["Fiji", "Scotland"], ["South Africa", "Wales"], ["Argentina", "England"]
     ]},
     { round: 4, date: "2026-11-07", matches: [
-      ["France", "South Africa"], ["Ireland", "New Zealand"], ["England", "Australia"],
-      ["Scotland", "Argentina"], ["Wales", "Fiji"], ["Italy", "Japan"]
+      ["Ireland", "Argentina"], ["Italy", "South Africa"], ["Scotland", "New Zealand"],
+      ["Wales", "Japan"], ["France", "Fiji"], ["England", "Australia"]
     ]},
     { round: 5, date: "2026-11-14", matches: [
-      ["Ireland", "South Africa"], ["France", "Australia"], ["England", "New Zealand"],
-      ["Scotland", "Fiji"], ["Italy", "Argentina"], ["Wales", "Japan"]
+      ["France", "South Africa"], ["Italy", "Argentina"], ["Wales", "New Zealand"],
+      ["England", "Japan"], ["Ireland", "Fiji"], ["Scotland", "Australia"]
     ]},
     { round: 6, date: "2026-11-21", matches: [
-      ["Ireland", "Argentina"], ["France", "New Zealand"], ["England", "South Africa"],
-      ["Scotland", "Australia"], ["Italy", "Fiji"], ["Wales", "Japan"]
+      ["England", "New Zealand"], ["Scotland", "Japan"], ["Ireland", "South Africa"],
+      ["Italy", "Fiji"], ["Wales", "Australia"], ["France", "Argentina"]
     ]}
   ],
   results: [
