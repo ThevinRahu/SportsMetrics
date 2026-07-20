@@ -331,6 +331,13 @@ VERIFIED_MATCHES = [
     ("England","Ireland",21,42),("Wales","Scotland",23,26),("France","Italy",33,8),
     ("Ireland","Wales",27,17),("Scotland","France",50,40),("Italy","England",23,18),
     ("Ireland","Scotland",43,21),("Wales","Italy",31,17),("France","England",48,46),
+    # Nations Championship 2026 - Rounds 1-3
+    ("New Zealand","France",34,32),("Australia","Ireland",31,33),("South Africa","England",45,21),
+    ("Argentina","Scotland",38,47),("Fiji","Wales",24,39),("Japan","Italy",27,10),
+    ("New Zealand","Italy",47,17),("Australia","France",26,42),("Japan","Ireland",20,36),
+    ("Fiji","England",8,73),("South Africa","Scotland",42,28),("Argentina","Wales",35,21),
+    ("New Zealand","Ireland",40,21),("Japan","France",15,42),("Australia","Italy",57,10),
+    ("Fiji","Scotland",17,33),("South Africa","Wales",43,0),("Argentina","England",24,31),
     # Super Rugby 2025
     ("Crusaders","Hurricanes",33,25),("Waratahs","Highlanders",37,36),("Fijian Drua","Brumbies",32,36),
     ("Blues","Chiefs",14,25),("Western Force","Moana Pasifika",45,44),("Chiefs","Crusaders",49,24),
