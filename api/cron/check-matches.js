@@ -412,8 +412,8 @@ export default async function handler(req, res) {
 
   try {
     const matches = await getLiveOrScheduledMatches();
-    // Limit to 3 matches per run to stay within function timeout
-    const toCheck = matches.slice(0, 3);
+    // Limit to 6 matches per run (one full round) to stay within 60s timeout
+    const toCheck = matches.slice(0, 6);
     checked = toCheck.length;
 
     for (const match of toCheck) {
