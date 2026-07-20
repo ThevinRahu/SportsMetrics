@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { theme, ratingColor, winColor } from '../styles/theme';
 import { getTeamMatches, getH2H } from '../data/matchHistory';
 
@@ -88,7 +88,34 @@ export function MomentumChart({ teamKey, teams }) {
  * Head-to-Head History between two teams
  */
 export function H2HHistory({ myKey, oppKey, teams }) {
-  const h2h = getH2H(myKey, oppKey);
+  const staticH2H = getH2H(myKey, oppKey);
+  const [serverH2H, setServerH2H] = useState([]);
+  
+  // Fetch H2H from server (Postgres - includes cron-detected matches)
+  useEffect(() => {
+    fetch(`/api/matches?h2h=${encodeURIComponent(myKey)},${encodeURIComponent(oppKey)}`)
+      .then(r => r.ok ? r.json() : [])
+      .then(matches => {
+        // Convert server format to static format [home, away, homeScore, awayScore, year, comp]
+        const converted = matches.map(m => [
+          m.home_team, m.away_team, m.home_score, m.away_score,
+          m.match_date ? m.match_date.slice(0, 4) : '2026', 'NC'
+        ]);
+        setServerH2H(converted);
+      })
+      .catch(() => {});
+  }, [myKey, oppKey]);
+
+  // Merge: server data takes priority for duplicates, then add static data not in server
+  const h2h = useMemo(() => {
+    const all = [...serverH2H];
+    for (const s of staticH2H) {
+      const isDup = all.some(a => a[0] === s[0] && a[1] === s[1] && a[2] === s[2] && a[3] === s[3]);
+      if (!isDup) all.push(s);
+    }
+    return all;
+  }, [staticH2H, serverH2H]);
+  
   const my = teams[myKey];
   const opp = teams[oppKey];
 

@@ -15,10 +15,8 @@ import {
   saveCustomTournament, getAllCustomTournaments, updateCustomTournament,
   logRefresh, saveMatches, seedMatchHistory
 } from './db';
-import { refreshTournamentData } from './services/dataFetcher';
 import { fetchFromServer, startLiveSync, onLiveEvent } from './services/liveSync';
 import { retrainModel } from './analytics/mlEngine';
-import { updateRatings } from './analytics/elo';
 import { getAllMatches } from './data/matchHistory';
 
 // Default tournament data (fallback only if server + IndexedDB are both empty)
@@ -187,48 +185,62 @@ export default function App() {
     setRefreshing(true);
     setRefreshStatus(null);
 
-    const existing = tournamentData[tournamentId];
-    if (!existing) { setRefreshing(false); return; }
-
     try {
-      const result = await refreshTournamentData(tournamentId, existing);
+      // Trigger server-side cron pipeline (Crawl4AI + full recompute)
+      const cronRes = await fetch('/api/cron/check-matches', {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${window.__CRON_SECRET || 'SportsMetricsCronLive'}` },
+        signal: AbortSignal.timeout(90000),
+      });
       
-      if (result.data) {
-        const updatedData = { ...result.data, id: tournamentId, lastRefresh: new Date().toISOString() };
-        setTournamentData(prev => ({ ...prev, [tournamentId]: updatedData }));
-        await saveTournament(updatedData);
-        if (updatedData.teams) retrainModel(updatedData.teams);
-        if (result.matches && result.matches.length > 0) await saveMatches(result.matches);
-
-        // Recalculate Elo ratings from new match results
-        if (result.matches && result.matches.length > 0 && updatedData.teams) {
-          const teams = updatedData.teams;
-          for (const match of result.matches) {
-            const homeTeam = teams[match.homeTeam];
-            const awayTeam = teams[match.awayTeam];
-            if (homeTeam && awayTeam && match.homeScore != null && match.awayScore != null) {
-              const { newRatingA, newRatingB } = updateRatings(
-                homeTeam.elo || 1400, awayTeam.elo || 1400,
-                match.homeScore, match.awayScore, 32, true
-              );
-              homeTeam.elo = newRatingA;
-              awayTeam.elo = newRatingB;
-            }
-          }
-          // Save updated Elo to state and DB
-          setTournamentData(prev => ({ ...prev, [tournamentId]: { ...updatedData, teams } }));
-          await saveTournament({ ...updatedData, teams });
-        }
-        await logRefresh(tournamentId, result.success, result.source, result.error || "");
-
-        setRefreshStatus({
-          success: result.success,
-          message: result.error || (result.success ? `Data refreshed from ${result.source}` : "Refresh failed"),
-        });
+      let cronResult = { checked: 0, completed: 0 };
+      if (cronRes.ok) {
+        cronResult = await cronRes.json();
       }
+
+      // Fetch updated tournament data from server (regardless of cron result)
+      const tournamentRes = await fetch(`/api/tournaments?id=${tournamentId}`, {
+        signal: AbortSignal.timeout(10000),
+      });
+
+      if (tournamentRes.ok) {
+        const serverData = await tournamentRes.json();
+        if (serverData && serverData.teams && Object.keys(serverData.teams).length > 0) {
+          const mapped = {
+            ...serverData,
+            id: tournamentId,
+            dataVersion: serverData.data_version || serverData.dataVersion,
+            totalRounds: serverData.total_rounds || serverData.totalRounds,
+            dataUrl: serverData.data_url || serverData.dataUrl,
+            lastRefresh: new Date().toISOString(),
+          };
+          setTournamentData(prev => ({ ...prev, [tournamentId]: mapped }));
+          await saveTournament(mapped);
+          if (mapped.teams) retrainModel(mapped.teams);
+        }
+      }
+
+      const message = cronResult.completed > 0
+        ? `Updated ${cronResult.completed} match(es) via Crawl4AI`
+        : cronResult.checked > 0
+          ? `Checked ${cronResult.checked} matches - no new completions found`
+          : 'Data refreshed from server';
+
+      setRefreshStatus({ success: true, message });
     } catch (error) {
+      // Even if cron fails, try fetching latest data from server
+      try {
+        const fallbackRes = await fetch(`/api/tournaments?id=${tournamentId}`, { signal: AbortSignal.timeout(10000) });
+        if (fallbackRes.ok) {
+          const data = await fallbackRes.json();
+          if (data && data.teams) {
+            const mapped = { ...data, id: tournamentId, dataVersion: data.data_version, totalRounds: data.total_rounds, dataUrl: data.data_url, lastRefresh: new Date().toISOString() };
+            setTournamentData(prev => ({ ...prev, [tournamentId]: mapped }));
+            await saveTournament(mapped);
+          }
+        }
+      } catch { /* silent */ }
       setRefreshStatus({ success: false, message: `Refresh error: ${error.message}` });
-      await logRefresh(tournamentId, false, "", error.message);
     }
 
     setRefreshing(false);
