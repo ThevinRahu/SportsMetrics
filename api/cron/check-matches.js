@@ -72,7 +72,7 @@ async function checkMatchStatus(match) {
 }
 
 /**
- * Crawl4AI Extraction - renders JS pages and extracts structured data
+ * Crawl4AI Extraction - renders JS pages via /scrape, then regex-parses stats
  * This handles SPAs like rugbypass where stats only appear after JS executes.
  */
 async function extractWithCrawl4AI(url, match) {
@@ -80,90 +80,13 @@ async function extractWithCrawl4AI(url, match) {
   if (!crawl4aiKey) return { isFinal: false };
 
   try {
-    const res = await fetch('https://gate.crawl4ai.com/extract', {
+    const res = await fetch('https://gate.crawl4ai.com/scrape', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${crawl4aiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        url,
-        instruction: `Extract the rugby match score and all match statistics from this page. The match is ${match.home_team} vs ${match.away_team}. Look for "Full Time" or "FT" to confirm the match is complete. Extract all stats in the format "home_value Label away_value".`,
-        schema: {
-          type: 'object',
-          properties: {
-            matchComplete: { type: 'boolean', description: 'true if page shows Full Time or FT' },
-            homeScore: { type: 'integer', description: 'home team score' },
-            awayScore: { type: 'integer', description: 'away team score' },
-            homeTeam: { type: 'string' },
-            awayTeam: { type: 'string' },
-            stats: {
-              type: 'object',
-              properties: {
-                home: {
-                  type: 'object',
-                  properties: {
-                    tackles: { type: 'integer' },
-                    missed: { type: 'integer' },
-                    tackleRate: { type: 'integer', description: 'tackle completion percentage' },
-                    carries: { type: 'integer' },
-                    lineBreaks: { type: 'integer' },
-                    penalties: { type: 'integer', description: 'penalties conceded' },
-                    scrums: { type: 'integer' },
-                    scrumWin: { type: 'integer', description: 'scrum win percentage' },
-                    lineouts: { type: 'integer' },
-                    lineoutWin: { type: 'integer', description: 'lineout win percentage' },
-                    tries: { type: 'integer' },
-                    conversions: { type: 'integer' },
-                    penaltyGoals: { type: 'integer' },
-                    territory: { type: 'integer', description: 'territory percentage' },
-                    possession: { type: 'integer', description: 'possession percentage' },
-                    turnoversWon: { type: 'integer' },
-                    turnoversLost: { type: 'integer' },
-                    postContactMetres: { type: 'integer' },
-                    passes: { type: 'integer' },
-                    kicks: { type: 'integer' },
-                    gainline: { type: 'integer', description: 'gainline success percentage' },
-                    ruckSpeed: { type: 'integer', description: 'ruck speed 0-3s percentage' },
-                    dominantTackles: { type: 'integer' },
-                    offloads: { type: 'integer' },
-                  }
-                },
-                away: {
-                  type: 'object',
-                  properties: {
-                    tackles: { type: 'integer' },
-                    missed: { type: 'integer' },
-                    tackleRate: { type: 'integer' },
-                    carries: { type: 'integer' },
-                    lineBreaks: { type: 'integer' },
-                    penalties: { type: 'integer' },
-                    scrums: { type: 'integer' },
-                    scrumWin: { type: 'integer' },
-                    lineouts: { type: 'integer' },
-                    lineoutWin: { type: 'integer' },
-                    tries: { type: 'integer' },
-                    conversions: { type: 'integer' },
-                    penaltyGoals: { type: 'integer' },
-                    territory: { type: 'integer' },
-                    possession: { type: 'integer' },
-                    turnoversWon: { type: 'integer' },
-                    turnoversLost: { type: 'integer' },
-                    postContactMetres: { type: 'integer' },
-                    passes: { type: 'integer' },
-                    kicks: { type: 'integer' },
-                    gainline: { type: 'integer' },
-                    ruckSpeed: { type: 'integer' },
-                    dominantTackles: { type: 'integer' },
-                    offloads: { type: 'integer' },
-                  }
-                }
-              }
-            }
-          },
-          required: ['matchComplete', 'homeScore', 'awayScore']
-        }
-      }),
+      body: JSON.stringify({ url, format: 'md' }),
     });
 
     if (!res.ok) {
@@ -172,26 +95,37 @@ async function extractWithCrawl4AI(url, match) {
     }
 
     const result = await res.json();
-    if (!result.ok || !result.data) return { isFinal: false };
+    if (!result.ok || !result.markdown) return { isFinal: false };
 
-    const data = Array.isArray(result.data) ? result.data[0] : result.data;
+    const content = result.markdown;
 
-    if (!data.matchComplete || data.homeScore == null || data.awayScore == null) {
+    // Check for Full Time
+    if (!/Full\s*Time|FT/i.test(content)) {
       return { isFinal: false };
     }
 
-    // Validate scores
-    if (data.homeScore < 0 || data.homeScore > 100 || data.awayScore < 0 || data.awayScore > 100) {
+    // Extract score - pattern in markdown: "40 - 21 \n\nFull Time"
+    const scoreMatch = content.match(/(\d+)\s*-\s*(\d+)\s*\n*\s*(?:Full\s*Time|FT)/i)
+      || content.match(/(\d+)\s*-\s*(\d+)/);
+    if (!scoreMatch) return { isFinal: false };
+
+    const homeScore = parseInt(scoreMatch[1]);
+    const awayScore = parseInt(scoreMatch[2]);
+
+    if (homeScore < 0 || homeScore > 100 || awayScore < 0 || awayScore > 100) {
       return { isFinal: false };
     }
 
-    console.log(`Crawl4AI: ${match.home_team} ${data.homeScore}-${data.awayScore} ${match.away_team}`);
+    // Extract stats using regex on the rendered markdown
+    const stats = extractBasicStats(content);
+
+    console.log(`Crawl4AI: ${match.home_team} ${homeScore}-${awayScore} ${match.away_team}`);
 
     return {
       isFinal: true,
-      homeScore: data.homeScore,
-      awayScore: data.awayScore,
-      stats: data.stats || { home: {}, away: {} },
+      homeScore,
+      awayScore,
+      stats,
       source: 'crawl4ai',
     };
   } catch (e) {
