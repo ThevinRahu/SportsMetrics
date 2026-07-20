@@ -17,13 +17,17 @@ Browser (React + ONNX inference)
     |
     v
 /api/tournaments (Neon Postgres - shared source of truth)
+/api/matches (H2H history from Postgres)
 /api/extract-stats (server-side Groq AI extraction)
 /api/events (SSE/poll - real-time match updates)
-/api/cron/check-matches (auto-refresh on match completion)
+/api/cron/check-matches (Crawl4AI + auto-refresh on match completion)
 /api/proxy (CORS relay for rugby data sources)
     |
     v
 Neon Postgres (free tier) - tournaments, matches, events, refresh_logs
+    |
+    v
+Crawl4AI (renders JS pages, extracts stats from SPAs like rugbypass)
 ```
 
 **Data flow:** Neon Postgres -> `/api/tournaments` -> React state -> IndexedDB (offline cache)
@@ -36,33 +40,37 @@ All clients see the same data. Updates propagate automatically when matches comp
 
 | Model | Type | Training Data | What it predicts |
 |-------|------|---------------|-----------------|
-| **ONNX GradientBoostingClassifier** | Pre-trained (scikit-learn) | 1642 samples | Win probability |
-| **ONNX GradientBoostingRegressor** | Pre-trained (scikit-learn) | 1642 samples | Expected margin & score |
+| **ONNX GradientBoostingClassifier** | Pre-trained (scikit-learn) | 1666 samples | Win probability |
+| **ONNX GradientBoostingRegressor** | Pre-trained (scikit-learn) | 1666 samples | Expected margin & score |
 | **JS Gradient Boosted Trees** | Trains at runtime | Tournament data | Win prob + feature importance |
 | **JS Random Forest** | Trains at runtime | Tournament data | Confidence intervals |
 
 ### Training Data Sources
-- **169 verified matches** from Super Rugby Pacific 2025/2026, Six Nations 2026, Nations Championship 2026, Rugby Championship 2025 (exact team stats from all.rugby, rugbypass.com)
+- **187 verified matches** from Super Rugby Pacific 2025/2026, Six Nations 2026, Nations Championship 2026 (R1-R3), Rugby Championship 2025 (exact team stats from all.rugby, rugbypass.com)
 - **673 matches from rugbypy** across Top 14, URC, Premiership, Japan League One, Sevens, and international competitions - with real per-match stats
 - **120 teams** total with real rugby metrics
 - **Recency-weighted training** - recent matches weighted 3-4x more than older data via exponential decay (240-day half-life)
 
-### 13 Input Features (what drives predictions)
+### 17 Input Features (what drives predictions)
 | # | Feature | Source Stat | Importance |
 |---|---------|-------------|------------|
-| 1 | Elo Rating Gap | Overall team quality | 21.9% |
-| 2 | Gainline Advantage | 22m entries / gainline % | 2.8% |
-| 3 | Tackle Efficiency | Tackle rate % | 3.2% |
-| 4 | Scrum Dominance | Scrum success % | 4.2% |
-| 5 | Lineout Control | Lineout success % | 4.9% |
-| 6 | Kicking Accuracy | Goal kick % | 4.9% |
-| 7 | Form & Momentum | EMA over last 10-12 results | 17.4% |
-| 8 | Discipline Edge | Penalties conceded | 6.3% |
-| 9 | Scoring Rate | Points per game | 9.0% |
-| 10 | Turnover Threat | Turnovers won/game | 5.4% |
-| 11 | Line Break Power | Line breaks/game | 5.7% |
-| 12 | Defensive Pressure | Missed tackles/game | 5.2% |
-| 13 | Venue | Home (+0.5) / Away (-0.5) / Neutral (0) | 9.1% |
+| 1 | Elo Rating Gap | Overall team quality | ~22% |
+| 2 | Gainline Advantage | Gainline success % | ~3% |
+| 3 | Tackle Efficiency | Tackle rate % | ~3% |
+| 4 | Scrum Dominance | Scrum success % | ~4% |
+| 5 | Lineout Control | Lineout success % | ~5% |
+| 6 | Kicking Accuracy | Goal kick % | ~5% |
+| 7 | Form & Momentum | EMA over last 10-12 results | ~17% |
+| 8 | Discipline Edge | Penalties conceded | ~6% |
+| 9 | Scoring Rate | Points per game | ~9% |
+| 10 | Turnover Threat | Turnovers won/game | ~5% |
+| 11 | Line Break Power | Line breaks/game | ~6% |
+| 12 | Defensive Pressure | Missed tackles/game | ~5% |
+| 13 | Maul Dominance | Maul success % | ~3% |
+| 14 | Kick Metres Edge | Kick metres/game | ~3% |
+| 15 | Ruck Speed | Ruck recycling tempo | ~2% |
+| 16 | Scrum Pressure | Scrum penalties/game | ~2% |
+| 17 | Venue | Home (+0.5) / Away (-0.5) / Neutral (0) | ~9% |
 
 ### How Prediction Works
 1. User selects two teams + venue
@@ -122,11 +130,14 @@ python ml/sanity_check.py       # Verify predictions are sane
 - ONNX model natively handles venue (up to 50% prediction swing)
 - Affects win probability, margin, and scores
 
-### Auto-Refresh (Server-Side)
-- Cron job checks rugbypass for match completions daily
+### Auto-Refresh (Crawl4AI + Server-Side)
+- Cron checks rugbypass match pages via Crawl4AI (renders JS, extracts from SPA)
+- Detects match completion (Full Time), extracts scores + all stats
+- Full recompute: standings, Elo, form, team profile stats blended
 - Publishes `match_completed` events to Postgres
 - Clients poll `/api/events` every 30s and auto-update UI
-- No manual refresh needed on match day
+- Refresh Data button triggers the same server-side pipeline
+- Only processes matches not already marked final (no re-extraction)
 
 ### AI Data Extraction (5-Stage Pipeline)
 1. **Source Router** - Routes to correct page (match-center for stats, index for standings)
@@ -258,8 +269,8 @@ ml/
 ├── rugbypy_matches.json     # 682 match results
 └── rugbypy_team_stats.json  # 1363 per-match stat records
 public/model/
-├── win_classifier.onnx      # GBT 200 trees, 82% train acc, 61% CV
-└── margin_regressor.onnx    # GBT 100 trees, R²=0.47
+├── win_classifier.onnx      # GBT 200 trees, 82% train acc, 62% CV
+└── margin_regressor.onnx    # GBT 100 trees, R²=0.46
 ```
 
 ---
@@ -296,6 +307,7 @@ public/model/
 - Neon Postgres (shared backend - free tier)
 - Zod (schema validation)
 - Dexie.js (IndexedDB client cache)
+- Crawl4AI (headless browser rendering for JS-heavy pages)
 - Groq API (server-side AI extraction)
 - Vercel (hosting + cron + serverless functions)
 
@@ -305,4 +317,4 @@ public/model/
 
 Private - commercial use intended.
 
-*SportsMetrics v2.0 - Server-backed architecture with recency-weighted ML, auto-refresh, and 5-stage extraction pipeline.*
+*SportsMetrics v2.1 - Server-backed architecture with Crawl4AI auto-refresh, recency-weighted 17-feature ML, and 5-stage extraction pipeline.*
