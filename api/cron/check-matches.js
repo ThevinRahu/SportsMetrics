@@ -12,7 +12,7 @@
  * Protected by CRON_SECRET header (Vercel injects this automatically for cron).
  */
 
-export const config = { maxDuration: 30 };
+export const config = { maxDuration: 60 };
 
 import { getLiveOrScheduledMatches, upsertMatch, getTournament, upsertTournament, publishEvent, logRefresh } from '../lib/db.js';
 
@@ -412,9 +412,11 @@ export default async function handler(req, res) {
 
   try {
     const matches = await getLiveOrScheduledMatches();
-    checked = matches.length;
+    // Limit to 3 matches per run to stay within function timeout
+    const toCheck = matches.slice(0, 3);
+    checked = toCheck.length;
 
-    for (const match of matches) {
+    for (const match of toCheck) {
       const status = await checkMatchStatus(match);
       
       if (status.isFinal && match.status !== 'final') {
