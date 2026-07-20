@@ -44,7 +44,7 @@ async function checkMatchStatus(match) {
     });
     clearTimeout(timeout);
 
-    if (!res.ok) return { isFinal: false };
+    if (!res.ok) return await fallbackToAI(match);
 
     const html = await res.text();
     
@@ -55,7 +55,11 @@ async function checkMatchStatus(match) {
 
     // Extract score
     const scoreMatch = html.match(/(\d+)\s*-\s*(\d+)\s*(?:Full\s*Time|FT)/i);
-    if (!scoreMatch) return { isFinal: false };
+    if (!scoreMatch) {
+      // Page has Full Time text but score regex didn't match (JS-rendered SPA)
+      // Fall back to AI knowledge
+      return await fallbackToAI(match);
+    }
 
     // Extract basic stats using same regex patterns as client
     const stats = extractBasicStats(html);
@@ -68,6 +72,169 @@ async function checkMatchStatus(match) {
     };
   } catch (e) {
     console.error(`Status check failed for ${match.home_team} vs ${match.away_team}:`, e.message);
+    // If fetch failed entirely, try AI as fallback
+    return await fallbackToAI(match);
+  }
+}
+
+/**
+ * AI Knowledge Fallback - ask Groq for match result when page scraping fails
+ * (e.g., rugbypass is a JS SPA and stats don't appear in raw HTML)
+ * 
+ * Only accepts data the AI is confident about. Uses strict prompting
+ * to minimize hallucination risk.
+ */
+async function fallbackToAI(match) {
+  const groqKey = process.env.GROQ_API_KEY;
+  if (!groqKey) return { isFinal: false };
+
+  try {
+    const prompt = `What was the final score and match stats for ${match.home_team} vs ${match.away_team} played on ${match.match_date} in the Nations Championship 2026?
+
+CRITICAL RULES:
+- Only answer if you are CERTAIN this match has been played and you know the real result
+- If you are not sure or the match hasn't happened yet, return {"played": false}
+- Do NOT guess or make up scores. Only provide verified, real data.
+- This data will be used for professional coaching decisions.
+
+If the match HAS been played, return this JSON:
+{
+  "played": true,
+  "homeTeam": "${match.home_team}",
+  "awayTeam": "${match.away_team}",
+  "homeScore": <number>,
+  "awayScore": <number>,
+  "stats": {
+    "home": {
+      "tackles": null,
+      "missed": null,
+      "tackleRate": null,
+      "carries": null,
+      "lineBreaks": null,
+      "penalties": null,
+      "scrums": null,
+      "scrumWin": null,
+      "lineouts": null,
+      "lineoutWin": null,
+      "tries": null,
+      "conversions": null,
+      "penaltyGoals": null,
+      "territory": null,
+      "possession": null,
+      "turnoversWon": null,
+      "turnoversLost": null,
+      "postContactMetres": null,
+      "passes": null,
+      "kicks": null,
+      "gainline": null,
+      "ruckSpeed": null,
+      "dominantTackles": null,
+      "offloads": null
+    },
+    "away": {
+      "tackles": null,
+      "missed": null,
+      "tackleRate": null,
+      "carries": null,
+      "lineBreaks": null,
+      "penalties": null,
+      "scrums": null,
+      "scrumWin": null,
+      "lineouts": null,
+      "lineoutWin": null,
+      "tries": null,
+      "conversions": null,
+      "penaltyGoals": null,
+      "territory": null,
+      "possession": null,
+      "turnoversWon": null,
+      "turnoversLost": null,
+      "postContactMetres": null,
+      "passes": null,
+      "kicks": null,
+      "gainline": null,
+      "ruckSpeed": null,
+      "dominantTackles": null,
+      "offloads": null
+    }
+  }
+}
+
+STAT DEFINITIONS:
+- tackles: total tackles made
+- missed: tackles missed
+- tackleRate: tackle completion percentage (0-100)
+- carries: ball carries
+- lineBreaks: line breaks made
+- penalties: penalties conceded
+- scrums: number of scrums
+- scrumWin: scrum win percentage (0-100)
+- lineouts: number of lineouts
+- lineoutWin: lineout win percentage (0-100)
+- tries: tries scored
+- conversions: conversions kicked
+- penaltyGoals: penalty goals kicked
+- territory: territory percentage (0-100)
+- possession: possession percentage (0-100)
+- turnoversWon: turnovers won
+- turnoversLost: turnovers conceded
+- postContactMetres: post-contact metres gained
+- passes: total passes
+- kicks: total kicks from hand
+- gainline: gainline success percentage (0-100) - percentage of carries crossing the advantage line
+- ruckSpeed: ruck speed - percentage of rucks where ball is recycled in 0-3 seconds
+- dominantTackles: dominant tackles made (drove ball carrier backwards)
+- offloads: offloads in contact
+
+Return ONLY JSON. Use null for any stat you're not certain about.`;
+
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${groqKey}`,
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          { role: 'system', content: 'You are a rugby data assistant. Only provide real, verified match results. Never guess. If unsure, say the match has not been played.' },
+          { role: 'user', content: prompt },
+        ],
+        temperature: 0.0,
+        max_tokens: 1000,
+      }),
+    });
+
+    if (!res.ok) return { isFinal: false };
+
+    const data = await res.json();
+    let jsonStr = (data.choices?.[0]?.message?.content || '').trim();
+    if (jsonStr.startsWith('```')) {
+      jsonStr = jsonStr.replace(/^```(?:json)?\s*/, '').replace(/\s*```$/, '');
+    }
+
+    const parsed = JSON.parse(jsonStr);
+
+    if (!parsed.played || parsed.homeScore == null || parsed.awayScore == null) {
+      return { isFinal: false };
+    }
+
+    // Validate scores are reasonable (rugby scores: 0-100 range)
+    if (parsed.homeScore < 0 || parsed.homeScore > 100 || parsed.awayScore < 0 || parsed.awayScore > 100) {
+      return { isFinal: false };
+    }
+
+    console.log(`AI fallback: ${match.home_team} ${parsed.homeScore}-${parsed.awayScore} ${match.away_team}`);
+
+    return {
+      isFinal: true,
+      homeScore: parsed.homeScore,
+      awayScore: parsed.awayScore,
+      stats: parsed.stats || { home: {}, away: {} },
+      source: 'ai-knowledge',
+    };
+  } catch (e) {
+    console.error(`AI fallback failed for ${match.home_team} vs ${match.away_team}:`, e.message);
     return { isFinal: false };
   }
 }
