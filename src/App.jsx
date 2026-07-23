@@ -189,7 +189,7 @@ export default function App() {
       // Trigger server-side cron pipeline (Crawl4AI + full recompute)
       const cronRes = await fetch('/api/cron/check-matches', {
         method: 'GET',
-        headers: { 'Authorization': `Bearer ${window.__CRON_SECRET || 'SportsMetricsCronLive'}` },
+        headers: { 'X-Client-Refresh': 'true' },
         signal: AbortSignal.timeout(90000),
       });
       

@@ -228,3 +228,4 @@ export function resultsToNumeric(wldArray) {
 }
 
 export default { predictScore, formEMA, formEMAExtended, resultsToNumeric, momentumScore, injuryRiskEstimate };
+

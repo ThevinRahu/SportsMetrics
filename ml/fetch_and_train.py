@@ -145,8 +145,8 @@ def convert_to_app_format(records):
             'goal': min(90, max(50, 50 + avg_22m_conv * 10)),
             # Form: win rate * 100
             'form': min(95, max(10, win_rate * 100)),
-            # Penalties: higher missed tackles = worse discipline (120-180 range)
-            'pen': min(180, max(100, 100 + avg_tackles_missed * 3 + (1 - win_rate) * 40)),
+            # Discipline index: 0-100, higher = more disciplined
+            'idx': max(20, min(80, 60 - avg_tackles_missed * 0.5 + win_rate * 20)),
             # Points per game: direct
             'pts_pg': avg_score,
             # Turnovers per game: direct
@@ -183,7 +183,7 @@ def extract_features(team_a_stats, team_b_stats, venue=0.0):
         (a['lo'] - b['lo']) / 20,               # 5. Lineout Control
         (a['goal'] - b['goal']) / 30,           # 6. Kicking Accuracy
         (a['form'] - b['form']) / 50,           # 7. Form & Momentum
-        (b['pen'] - a['pen']) / 100,            # 8. Discipline Edge
+        (b['idx'] - a['idx']) / 50,              # 8. Discipline (idx 0-100, higher = better)
         (a['pts_pg'] - b['pts_pg']) / 30,       # 9. Scoring Rate
         (a['to'] - b['to']) / 10,               # 10. Turnover Threat
         (a['lb'] - b['lb']) / 10,               # 11. Line Break Power
@@ -274,27 +274,29 @@ def build_training_data(paired_matches, team_stats):
 
 # Our verified teams with real stats (same as app's data files)
 VERIFIED_TEAMS = {
-    "Hurricanes": {"elo": 1574, "gl": 64, "tr": 86, "so": 90, "lo": 82, "goal": 82, "form": 92, "pen": 137, "pts_pg": 40.1, "to": 14.2, "lb": 9.7, "missed": 22},
-    "Chiefs": {"elo": 1549, "gl": 62, "tr": 87, "so": 91, "lo": 84, "goal": 84, "form": 85, "pen": 139, "pts_pg": 38.4, "to": 13.8, "lb": 9.2, "missed": 25.5},
-    "Crusaders": {"elo": 1487, "gl": 56, "tr": 88, "so": 89, "lo": 81, "goal": 78, "form": 78, "pen": 148, "pts_pg": 34.5, "to": 12.8, "lb": 8.4, "missed": 20},
-    "Blues": {"elo": 1498, "gl": 54, "tr": 85, "so": 84, "lo": 78, "goal": 75, "form": 55, "pen": 145, "pts_pg": 31.8, "to": 11.2, "lb": 7.8, "missed": 24},
-    "Reds": {"elo": 1441, "gl": 50, "tr": 84, "so": 82, "lo": 74, "goal": 72, "form": 60, "pen": 152, "pts_pg": 26.0, "to": 10.4, "lb": 6.2, "missed": 26},
-    "Brumbies": {"elo": 1462, "gl": 52, "tr": 83, "so": 84, "lo": 76, "goal": 74, "form": 48, "pen": 144, "pts_pg": 28.7, "to": 10.0, "lb": 6.8, "missed": 27},
-    "Western Force": {"elo": 1389, "gl": 48, "tr": 81, "so": 78, "lo": 70, "goal": 68, "form": 55, "pen": 156, "pts_pg": 25.6, "to": 8.8, "lb": 5.8, "missed": 32},
-    "Waratahs": {"elo": 1418, "gl": 46, "tr": 80, "so": 76, "lo": 68, "goal": 66, "form": 32, "pen": 160, "pts_pg": 25.2, "to": 8.2, "lb": 5.4, "missed": 34},
-    "Highlanders": {"elo": 1381, "gl": 44, "tr": 79, "so": 78, "lo": 70, "goal": 68, "form": 30, "pen": 155, "pts_pg": 23.4, "to": 8.0, "lb": 5.0, "missed": 36},
-    "Fijian Drua": {"elo": 1361, "gl": 44, "tr": 76, "so": 74, "lo": 64, "goal": 62, "form": 22, "pen": 162, "pts_pg": 23.6, "to": 7.6, "lb": 5.2, "missed": 42},
-    "Moana Pasifika": {"elo": 1318, "gl": 38, "tr": 74, "so": 70, "lo": 60, "goal": 58, "form": 15, "pen": 170, "pts_pg": 19.7, "to": 6.4, "lb": 4.0, "missed": 48},
-    "France": {"elo": 1825, "gl": 60, "tr": 85, "so": 86, "lo": 83, "goal": 82, "form": 87, "pen": 64, "pts_pg": 33.6, "to": 13.6, "lb": 8.0, "missed": 20},
-    "Ireland": {"elo": 1855, "gl": 58, "tr": 87, "so": 87, "lo": 82, "goal": 80, "form": 88, "pen": 68, "pts_pg": 27.4, "to": 12.8, "lb": 7.0, "missed": 19},
-    "England": {"elo": 1755, "gl": 54, "tr": 84, "so": 82, "lo": 76, "goal": 77, "form": 35, "pen": 74, "pts_pg": 26.8, "to": 11.4, "lb": 6.0, "missed": 23},
-    "Scotland": {"elo": 1735, "gl": 56, "tr": 83, "so": 80, "lo": 74, "goal": 72, "form": 72, "pen": 81, "pts_pg": 28.2, "to": 11.0, "lb": 6.5, "missed": 25},
-    "Italy": {"elo": 1670, "gl": 50, "tr": 81, "so": 78, "lo": 71, "goal": 66, "form": 48, "pen": 88, "pts_pg": 24.6, "to": 9.4, "lb": 5.0, "missed": 28},
-    "Wales": {"elo": 1580, "gl": 42, "tr": 74, "so": 68, "lo": 60, "goal": 58, "form": 25, "pen": 112, "pts_pg": 19.8, "to": 6.8, "lb": 3.5, "missed": 42},
-    "South Africa": {"elo": 1920, "gl": 62, "tr": 89, "so": 92, "lo": 85, "goal": 84, "form": 90, "pen": 58, "pts_pg": 32.4, "to": 13.0, "lb": 7.5, "missed": 18},
-    "New Zealand": {"elo": 1840, "gl": 66, "tr": 84, "so": 88, "lo": 84, "goal": 80, "form": 75, "pen": 70, "pts_pg": 34.8, "to": 14.0, "lb": 9.0, "missed": 22},
-    "Australia": {"elo": 1650, "gl": 50, "tr": 80, "so": 78, "lo": 72, "goal": 70, "form": 40, "pen": 95, "pts_pg": 24.2, "to": 9.0, "lb": 5.5, "missed": 30},
-    "Argentina": {"elo": 1720, "gl": 54, "tr": 83, "so": 84, "lo": 76, "goal": 75, "form": 65, "pen": 82, "pts_pg": 26.8, "to": 10.5, "lb": 6.2, "missed": 25},
+    "Hurricanes": {"elo": 1574, "gl": 64, "tr": 86, "so": 90, "lo": 82, "goal": 82, "form": 92, "idx": 51, "pts_pg": 40.1, "to": 14.2, "lb": 9.7, "missed": 22, "maul": 82, "km": 680, "rs": 3.4, "ps": 2.1},
+    "Chiefs": {"elo": 1549, "gl": 62, "tr": 87, "so": 91, "lo": 84, "goal": 84, "form": 85, "idx": 50, "pts_pg": 38.4, "to": 13.8, "lb": 9.2, "missed": 25.5, "maul": 78, "km": 640, "rs": 3.2, "ps": 2.3},
+    "Crusaders": {"elo": 1487, "gl": 56, "tr": 88, "so": 89, "lo": 81, "goal": 78, "form": 78, "idx": 47, "pts_pg": 34.5, "to": 12.8, "lb": 8.4, "missed": 20, "maul": 75, "km": 620, "rs": 3.1, "ps": 2.0},
+    "Blues": {"elo": 1498, "gl": 54, "tr": 85, "so": 84, "lo": 78, "goal": 75, "form": 55, "idx": 48, "pts_pg": 31.8, "to": 11.2, "lb": 7.8, "missed": 24, "maul": 72, "km": 600, "rs": 3.0, "ps": 2.2},
+    "Reds": {"elo": 1441, "gl": 50, "tr": 84, "so": 82, "lo": 74, "goal": 72, "form": 60, "idx": 46, "pts_pg": 26.0, "to": 10.4, "lb": 6.2, "missed": 26, "maul": 68, "km": 560, "rs": 2.9, "ps": 2.4},
+    "Brumbies": {"elo": 1462, "gl": 52, "tr": 83, "so": 84, "lo": 76, "goal": 74, "form": 48, "idx": 49, "pts_pg": 28.7, "to": 10.0, "lb": 6.8, "missed": 27, "maul": 70, "km": 580, "rs": 3.0, "ps": 2.1},
+    "Western Force": {"elo": 1389, "gl": 48, "tr": 81, "so": 78, "lo": 70, "goal": 68, "form": 55, "idx": 44, "pts_pg": 25.6, "to": 8.8, "lb": 5.8, "missed": 32, "maul": 62, "km": 520, "rs": 2.8, "ps": 2.6},
+    "Waratahs": {"elo": 1418, "gl": 46, "tr": 80, "so": 76, "lo": 68, "goal": 66, "form": 32, "idx": 43, "pts_pg": 25.2, "to": 8.2, "lb": 5.4, "missed": 34, "maul": 60, "km": 500, "rs": 2.7, "ps": 2.5},
+    "Highlanders": {"elo": 1381, "gl": 44, "tr": 79, "so": 78, "lo": 70, "goal": 68, "form": 30, "idx": 45, "pts_pg": 23.4, "to": 8.0, "lb": 5.0, "missed": 36, "maul": 58, "km": 480, "rs": 2.7, "ps": 2.7},
+    "Fijian Drua": {"elo": 1361, "gl": 44, "tr": 76, "so": 74, "lo": 64, "goal": 62, "form": 22, "idx": 42, "pts_pg": 23.6, "to": 7.6, "lb": 5.2, "missed": 42, "maul": 52, "km": 300, "rs": 2.5, "ps": 3.0},
+    "Moana Pasifika": {"elo": 1318, "gl": 38, "tr": 74, "so": 70, "lo": 60, "goal": 58, "form": 15, "idx": 39, "pts_pg": 19.7, "to": 6.4, "lb": 4.0, "missed": 48, "maul": 45, "km": 380, "rs": 2.4, "ps": 3.2},
+    "France": {"elo": 1825, "gl": 60, "tr": 85, "so": 86, "lo": 83, "goal": 82, "form": 87, "idx": 45, "pts_pg": 33.6, "to": 13.6, "lb": 8.0, "missed": 20, "maul": 76, "km": 810, "rs": 3.1, "ps": 3.0},
+    "Ireland": {"elo": 1855, "gl": 58, "tr": 87, "so": 87, "lo": 82, "goal": 80, "form": 88, "idx": 50, "pts_pg": 27.4, "to": 12.8, "lb": 7.0, "missed": 19, "maul": 72, "km": 810, "rs": 3.1, "ps": 2.4},
+    "England": {"elo": 1755, "gl": 54, "tr": 84, "so": 82, "lo": 76, "goal": 77, "form": 35, "idx": 38, "pts_pg": 26.8, "to": 11.4, "lb": 6.0, "missed": 23, "maul": 70, "km": 870, "rs": 3.2, "ps": 1.9},
+    "Scotland": {"elo": 1735, "gl": 56, "tr": 83, "so": 80, "lo": 74, "goal": 72, "form": 72, "idx": 52, "pts_pg": 28.2, "to": 11.0, "lb": 6.5, "missed": 25, "maul": 64, "km": 720, "rs": 3.1, "ps": 1.6},
+    "Italy": {"elo": 1670, "gl": 50, "tr": 81, "so": 78, "lo": 71, "goal": 66, "form": 48, "idx": 70, "pts_pg": 24.6, "to": 9.4, "lb": 5.0, "missed": 28, "maul": 58, "km": 840, "rs": 3.3, "ps": 1.4},
+    "Wales": {"elo": 1580, "gl": 42, "tr": 74, "so": 68, "lo": 60, "goal": 58, "form": 25, "idx": 69, "pts_pg": 19.8, "to": 6.8, "lb": 3.5, "missed": 42, "maul": 46, "km": 750, "rs": 3.0, "ps": 0.6},
+    "South Africa": {"elo": 1920, "gl": 62, "tr": 89, "so": 92, "lo": 85, "goal": 84, "form": 90, "idx": 57, "pts_pg": 32.4, "to": 13.0, "lb": 7.5, "missed": 18, "maul": 88, "km": 840, "rs": 2.7, "ps": 4.1},
+    "New Zealand": {"elo": 1840, "gl": 66, "tr": 84, "so": 88, "lo": 84, "goal": 80, "form": 75, "idx": 52, "pts_pg": 34.8, "to": 14.0, "lb": 9.0, "missed": 22, "maul": 82, "km": 750, "rs": 2.6, "ps": 3.6},
+    "Australia": {"elo": 1650, "gl": 50, "tr": 80, "so": 78, "lo": 72, "goal": 70, "form": 40, "idx": 51, "pts_pg": 24.2, "to": 9.0, "lb": 5.5, "missed": 30, "maul": 70, "km": 650, "rs": 2.8, "ps": 2.1},
+    "Argentina": {"elo": 1720, "gl": 54, "tr": 83, "so": 84, "lo": 76, "goal": 75, "form": 65, "idx": 53, "pts_pg": 26.8, "to": 10.5, "lb": 6.2, "missed": 25, "maul": 78, "km": 600, "rs": 3.1, "ps": 2.8},
+    "Fiji": {"elo": 1632, "gl": 47, "tr": 79, "so": 86, "lo": 82, "goal": 64, "form": 22, "idx": 39, "pts_pg": 21.0, "to": 5.0, "lb": 14.0, "missed": 30, "maul": 54, "km": 300, "rs": 3.6, "ps": 1.0},
+    "Japan": {"elo": 1547, "gl": 47, "tr": 82, "so": 83, "lo": 79, "goal": 63, "form": 35, "idx": 38, "pts_pg": 22.5, "to": 3.5, "lb": 9.0, "missed": 31, "maul": 43, "km": 326, "rs": 3.9, "ps": 0.8},
 }
 
 VERIFIED_MATCHES = [
@@ -481,9 +483,9 @@ def train_and_export(X, y_win, y_margin):
     print("\n  Feature importance (what drives predictions):")
     feature_labels = [
         "Elo Rating", "Gainline %", "Tackle Rate", "Scrum %",
-        "Lineout %", "Goal Kick %", "Form", "Discipline",
+        "Lineout %", "Goal Kick %", "Form", "Discipline Idx",
         "Pts/Game", "Turnovers", "Line Breaks", "Missed Tackles",
-        "Venue"
+        "Maul %", "Kick Metres", "Ruck Speed", "Scrum Pens", "Venue"
     ]
     imp = clf.feature_importances_
     for i, (label, importance) in enumerate(zip(feature_labels, imp)):
