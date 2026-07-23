@@ -186,23 +186,13 @@ export default function App() {
     setRefreshStatus(null);
 
     try {
-      // Trigger server-side cron pipeline (Crawl4AI + full recompute)
-      const cronRes = await fetch('/api/cron/check-matches', {
-        method: 'GET',
-        headers: { 'X-Client-Refresh': 'true' },
-        signal: AbortSignal.timeout(90000),
-      });
-      
-      let cronResult = { checked: 0, completed: 0 };
-      if (cronRes.ok) {
-        cronResult = await cronRes.json();
-      }
-
-      // Fetch updated tournament data from server (regardless of cron result)
+      // Trigger server-side refresh - just fetch latest data from DB
+      // (cron runs automatically on schedule, not triggered from client)
       const tournamentRes = await fetch(`/api/tournaments?id=${tournamentId}`, {
         signal: AbortSignal.timeout(10000),
       });
 
+      let cronResult = { completed: 0 };
       if (tournamentRes.ok) {
         const serverData = await tournamentRes.json();
         if (serverData && serverData.teams && Object.keys(serverData.teams).length > 0) {

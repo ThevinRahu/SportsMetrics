@@ -17,7 +17,7 @@ teams = {
 def feat(a, b, v=0.0):
     return np.array([[(a['elo']-b['elo'])/400,(a['gl']-b['gl'])/50,(a['tr']-b['tr'])/20,
         (a['so']-b['so'])/20,(a['lo']-b['lo'])/20,(a['goal']-b['goal'])/30,
-        (a['form']-b['form'])/50,(b['idx']-a['idx'])/50,(a['pts_pg']-b['pts_pg'])/30,
+        (a['form']-b['form'])/50,(a['idx']-b['idx'])/50,(a['pts_pg']-b['pts_pg'])/30,
         (a['to']-b['to'])/10,(a['lb']-b['lb'])/10,(b['missed']-a['missed'])/30,
         (a['maul']-b['maul'])/30,(a['km']-b['km'])/400,(a['rs']-b['rs'])/2,
         (a['ps']-b['ps'])/4, v]], dtype=np.float32)

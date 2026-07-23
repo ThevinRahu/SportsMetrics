@@ -183,7 +183,7 @@ def extract_features(team_a_stats, team_b_stats, venue=0.0):
         (a['lo'] - b['lo']) / 20,               # 5. Lineout Control
         (a['goal'] - b['goal']) / 30,           # 6. Kicking Accuracy
         (a['form'] - b['form']) / 50,           # 7. Form & Momentum
-        (b['idx'] - a['idx']) / 50,              # 8. Discipline (idx 0-100, higher = better)
+        (a['idx'] - b['idx']) / 50,              # 8. Discipline (idx 0-100, higher = better)
         (a['pts_pg'] - b['pts_pg']) / 30,       # 9. Scoring Rate
         (a['to'] - b['to']) / 10,               # 10. Turnover Threat
         (a['lb'] - b['lb']) / 10,               # 11. Line Break Power

@@ -360,12 +360,11 @@ function extractBasicStats(html) {
 }
 
 export default async function handler(req, res) {
-  // Verify caller is Vercel cron, authorized via secret, or client refresh button
+  // Verify caller is Vercel cron or authorized via secret
   const auth = req.headers['authorization']?.replace('Bearer ', '');
   const vercelCron = req.headers['x-vercel-cron'];
-  const clientRefresh = req.headers['x-client-refresh'];
   
-  if (!vercelCron && !clientRefresh && auth !== process.env.CRON_SECRET) {
+  if (!vercelCron && auth !== process.env.CRON_SECRET) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 

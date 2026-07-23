@@ -50,7 +50,7 @@ export function predictScore(teamAKey, teamBKey, teams, venue = "neutral") {
     ((a.setpiece?.lo || 75) - (b.setpiece?.lo || 75)) / 20,
     ((a.kicking?.goal || 70) - (b.kicking?.goal || 70)) / 30,
     ((a.form?.rating || 50) - (b.form?.rating || 50)) / 50,
-    ((b.discipline?.pen || 80) - (a.discipline?.pen || 80)) / 100,
+    ((a.discipline?.idx || 50) - (b.discipline?.idx || 50)) / 50,
     ((a.attack?.pts_pg || 20) - (b.attack?.pts_pg || 20)) / 30,
     ((a.defense?.to || 10) - (b.defense?.to || 10)) / 10,
     ((a.attack?.lb || 5) - (b.attack?.lb || 5)) / 10,

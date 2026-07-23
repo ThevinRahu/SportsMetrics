@@ -91,7 +91,7 @@ function extractFeatures(teamA, teamB) {
     ((teamA.setpiece?.lo || 75) - (teamB.setpiece?.lo || 75)) / 20,
     ((teamA.kicking?.goal || 70) - (teamB.kicking?.goal || 70)) / 30,
     ((teamA.form?.rating || 50) - (teamB.form?.rating || 50)) / 50,
-    ((teamB.discipline?.idx || 50) - (teamA.discipline?.idx || 50)) / 50,
+    ((teamA.discipline?.idx || 50) - (teamB.discipline?.idx || 50)) / 50,
     ((teamA.attack?.pts_pg || 20) - (teamB.attack?.pts_pg || 20)) / 30,
     ((teamA.defense?.to || 10) - (teamB.defense?.to || 10)) / 10,
     ((teamA.attack?.lb || 5) - (teamB.attack?.lb || 5)) / 10,

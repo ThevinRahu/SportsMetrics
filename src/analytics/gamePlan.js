@@ -39,7 +39,7 @@ export function advancedWinProbability(myKey, oppKey, teams, venue = "neutral") 
     ((my.setpiece?.lo || 75) - (opp.setpiece?.lo || 75)) / 20,
     ((my.kicking?.goal || 70) - (opp.kicking?.goal || 70)) / 30,
     ((my.form?.rating || 50) - (opp.form?.rating || 50)) / 50,
-    ((opp.discipline?.pen || 80) - (my.discipline?.pen || 80)) / 100,
+    ((my.discipline?.idx || 50) - (opp.discipline?.idx || 50)) / 50,
     ((my.attack?.pts_pg || 20) - (opp.attack?.pts_pg || 20)) / 30,
     ((my.defense?.to || 10) - (opp.defense?.to || 10)) / 10,
     ((my.attack?.lb || 5) - (opp.attack?.lb || 5)) / 10,
@@ -99,12 +99,12 @@ export function generateGamePlan(myKey, oppKey, teams) {
     });
   }
 
-  if ((my.discipline?.pen || 80) > (opp.discipline?.pen || 80) + 8) {
+  if ((my.discipline?.idx || 50) < (opp.discipline?.idx || 50) - 10) {
     areas.push({
       area: "Discipline",
       priority: "high",
-      detail: `${my.discipline.pen} penalties vs ${opp.discipline.pen}. Breakdown discipline and offside line management critical.`,
-      improvement: `Reduce by ${Math.round((my.discipline.pen - opp.discipline.pen) * 0.6)} penalties`,
+      detail: `Discipline index ${my.discipline?.idx || 50} vs ${opp.discipline?.idx || 50}. Breakdown discipline and offside line management critical.`,
+      improvement: `Improve discipline index by ${Math.round(((opp.discipline?.idx || 50) - (my.discipline?.idx || 50)) * 0.6)} points`,
       drills: ["Breakdown entry angles", "Offside awareness drills", "Referee communication protocols"]
     });
   }
@@ -161,10 +161,10 @@ export function generateGamePlan(myKey, oppKey, teams) {
 
   // === EXPLOITABLE WEAKNESSES ===
 
-  if ((opp.discipline?.pen || 80) > 90) {
+  if ((opp.discipline?.idx || 50) < 35) {
     exploits.push({
       area: "Breakdown Pressure",
-      detail: `${oppKey} concede ${opp.discipline.pen} penalties per game. Target breakdown entries and slowing their ball.`,
+      detail: `${oppKey} has poor discipline (idx: ${opp.discipline?.idx || 50}). Target breakdown entries and slowing their ball.`,
       tactic: "Contest every ruck, force referee decisions"
     });
   }
@@ -244,8 +244,8 @@ export function generateGamePlan(myKey, oppKey, teams) {
   if ((my.defense?.missed || 20) > 30) {
     risks.push(`Your ${my.defense.missed} missed tackles/game could be exploited by ${oppKey}'s outside backs`);
   }
-  if ((my.discipline?.pen || 80) > 95) {
-    risks.push(`Penalty count (${my.discipline.pen}) gives opposition easy territory and points`);
+  if ((my.discipline?.idx || 50) < 30) {
+    risks.push(`Poor discipline (idx: ${my.discipline?.idx}) gives opposition easy territory and points`);
   }
   
   // Player injury risks
@@ -271,7 +271,7 @@ export function improvementImpact(myKey, oppKey, teams) {
     { metric: "Tackle Rate", path: "defense.tr", boost: 3 },
     { metric: "Scrum", path: "setpiece.so", boost: 5 },
     { metric: "Lineout", path: "setpiece.lo", boost: 5 },
-    { metric: "Discipline (-5 pen)", path: "discipline.pen", boost: -5 },
+    { metric: "Discipline (+5 idx)", path: "discipline.idx", boost: 5 },
     { metric: "Goal Kicking", path: "kicking.goal", boost: 5 },
     { metric: "Red Zone", path: "attack.c22", boost: 5 }
   ];
