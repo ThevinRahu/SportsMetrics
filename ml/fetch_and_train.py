@@ -425,7 +425,7 @@ NAME_MAP = {
 # TRAIN AND EXPORT
 # ============================================================
 
-def train_and_export(X, y_win, y_margin, match_groups=None, temporal_split_idx=None):
+def train_and_export(X, y_win, y_margin, match_groups=None, temporal_split_idx=None, is_verified=None):
     """Train GBT + RF and export to ONNX.
     
     Honest evaluation methods:
@@ -439,20 +439,19 @@ def train_and_export(X, y_win, y_margin, match_groups=None, temporal_split_idx=N
     print(f"  Class balance: {y_win.sum()}/{len(y_win)} wins ({y_win.mean():.1%})")
 
     # --- Win Classifier ---
-    # Use sample_weight to give more importance to verified matches (exact stats)
-    n_verified = len(X_v)
-    n_rugbypy = len(X) - n_verified
-    # Verified samples weighted 3x more (they perfectly match inference format)
+    # Use sample_weight: verified matches 3x (exact app stats), rugbypy 0.7x (converted)
     sample_weights = np.ones(len(X))
-    sample_weights[:n_verified] = 3.0
-
-    # Apply recency weighting: recent matches matter more than old ones
-    # Verified matches (2025-2026) get full weight (already 3x base)
-    # Rugbypy matches get gentle decay with high floor to preserve model stability
-    reference_date = datetime.now()
-    # Verified: keep full 3.0 weight (they're current season, exact format)
-    # Rugbypy: gentle decay, floor 0.7 - still contributes meaningfully
-    sample_weights[n_verified:] *= 0.7
+    if is_verified is not None:
+        # Verified samples (exact app stats, 2025-2026) get 3x weight
+        sample_weights[is_verified] = 3.0
+        # Rugbypy samples (converted, older) get 0.7x weight
+        sample_weights[~is_verified] = 0.7
+        n_verified_count = is_verified.sum()
+        n_rugbypy_count = (~is_verified).sum()
+        print(f"  Sample weights: {n_verified_count} verified @ 3.0, {n_rugbypy_count} rugbypy @ 0.7")
+    else:
+        # Fallback: no distinction
+        print(f"  Sample weights: uniform (no verified/rugbypy distinction)")
 
     clf = GradientBoostingClassifier(
         n_estimators=200,
@@ -681,6 +680,9 @@ if __name__ == '__main__':
     ym_all = ym_r + ym_v_pre + ym_v_2026
     all_groups = match_groups_r + groups_v_pre + groups_v_2026
     
+    # Build is_verified mask: False for rugbypy, True for all verified samples
+    is_verified_list = [False] * len(X_r) + [True] * (len(X_v_pre) + len(X_v_2026))
+    
     temporal_split_idx = len(X_r) + len(X_v_pre)
     print(f"  Temporal split: train={temporal_split_idx} samples (pre-2026), test={len(X_v_2026)} samples (2026)")
 
@@ -688,6 +690,7 @@ if __name__ == '__main__':
     y_win = np.array(yw_all)
     y_margin = np.array(ym_all, dtype=np.float32)
     match_groups = np.array(all_groups)
+    is_verified = np.array(is_verified_list, dtype=bool)
 
     # Clean NaN/Inf
     mask = np.isfinite(X).all(axis=1)
@@ -698,11 +701,12 @@ if __name__ == '__main__':
         y_win = y_win[mask]
         y_margin = y_margin[mask]
         match_groups = match_groups[mask]
+        is_verified = is_verified[mask]
         # Adjust temporal split (count remaining samples before split)
         temporal_split_idx = int(mask[:temporal_split_idx].sum())
 
     print(f"  Final: {len(X)} total training samples")
-    print(f"    - Rugbypy (pre-2026, converted): {len(X_r)}")
+    print(f"    - Rugbypy (pre-2026, converted): {(~is_verified).sum()}")
     print(f"    - Verified pre-2026 (SR 2025): {len(X_v_pre)}")
     print(f"    - Verified 2026 (SR/6N/NC): {len(X_v_2026)}")
 
@@ -710,7 +714,8 @@ if __name__ == '__main__':
     cv_acc, n_samples = train_and_export(
         X, y_win, y_margin,
         match_groups=match_groups,
-        temporal_split_idx=temporal_split_idx
+        temporal_split_idx=temporal_split_idx,
+        is_verified=is_verified
     )
 
     print(f"\n{'=' * 60}")
