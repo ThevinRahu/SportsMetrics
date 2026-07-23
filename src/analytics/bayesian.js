@@ -17,6 +17,8 @@
  * where lambda (expected tries) depends on attack vs defense metrics.
  */
 
+import { extractFeatures, FEATURE_WEIGHTS } from './features';
+
 /**
  * Poisson probability mass function
  * P(X = k) = (lambda^k * e^-lambda) / k!
@@ -41,28 +43,11 @@ export function predictScore(teamAKey, teamBKey, teams, venue = "neutral") {
   if (!a || !b) return null;
 
   // Use ML model as source of truth for margin
-  // Import would create circular dep, so we calculate the same way mlEngine does
-  const features = [
-    ((a.elo || 1400) - (b.elo || 1400)) / 400,
-    ((a.attack?.gl || 50) - (b.attack?.gl || 50)) / 50,
-    ((a.defense?.tr || 80) - (b.defense?.tr || 80)) / 20,
-    ((a.setpiece?.so || 80) - (b.setpiece?.so || 80)) / 20,
-    ((a.setpiece?.lo || 75) - (b.setpiece?.lo || 75)) / 20,
-    ((a.kicking?.goal || 70) - (b.kicking?.goal || 70)) / 30,
-    ((a.form?.rating || 50) - (b.form?.rating || 50)) / 50,
-    ((a.discipline?.idx || 50) - (b.discipline?.idx || 50)) / 50,
-    ((a.attack?.pts_pg || 20) - (b.attack?.pts_pg || 20)) / 30,
-    ((a.defense?.to || 10) - (b.defense?.to || 10)) / 10,
-    ((a.attack?.lb || 5) - (b.attack?.lb || 5)) / 10,
-    ((b.defense?.missed || 25) - (a.defense?.missed || 25)) / 30,
-    ((a.setpiece?.maul || 65) - (b.setpiece?.maul || 65)) / 30,
-    ((a.kicking?.km || 500) - (b.kicking?.km || 500)) / 400,
-    ((a.attack?.rs || 3.0) - (b.attack?.rs || 3.0)) / 2,
-    ((a.setpiece?.ps || 2.0) - (b.setpiece?.ps || 2.0)) / 4,
-  ];
+  // Shared extractFeatures from features.js (single source of truth)
+  const features = extractFeatures(a, b);
 
   // Weighted sum (same relative importance as ONNX model feature importance)
-  const weights = [0.22, 0.03, 0.03, 0.04, 0.05, 0.05, 0.17, 0.06, 0.09, 0.05, 0.06, 0.05, 0.03, 0.03, 0.02, 0.02];
+  const weights = FEATURE_WEIGHTS;
   let rawScore = features.reduce((sum, f, i) => sum + f * weights[i], 0);
   
   // Home advantage adjustment

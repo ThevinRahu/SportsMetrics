@@ -21,6 +21,8 @@
  * - Form: last 5 results, streak, momentum rating
  */
 
+import { extractFeatures, FEATURE_WEIGHTS } from './features';
+
 /**
  * Comprehensive win probability calculation
  * Uses multi-factor model beyond simple Elo
@@ -30,28 +32,12 @@ export function advancedWinProbability(myKey, oppKey, teams, venue = "neutral") 
   const opp = teams[oppKey];
   if (!my || !opp) return 50;
 
-  // Same feature extraction and weighting as the trained ONNX model (17 features)
-  const features = [
-    ((my.elo || 1400) - (opp.elo || 1400)) / 400,
-    ((my.attack?.gl || 50) - (opp.attack?.gl || 50)) / 50,
-    ((my.defense?.tr || 80) - (opp.defense?.tr || 80)) / 20,
-    ((my.setpiece?.so || 80) - (opp.setpiece?.so || 80)) / 20,
-    ((my.setpiece?.lo || 75) - (opp.setpiece?.lo || 75)) / 20,
-    ((my.kicking?.goal || 70) - (opp.kicking?.goal || 70)) / 30,
-    ((my.form?.rating || 50) - (opp.form?.rating || 50)) / 50,
-    ((my.discipline?.idx || 50) - (opp.discipline?.idx || 50)) / 50,
-    ((my.attack?.pts_pg || 20) - (opp.attack?.pts_pg || 20)) / 30,
-    ((my.defense?.to || 10) - (opp.defense?.to || 10)) / 10,
-    ((my.attack?.lb || 5) - (opp.attack?.lb || 5)) / 10,
-    ((opp.defense?.missed || 25) - (my.defense?.missed || 25)) / 30,
-    ((my.setpiece?.maul || 65) - (opp.setpiece?.maul || 65)) / 30,
-    ((my.kicking?.km || 500) - (opp.kicking?.km || 500)) / 400,
-    ((my.attack?.rs || 3.0) - (opp.attack?.rs || 3.0)) / 2,
-    ((my.setpiece?.ps || 2.0) - (opp.setpiece?.ps || 2.0)) / 4,
-  ];
+  // Same feature extraction and weighting as the trained ONNX model (16 features)
+  // Uses shared extractFeatures() from features.js (single source of truth)
+  const features = extractFeatures(my, opp);
 
   // Weights aligned with ONNX model feature importance
-  const weights = [0.22, 0.03, 0.03, 0.04, 0.05, 0.05, 0.17, 0.06, 0.09, 0.05, 0.06, 0.05, 0.03, 0.03, 0.02, 0.02];
+  const weights = FEATURE_WEIGHTS;
   let rawScore = features.reduce((sum, f, i) => sum + f * weights[i], 0);
   
   // Home advantage: +0.15 raw score (≈ +4% win probability)

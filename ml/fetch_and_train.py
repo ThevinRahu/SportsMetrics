@@ -425,8 +425,16 @@ NAME_MAP = {
 # TRAIN AND EXPORT
 # ============================================================
 
-def train_and_export(X, y_win, y_margin):
-    """Train GBT + RF and export to ONNX"""
+def train_and_export(X, y_win, y_margin, match_groups=None, temporal_split_idx=None):
+    """Train GBT + RF and export to ONNX.
+    
+    Honest evaluation methods:
+    1. GroupKFold (groups = match_id) - mirrored rows never leak across folds
+    2. Temporal holdout - train on pre-2026, test on 2026 only
+    3. Standard 5-fold CV (for comparison - known to be optimistic)
+    """
+    from sklearn.model_selection import GroupKFold
+    
     print(f"\nTraining on {len(X)} samples, 17 features...")
     print(f"  Class balance: {y_win.sum()}/{len(y_win)} wins ({y_win.mean():.1%})")
 
@@ -458,11 +466,47 @@ def train_and_export(X, y_win, y_margin):
     clf.fit(X, y_win, sample_weight=sample_weights)
     train_acc = clf.score(X, y_win)
 
+    # --- HONEST EVALUATION ---
+    print(f"\n  === Evaluation (Honest) ===")
+    
+    # 1. Standard 5-fold CV (known to be optimistic due to data leakage)
     cv_scores = cross_val_score(clf, X, y_win, cv=5, scoring='accuracy')
     cv_acc = cv_scores.mean()
-
-    print(f"\n  Classifier train accuracy: {train_acc:.1%}")
-    print(f"  Classifier CV accuracy:    {cv_acc:.1%} (+/- {cv_scores.std():.1%})")
+    print(f"  Standard 5-Fold CV:     {cv_acc:.1%} (+/- {cv_scores.std():.1%}) [optimistic - leakage risk]")
+    
+    # 2. GroupKFold CV (mirrored rows stay in same fold - no within-match leakage)
+    group_cv_acc = None
+    if match_groups is not None and len(match_groups) == len(X):
+        gkf = GroupKFold(n_splits=5)
+        group_scores = cross_val_score(clf, X, y_win, cv=gkf, groups=match_groups, scoring='accuracy')
+        group_cv_acc = group_scores.mean()
+        print(f"  GroupKFold CV (match):   {group_cv_acc:.1%} (+/- {group_scores.std():.1%}) [honest - no mirror leak]")
+    else:
+        print(f"  GroupKFold CV:           [skipped - no match groups provided]")
+    
+    # 3. Temporal holdout (train pre-2026, test 2026 only)
+    temporal_acc = None
+    if temporal_split_idx is not None and 0 < temporal_split_idx < len(X):
+        X_train_t = X[:temporal_split_idx]
+        y_train_t = y_win[:temporal_split_idx]
+        X_test_t = X[temporal_split_idx:]
+        y_test_t = y_win[temporal_split_idx:]
+        sw_train = sample_weights[:temporal_split_idx]
+        
+        clf_temporal = GradientBoostingClassifier(
+            n_estimators=200, max_depth=4, learning_rate=0.08,
+            subsample=0.85, min_samples_leaf=10, max_features=0.8, random_state=42
+        )
+        clf_temporal.fit(X_train_t, y_train_t, sample_weight=sw_train)
+        temporal_acc = clf_temporal.score(X_test_t, y_test_t)
+        print(f"  Temporal Holdout:        {temporal_acc:.1%} (train pre-2026: {len(X_train_t)}, test 2026: {len(X_test_t)}) [most honest]")
+    else:
+        print(f"  Temporal Holdout:        [skipped - no temporal split provided]")
+    
+    # Report which number to trust
+    honest_acc = temporal_acc or group_cv_acc or cv_acc
+    print(f"\n  Train accuracy:          {train_acc:.1%}")
+    print(f"  ** Best honest estimate: {honest_acc:.1%} **")
 
     # --- Margin Regressor (use GBT same as classifier for consistency) ---
     from sklearn.ensemble import GradientBoostingRegressor
@@ -512,10 +556,10 @@ def train_and_export(X, y_win, y_margin):
         f.write(onnx_reg.SerializeToString())
 
     print(f"\n[OK] Exported to public/model/")
-    print(f"  win_classifier.onnx  - {cv_acc:.1%} CV accuracy")
+    print(f"  win_classifier.onnx  - {honest_acc:.1%} honest CV accuracy")
     print(f"  margin_regressor.onnx - R^2 = {reg_score:.3f}")
 
-    return int(round(cv_acc * 100)), len(X)
+    return int(round(honest_acc * 100)), len(X)
 
 
 # ============================================================
@@ -558,6 +602,7 @@ if __name__ == '__main__':
     X_r = []
     yw_r = []
     ym_r = []
+    match_groups_r = []  # For GroupKFold - mirrored rows share same group
     used = 0
 
     for a_record, b_record in paired:
@@ -570,30 +615,79 @@ if __name__ == '__main__':
         a_stats = mapped_teams[a_name]
         b_stats = mapped_teams[b_name]
 
+        group_id = used  # Both perspectives of same match share group
+
         # Home perspective
         feats = extract_features(a_stats, b_stats, venue=0.0)
         X_r.append(feats)
         yw_r.append(1 if a_record['score'] > b_record['score'] else 0)
         ym_r.append((a_record['score'] - b_record['score']) / 20.0)
+        match_groups_r.append(group_id)
 
         # Away perspective
         feats_rev = extract_features(b_stats, a_stats, venue=0.0)
         X_r.append(feats_rev)
         yw_r.append(1 if b_record['score'] > a_record['score'] else 0)
         ym_r.append((b_record['score'] - a_record['score']) / 20.0)
+        match_groups_r.append(group_id)
         used += 1
 
     print(f"  {len(X_r)} samples from {used} rugbypy matches")
 
     # --- Combine all ---
     print("\n--- Combining datasets ---")
-    X_all = X_v + X_r
-    yw_all = yw_v + yw_r
-    ym_all = ym_v + ym_r
+    
+    # Build match groups for verified samples too (each match = 2 rows with same group)
+    match_groups_v = []
+    group_offset = used  # Continue group IDs after rugbypy
+    for i in range(0, len(X_v), 2):
+        match_groups_v.append(group_offset + i // 2)
+        if i + 1 < len(X_v):
+            match_groups_v.append(group_offset + i // 2)
+    
+    # Temporal split: verified matches include Super Rugby 2026 (72 matches = 144 samples)
+    # and NC 2026 (18 matches = 36 samples), Six Nations 2026 (15 matches = 30 samples)
+    # All verified are 2025-2026. Rugbypy is mixed (older seasons).
+    # Temporal strategy: train on rugbypy (pre-2026) + SR 2025 (first 75 verified matches),
+    # test on 2026-only verified matches (SR2026 72 + 6N2026 15 + NC2026 18 = 105 matches = 210 samples).
+    #
+    # In VERIFIED_MATCHES order: SR2026 (72), Six Nations 2026 (15), NC 2026 (18), SR 2025 (75+)
+    # So 2026 matches = first 105 matches = 210 samples
+    # Pre-2026 matches (SR 2025) = remaining verified + all rugbypy
+    n_2026_matches = 72 + 15 + 18  # SR2026 + 6N2026 + NC2026 R1-R3
+    n_2026_samples = n_2026_matches * 2  # 210 samples
+    n_pre2026_verified = len(X_v) - n_2026_samples
+    
+    # Layout: [verified_2026 (210)] + [verified_pre2026 (rest)] + [rugbypy (all pre-2026)]
+    # For temporal: train = pre2026 verified + rugbypy, test = 2026 verified
+    # But our array is [X_v + X_r], where X_v starts with 2026 matches.
+    # Rearrange: put pre-2026 first, 2026 last (for temporal holdout test = tail)
+    
+    # Separate 2026 from pre-2026 in verified
+    X_v_2026 = X_v[:n_2026_samples]
+    yw_v_2026 = yw_v[:n_2026_samples]
+    ym_v_2026 = ym_v[:n_2026_samples]
+    groups_v_2026 = match_groups_v[:n_2026_samples]
+    
+    X_v_pre = X_v[n_2026_samples:]
+    yw_v_pre = yw_v[n_2026_samples:]
+    ym_v_pre = ym_v[n_2026_samples:]
+    groups_v_pre = match_groups_v[n_2026_samples:]
+    
+    # Final order: [rugbypy (pre-2026)] + [verified pre-2026] + [verified 2026]
+    # Temporal split index = len(rugbypy) + len(verified_pre2026)
+    X_all = X_r + X_v_pre + X_v_2026
+    yw_all = yw_r + yw_v_pre + yw_v_2026
+    ym_all = ym_r + ym_v_pre + ym_v_2026
+    all_groups = match_groups_r + groups_v_pre + groups_v_2026
+    
+    temporal_split_idx = len(X_r) + len(X_v_pre)
+    print(f"  Temporal split: train={temporal_split_idx} samples (pre-2026), test={len(X_v_2026)} samples (2026)")
 
     X = np.array(X_all, dtype=np.float32)
     y_win = np.array(yw_all)
     y_margin = np.array(ym_all, dtype=np.float32)
+    match_groups = np.array(all_groups)
 
     # Clean NaN/Inf
     mask = np.isfinite(X).all(axis=1)
@@ -603,17 +697,26 @@ if __name__ == '__main__':
         X = X[mask]
         y_win = y_win[mask]
         y_margin = y_margin[mask]
+        match_groups = match_groups[mask]
+        # Adjust temporal split (count remaining samples before split)
+        temporal_split_idx = int(mask[:temporal_split_idx].sum())
 
     print(f"  Final: {len(X)} total training samples")
-    print(f"    - Verified (exact app stats): {len(X_v)}")
-    print(f"    - Rugbypy (converted to app format): {len(X_r)}")
+    print(f"    - Rugbypy (pre-2026, converted): {len(X_r)}")
+    print(f"    - Verified pre-2026 (SR 2025): {len(X_v_pre)}")
+    print(f"    - Verified 2026 (SR/6N/NC): {len(X_v_2026)}")
 
-    # Train and export
-    cv_acc, n_samples = train_and_export(X, y_win, y_margin)
+    # Train and export (with honest evaluation)
+    cv_acc, n_samples = train_and_export(
+        X, y_win, y_margin,
+        match_groups=match_groups,
+        temporal_split_idx=temporal_split_idx
+    )
 
     print(f"\n{'=' * 60}")
-    print(f"[DONE] Feature-aligned model: {cv_acc}% CV accuracy")
+    print(f"[DONE] Feature-aligned model: {cv_acc}% honest CV accuracy")
     print(f"  Trained on {n_samples} samples")
+    print(f"  Evaluation: GroupKFold (no mirror leak) + Temporal holdout (2026)")
     print(f"  Browser extractFeatures() == Training extract_features()")
     print(f"  No scale mismatch. Predictions will be accurate.")
     print(f"{'=' * 60}")

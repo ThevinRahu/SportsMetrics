@@ -83,9 +83,17 @@ All clients see the same data. Updates propagate automatically when matches comp
 ```bash
 pip install scikit-learn skl2onnx onnx numpy onnxruntime rugbypy
 python ml/fetch_all_stats.py    # Fetch latest stats from rugbypy (optional)
-python ml/fetch_and_train.py    # Train and export ONNX models
+python ml/fetch_and_train.py    # Train and export ONNX models (reports honest accuracy)
 python ml/sanity_check.py       # Verify predictions are sane
 ```
+
+### Model Accuracy Note
+The training script reports three accuracy metrics:
+1. **Standard 5-Fold CV** — 61.1% (optimistic — mirrored rows can leak across folds)
+2. **GroupKFold CV** — 61.9% (honest — both perspectives of a match stay in the same fold)
+3. **Temporal Holdout** — **59.0%** (most honest — train on pre-2026 data, test only on 2026 matches)
+
+The temporal holdout is the number to trust for real-world predictive power. The model genuinely predicts the correct winner ~59% of the time on unseen future matches — meaningfully above the 50% coin-flip baseline, but not the inflated figure that naive CV would suggest. For a coaching-analytics tool showing relative probabilities and game plans, this is a useful signal (not a crystal ball, and never claimed to be one).
 
 ---
 
@@ -269,8 +277,8 @@ ml/
 ├── rugbypy_matches.json     # 682 match results
 └── rugbypy_team_stats.json  # 1363 per-match stat records
 public/model/
-├── win_classifier.onnx      # GBT 200 trees, 82% train acc, 62% CV
-└── margin_regressor.onnx    # GBT 100 trees, R²=0.46
+├── win_classifier.onnx      # GBT 200 trees, 59% temporal holdout accuracy
+└── margin_regressor.onnx    # GBT 200 trees, R²=0.539
 ```
 
 ---

@@ -18,3 +18,4 @@ export { expectedOutcome, winProbability, updateRatings } from './elo';
 export { simulateSeason, simulateHeadToHead } from './monteCarlo';
 export { predictScore, formEMA, momentumScore, injuryRiskEstimate } from './bayesian';
 export { advancedWinProbability, generateGamePlan, improvementImpact } from './gamePlan';
+export { extractFeatures, FEATURE_NAMES, FEATURE_NAMES_FULL, FEATURE_WEIGHTS, MODEL_IMPORTANCES } from './features';

@@ -64,44 +64,10 @@ async function loadONNX() {
 loadONNX();
 
 // =====================================================
-// FEATURE ENGINEERING
+// FEATURE ENGINEERING (shared module - single source of truth)
 // =====================================================
 
-const FEATURE_NAMES = [
-  "Elo Rating Gap",
-  "Gainline Advantage",
-  "Tackle Efficiency",
-  "Scrum Dominance",
-  "Lineout Control",
-  "Kicking Accuracy",
-  "Form & Momentum",
-  "Discipline Edge",
-  "Scoring Rate",
-  "Turnover Threat",
-  "Line Break Power",
-  "Defensive Pressure",
-];
-
-function extractFeatures(teamA, teamB) {
-  return [
-    ((teamA.elo || 1400) - (teamB.elo || 1400)) / 400,
-    ((teamA.attack?.gl || 50) - (teamB.attack?.gl || 50)) / 50,
-    ((teamA.defense?.tr || 80) - (teamB.defense?.tr || 80)) / 20,
-    ((teamA.setpiece?.so || 80) - (teamB.setpiece?.so || 80)) / 20,
-    ((teamA.setpiece?.lo || 75) - (teamB.setpiece?.lo || 75)) / 20,
-    ((teamA.kicking?.goal || 70) - (teamB.kicking?.goal || 70)) / 30,
-    ((teamA.form?.rating || 50) - (teamB.form?.rating || 50)) / 50,
-    ((teamA.discipline?.idx || 50) - (teamB.discipline?.idx || 50)) / 50,
-    ((teamA.attack?.pts_pg || 20) - (teamB.attack?.pts_pg || 20)) / 30,
-    ((teamA.defense?.to || 10) - (teamB.defense?.to || 10)) / 10,
-    ((teamA.attack?.lb || 5) - (teamB.attack?.lb || 5)) / 10,
-    ((teamB.defense?.missed || 25) - (teamA.defense?.missed || 25)) / 30,
-    ((teamA.setpiece?.maul || 65) - (teamB.setpiece?.maul || 65)) / 30,
-    ((teamA.kicking?.km || 500) - (teamB.kicking?.km || 500)) / 400,
-    ((teamA.attack?.rs || 3.0) - (teamB.attack?.rs || 3.0)) / 2,
-    ((teamA.setpiece?.ps || 2.0) - (teamB.setpiece?.ps || 2.0)) / 4,
-  ];
-}
+import { extractFeatures, FEATURE_NAMES, MODEL_IMPORTANCES } from './features';
 
 // =====================================================
 // DECISION STUMP (building block for boosting)
@@ -488,7 +454,6 @@ async function onnxPredict(teamAKey, teamBKey, teams, venue = "neutral") {
 
   // ML-driven key factors: perturb each feature and measure ONNX prediction change
   // This is a local SHAP-like approach - shows which stats matter most for THIS matchup
-  const MODEL_IMPORTANCES = [0.212, 0.020, 0.044, 0.037, 0.049, 0.051, 0.197, 0.067, 0.084, 0.055, 0.064, 0.068, 0.053];
   let factors = [];
   try {
     const baseProb = winProb / 100;
