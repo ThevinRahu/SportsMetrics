@@ -186,13 +186,24 @@ export default function App() {
     setRefreshStatus(null);
 
     try {
-      // Trigger server-side refresh - just fetch latest data from DB
-      // (cron runs automatically on schedule, not triggered from client)
+      // Trigger Crawl4AI extraction pipeline (same logic as cron, but manual)
+      const cronRes = await fetch('/api/refresh', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tournamentId }),
+        signal: AbortSignal.timeout(55000),
+      });
+
+      let cronResult = { completed: 0, checked: 0 };
+      if (cronRes.ok) {
+        cronResult = await cronRes.json();
+      }
+
+      // Fetch latest tournament data from DB (updated by the extraction)
       const tournamentRes = await fetch(`/api/tournaments?id=${tournamentId}`, {
         signal: AbortSignal.timeout(10000),
       });
 
-      let cronResult = { completed: 0 };
       if (tournamentRes.ok) {
         const serverData = await tournamentRes.json();
         if (serverData && serverData.teams && Object.keys(serverData.teams).length > 0) {
@@ -214,11 +225,11 @@ export default function App() {
         ? `Updated ${cronResult.completed} match(es) via Crawl4AI`
         : cronResult.checked > 0
           ? `Checked ${cronResult.checked} matches - no new completions found`
-          : 'Data refreshed from server';
+          : 'Data refreshed from server (no pending matches)';
 
       setRefreshStatus({ success: true, message });
     } catch (error) {
-      // Even if cron fails, try fetching latest data from server
+      // Even if extraction fails, try fetching latest data from server
       try {
         const fallbackRes = await fetch(`/api/tournaments?id=${tournamentId}`, { signal: AbortSignal.timeout(10000) });
         if (fallbackRes.ok) {
