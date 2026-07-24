@@ -16,6 +16,7 @@ export const config = { maxDuration: 60 };
 
 import { getLiveOrScheduledMatches, upsertMatch, getTournament, upsertTournament, publishEvent, logRefresh } from './lib/db.js';
 import { discoverMatchUrls, extractMatchStats, toStatsUrl, matchTeamToUrl, buildFallbackStatsUrl } from './lib/crawl4ai.js';
+import { blendStats } from './lib/blendStats.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -163,6 +164,12 @@ export default async function handler(req, res) {
               }
               homeTeam.form.rating = ema(homeTeam.form.last12.length >= 5 ? homeTeam.form.last12 : homeTeam.form.last5);
               awayTeam.form.rating = ema(awayTeam.form.last12.length >= 5 ? awayTeam.form.last12 : awayTeam.form.last5);
+
+              // Blend match stats into team profiles (attack, defense, setpiece, kicking, discipline)
+              if (status.stats) {
+                blendStats(homeTeam, status.stats.home);
+                blendStats(awayTeam, status.stats.away);
+              }
 
               // Pts/game
               if (homeTeam.season.played > 0) {

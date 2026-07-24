@@ -14,6 +14,7 @@ export const config = { maxDuration: 60 };
 
 import { getLiveOrScheduledMatches, upsertMatch, getTournament, upsertTournament, publishEvent, logRefresh } from '../lib/db.js';
 import { discoverMatchUrls, extractMatchStats, toStatsUrl, matchTeamToUrl, buildFallbackStatsUrl } from '../lib/crawl4ai.js';
+import { blendStats } from '../lib/blendStats.js';
 
 // ============================================================
 // STANDINGS / ELO / FORM RECOMPUTE
@@ -23,31 +24,6 @@ const REGRESSION_FACTOR = 0.30;
 const COMPETITION_MEAN = 1500;
 function applySeasonRegression(currentRating) {
   return Math.round(currentRating + (COMPETITION_MEAN - currentRating) * REGRESSION_FACTOR);
-}
-
-function blendStats(team, stats) {
-  if (!team || !stats) return;
-  if (stats.tackleRate != null && team.defense) team.defense.tr = Math.round((team.defense.tr + stats.tackleRate) / 2);
-  if (stats.missed != null && team.defense) team.defense.missed = parseFloat(((team.defense.missed + stats.missed) / 2).toFixed(1));
-  if (stats.lineBreaks != null && team.attack) team.attack.lb = parseFloat(((team.attack.lb + stats.lineBreaks) / 2).toFixed(1));
-  if (stats.scrumWin != null && team.setpiece) team.setpiece.so = Math.round((team.setpiece.so + stats.scrumWin) / 2);
-  if (stats.lineoutWin != null && team.setpiece) team.setpiece.lo = Math.round((team.setpiece.lo + stats.lineoutWin) / 2);
-  if (stats.penalties != null && team.discipline) team.discipline.pen = Math.round((team.discipline.pen + stats.penalties) / 2);
-  if (stats.turnoversWon != null && team.defense) team.defense.to = parseFloat(((team.defense.to + stats.turnoversWon) / 2).toFixed(1));
-  if (stats.gainline != null && team.attack) team.attack.gl = Math.round((team.attack.gl + stats.gainline) / 2);
-  if (stats.ruckSpeed != null && team.attack) team.attack.rs = parseFloat(((team.attack.rs + stats.ruckSpeed) / 2).toFixed(1));
-  if (stats.carries != null && team.kicking) {
-    const kmEst = (stats.kicks || 20) * 40;
-    team.kicking.km = Math.round((team.kicking.km + kmEst) / 2);
-  }
-  if (stats.tries != null && stats.conversions != null && stats.tries > 0 && team.kicking) {
-    const convRate = Math.round((stats.conversions / stats.tries) * 100);
-    team.kicking.goal = Math.round((team.kicking.goal + convRate) / 2);
-  }
-  if (stats.postContactMetres != null && team.setpiece) {
-    const maulProxy = Math.min(95, Math.max(40, stats.postContactMetres / 4));
-    team.setpiece.maul = Math.round((team.setpiece.maul + maulProxy) / 2);
-  }
 }
 
 // ============================================================
