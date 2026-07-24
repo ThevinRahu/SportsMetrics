@@ -89,11 +89,11 @@ python ml/sanity_check.py       # Verify predictions are sane
 
 ### Model Accuracy Note
 The training script reports three accuracy metrics:
-1. **Standard 5-Fold CV** — 61.1% (optimistic — mirrored rows can leak across folds)
-2. **GroupKFold CV** — 61.9% (honest — both perspectives of a match stay in the same fold)
-3. **Temporal Holdout** — **57.1%** (most honest — train on pre-2026 data, test only on 2026 matches)
+1. **Standard 5-Fold CV** - 61.1% (optimistic - mirrored rows can leak across folds)
+2. **GroupKFold CV** - 61.9% (honest - both perspectives of a match stay in the same fold)
+3. **Temporal Holdout** - **59.1%** (most honest - train on pre-2026 data, test only on 2026 matches)
 
-The temporal holdout is the number to trust for real-world predictive power. The model genuinely predicts the correct winner ~57% of the time on unseen future matches — above the 50% coin-flip baseline, and in line with the inherent variance of rugby (even bookmakers sit around 60-65% on outright winner calls with far more data). For a coaching-analytics tool showing relative probabilities and game plans, this is a useful directional signal — not a crystal ball, and never claimed to be one.
+The temporal holdout is the number to trust for real-world predictive power. The model genuinely predicts the correct winner ~59% of the time on unseen future matches - above the 50% coin-flip baseline, and in line with the inherent variance of rugby (even bookmakers sit around 60-65% on outright winner calls with far more data). For a coaching-analytics tool showing relative probabilities and game plans, this is a useful directional signal - not a crystal ball, and never claimed to be one.
 
 ---
 
