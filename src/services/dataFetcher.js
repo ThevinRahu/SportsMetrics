@@ -142,23 +142,11 @@ async function callAI(prompt, retries = 1) {
   }
 }
 
-// ===== SERVER-SIDE EXTRACTION (preferred path) =====
+// ===== SERVER-SIDE EXTRACTION (removed - cron handles this via Crawl4AI) =====
 
 async function callServerExtraction(url, teamNames, tournamentName) {
-  try {
-    const res = await fetch('/api/extract-stats', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      signal: AbortSignal.timeout(60000),
-      body: JSON.stringify({ url, teamNames, tournamentName }),
-    });
-    if (res.ok) {
-      const result = await res.json();
-      if (result.success) return result.data;
-    }
-  } catch (e) {
-    console.warn("Server-side extraction failed, falling back to client:", e.message);
-  }
+  // Extraction is now handled by api/cron/check-matches.js using Crawl4AI.
+  // Client reads fresh data from /api/tournaments (populated by the cron).
   return null;
 }
 

@@ -2,8 +2,7 @@
  * Centralized Crawl4AI extraction module.
  * 
  * Used by:
- *   - api/cron/check-matches.js (automatic match detection)
- *   - api/extract-stats.js (manual/on-demand extraction)
+ *   - api/cron/check-matches.js (automatic match detection + stats extraction)
  * 
  * Two-step pipeline:
  *   1. discoverMatchUrls(fixturesUrl, round) → [{ match, url }]
