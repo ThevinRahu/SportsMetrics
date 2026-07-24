@@ -12,6 +12,8 @@
  * an LLM instruction to return structured JSON directly.
  */
 
+import { validateExtraction } from './validateStats.js';
+
 // ============================================================
 // CORE: Crawl4AI /extract call
 // ============================================================
@@ -111,18 +113,22 @@ export async function extractMatchStats(statsUrl, homeTeam, awayTeam) {
     const parsed = normalizeExtractResult(result);
 
     if (parsed && parsed.played && parsed.homeScore != null && parsed.awayScore != null) {
-      // Validate scores (rugby: 0-100)
-      if (parsed.homeScore < 0 || parsed.homeScore > 100 || parsed.awayScore < 0 || parsed.awayScore > 100) {
-        return { isFinal: false };
+      // Validate and sanitize the extraction
+      const { valid, data, quality } = validateExtraction(parsed);
+      
+      if (!valid) {
+        // Brief pause before retry
+        if (attempt === 0) await new Promise(r => setTimeout(r, 500));
+        continue;
       }
 
-      console.log(`Crawl4AI stats: ${homeTeam} ${parsed.homeScore}-${parsed.awayScore} ${awayTeam} (attempt ${attempt + 1})`);
+      console.log(`Crawl4AI stats: ${homeTeam} ${data.homeScore}-${data.awayScore} ${awayTeam} (attempt ${attempt + 1}, quality ${quality}%)`);
 
       return {
         isFinal: true,
-        homeScore: parsed.homeScore,
-        awayScore: parsed.awayScore,
-        stats: parsed.stats || { home: {}, away: {} },
+        homeScore: data.homeScore,
+        awayScore: data.awayScore,
+        stats: data.stats,
         source: 'crawl4ai-extract',
       };
     }
