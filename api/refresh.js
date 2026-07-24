@@ -144,6 +144,17 @@ export default async function handler(req, res) {
               awayTeam.form.last5 = [...(awayTeam.form.last5 || []), awayResult].slice(-5);
               awayTeam.form.last12 = [...(awayTeam.form.last12 || []), awayResult].slice(-12);
 
+              // Streak
+              function computeStreak(last5) {
+                if (!last5 || last5.length === 0) return '';
+                const last = last5[last5.length - 1];
+                let count = 0;
+                for (let i = last5.length - 1; i >= 0 && last5[i] === last; i--) count++;
+                return `${last}${count}`;
+              }
+              homeTeam.form.streak = computeStreak(homeTeam.form.last5);
+              awayTeam.form.streak = computeStreak(awayTeam.form.last5);
+
               // EMA rating
               function ema(results, alpha = 0.30) {
                 let v = 50;
