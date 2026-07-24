@@ -45,8 +45,17 @@ export async function crawl4aiExtract(url, instruction) {
 
   const result = await res.json();
   
-  // Normalize: response can be array, object, or JSON string
-  let parsed = Array.isArray(result) ? result : result;
+  // Normalize: Crawl4AI returns { ok, data: [...] } wrapper or direct content
+  let parsed;
+  if (result && result.data && Array.isArray(result.data)) {
+    // Standard Crawl4AI /extract response: { ok, data: [...], provider, ... }
+    parsed = result.data.length === 1 ? result.data[0] : result.data;
+  } else if (Array.isArray(result)) {
+    parsed = result;
+  } else {
+    parsed = result;
+  }
+  
   if (typeof parsed === 'string') {
     try { parsed = JSON.parse(parsed); } catch { return null; }
   }
@@ -72,8 +81,8 @@ export async function discoverMatchUrls(fixturesUrl, round) {
   const result = await crawl4aiExtract(fixturesUrl, instruction);
   if (!result) return [];
 
-  // Normalize to array
-  const links = Array.isArray(result) ? result : (result.matches || result.links || []);
+  // Normalize to array (crawl4aiExtract already unwraps .data)
+  const links = Array.isArray(result) ? result : (result.matches || result.links || [result]);
   
   console.log(`Discovered ${links.length} match URLs from ${fixturesUrl} R${round}`);
   return links.filter(l => l && l.url);
@@ -97,7 +106,7 @@ export async function extractMatchStats(statsUrl, homeTeam, awayTeam) {
   const result = await crawl4aiExtract(statsUrl, instruction);
   if (!result) return { isFinal: false };
 
-  // Normalize - could be array with single item
+  // Normalize - could be array with single item, or direct object
   let parsed = Array.isArray(result) ? result[0] : result;
   if (typeof parsed === 'string') {
     try { parsed = JSON.parse(parsed); } catch { return { isFinal: false }; }
