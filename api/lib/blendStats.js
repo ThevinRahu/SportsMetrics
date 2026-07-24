@@ -42,15 +42,16 @@ export function blendStats(team, stats) {
   // --- Defense ---
   if (team.defense) {
     const tr = parseStatValue(stats.tackleRate);
-    if (tr != null) {
+    if (tr != null && tr >= 50 && tr <= 100) {
+      // tackleRate must be a percentage (50-100%), reject raw counts
       team.defense.tr = Math.round(((team.defense.tr || 80) + tr) / 2);
     }
     const missed = parseStatValue(stats.missed);
-    if (missed != null) {
+    if (missed != null && missed < 100) {
       team.defense.missed = parseFloat((((team.defense.missed || 25) + missed) / 2).toFixed(1));
     }
     const to = parseStatValue(stats.turnoversWon);
-    if (to != null) {
+    if (to != null && to < 30) {
       team.defense.to = parseFloat((((team.defense.to || 8) + to) / 2).toFixed(1));
     }
     const dom = parseStatValue(stats.dominantTackles);
@@ -62,19 +63,21 @@ export function blendStats(team, stats) {
   // --- Attack ---
   if (team.attack) {
     const lb = parseStatValue(stats.lineBreaks);
-    if (lb != null) {
+    if (lb != null && lb < 30) {
       team.attack.lb = parseFloat((((team.attack.lb || 5) + lb) / 2).toFixed(1));
     }
     const gl = parseStatValue(stats.gainline);
-    if (gl != null) {
+    if (gl != null && gl >= 20 && gl <= 100) {
+      // gainline must be a percentage (20-100%)
       team.attack.gl = Math.round(((team.attack.gl || 50) + gl) / 2);
     }
     const rs = parseStatValue(stats.ruckSpeed);
-    if (rs != null) {
+    if (rs != null && rs < 10) {
+      // ruck speed in seconds (typically 2-5)
       team.attack.rs = parseFloat((((team.attack.rs || 3.0) + rs) / 2).toFixed(1));
     }
     const off = parseStatValue(stats.offloads);
-    if (off != null) {
+    if (off != null && off < 30) {
       team.attack.off = parseFloat((((team.attack.off || 8) + off) / 2).toFixed(1));
     }
   }
@@ -82,15 +85,17 @@ export function blendStats(team, stats) {
   // --- Set Piece ---
   if (team.setpiece) {
     const so = parseStatValue(stats.scrumWin);
-    if (so != null) {
+    if (so != null && so >= 50 && so <= 100) {
+      // scrum win must be a percentage (50-100%)
       team.setpiece.so = Math.round(((team.setpiece.so || 80) + so) / 2);
     }
     const lo = parseStatValue(stats.lineoutWin);
-    if (lo != null) {
+    if (lo != null && lo >= 50 && lo <= 100) {
+      // lineout win must be a percentage (50-100%)
       team.setpiece.lo = Math.round(((team.setpiece.lo || 75) + lo) / 2);
     }
     const pcm = parseStatValue(stats.postContactMetres);
-    if (pcm != null) {
+    if (pcm != null && pcm > 10) {
       const maulProxy = Math.min(95, Math.max(40, pcm / 4));
       team.setpiece.maul = Math.round(((team.setpiece.maul || 60) + maulProxy) / 2);
     }
