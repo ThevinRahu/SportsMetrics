@@ -95,41 +95,55 @@ export async function discoverMatchUrls(fixturesUrl, round) {
 /**
  * Extract scores and full stats from a match stats page.
  * 
+ * Uses built-in retry: if first attempt returns played:false, retries once.
+ * 
  * @param {string} statsUrl - Stats page URL (with /stats/ path and ?g= param)
  * @param {string} homeTeam - Home team name
  * @param {string} awayTeam - Away team name
  * @returns {{ isFinal: boolean, homeScore?: number, awayScore?: number, stats?: object, source?: string }}
  */
 export async function extractMatchStats(statsUrl, homeTeam, awayTeam) {
-  const instruction = `What was the final score and match stats for ${homeTeam} vs ${awayTeam}? CRITICAL RULES: Only answer if you are CERTAIN this match has been played and you know the real result. If you are not sure or the match hasn't happened yet, return {"played": false}. Do NOT guess. If the match HAS been played, return this JSON: {"played": true, "homeTeam": "${homeTeam}", "awayTeam": "${awayTeam}", "homeScore": <number>, "awayScore": <number>, "stats": {"home": {"tackles": null, "missed": null, "tackleRate": null, "carries": null, "lineBreaks": null, "penalties": null, "scrums": null, "scrumWin": null, "lineouts": null, "lineoutWin": null, "tries": null, "conversions": null, "penaltyGoals": null, "territory": null, "possession": null, "turnoversWon": null, "turnoversLost": null, "postContactMetres": null, "passes": null, "kicks": null, "gainline": null, "ruckSpeed": null, "dominantTackles": null, "offloads": null}, "away": {"tackles": null, "missed": null, "tackleRate": null, "carries": null, "lineBreaks": null, "penalties": null, "scrums": null, "scrumWin": null, "lineouts": null, "lineoutWin": null, "tries": null, "conversions": null, "penaltyGoals": null, "territory": null, "possession": null, "turnoversWon": null, "turnoversLost": null, "postContactMetres": null, "passes": null, "kicks": null, "gainline": null, "ruckSpeed": null, "dominantTackles": null, "offloads": null}}}. Return ONLY JSON. Use null for any stat you're not certain about.`;
+  const instruction = `Extract the final score and match stats for ${homeTeam} vs ${awayTeam}. If match is complete return this JSON: {"played": true, "homeTeam": "${homeTeam}", "awayTeam": "${awayTeam}", "homeScore": <number>, "awayScore": <number>, "stats": {"home": {"tackles": null, "missed": null, "tackleRate": null, "carries": null, "lineBreaks": null, "penalties": null, "scrums": null, "scrumWin": null, "lineouts": null, "lineoutWin": null, "tries": null, "conversions": null, "penaltyGoals": null, "territory": null, "possession": null, "turnoversWon": null, "turnoversLost": null, "postContactMetres": null, "passes": null, "kicks": null, "gainline": null, "ruckSpeed": null, "dominantTackles": null, "offloads": null}, "away": {same fields}}}. If not played return {"played": false}. Return ONLY JSON, use null for missing stats.`;
 
-  const result = await crawl4aiExtract(statsUrl, instruction);
-  if (!result) return { isFinal: false };
+  // Attempt extraction with one retry on failure
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const result = await crawl4aiExtract(statsUrl, instruction);
+    const parsed = normalizeExtractResult(result);
 
-  // Normalize - could be array with single item, or direct object
+    if (parsed && parsed.played && parsed.homeScore != null && parsed.awayScore != null) {
+      // Validate scores (rugby: 0-100)
+      if (parsed.homeScore < 0 || parsed.homeScore > 100 || parsed.awayScore < 0 || parsed.awayScore > 100) {
+        return { isFinal: false };
+      }
+
+      console.log(`Crawl4AI stats: ${homeTeam} ${parsed.homeScore}-${parsed.awayScore} ${awayTeam} (attempt ${attempt + 1})`);
+
+      return {
+        isFinal: true,
+        homeScore: parsed.homeScore,
+        awayScore: parsed.awayScore,
+        stats: parsed.stats || { home: {}, away: {} },
+        source: 'crawl4ai-extract',
+      };
+    }
+
+    // Brief pause before retry
+    if (attempt === 0) await new Promise(r => setTimeout(r, 500));
+  }
+
+  return { isFinal: false };
+}
+
+/**
+ * Normalize Crawl4AI extract result into a usable object.
+ */
+function normalizeExtractResult(result) {
+  if (!result) return null;
   let parsed = Array.isArray(result) ? result[0] : result;
   if (typeof parsed === 'string') {
-    try { parsed = JSON.parse(parsed); } catch { return { isFinal: false }; }
+    try { parsed = JSON.parse(parsed); } catch { return null; }
   }
-
-  if (!parsed || !parsed.played || parsed.homeScore == null || parsed.awayScore == null) {
-    return { isFinal: false };
-  }
-
-  // Validate scores (rugby: 0-100)
-  if (parsed.homeScore < 0 || parsed.homeScore > 100 || parsed.awayScore < 0 || parsed.awayScore > 100) {
-    return { isFinal: false };
-  }
-
-  console.log(`Crawl4AI stats: ${homeTeam} ${parsed.homeScore}-${parsed.awayScore} ${awayTeam}`);
-
-  return {
-    isFinal: true,
-    homeScore: parsed.homeScore,
-    awayScore: parsed.awayScore,
-    stats: parsed.stats || { home: {}, away: {} },
-    source: 'crawl4ai-extract',
-  };
+  return parsed;
 }
 
 // ============================================================
