@@ -1,15 +1,11 @@
 /**
  * Cron Job: Check Live Match Status
  * 
- * Two-step Crawl4AI /extract pipeline:
+ * Two-step Crawl4AI /extract pipeline (centralized in api/lib/crawl4ai.js):
  *   1. Hit tournament fixtures page → get match URLs for the current round
  *   2. Append /stats/ to each URL → extract structured scores + stats as JSON
  * 
- * When a match finishes:
- *   - Updates match record in Postgres
- *   - Recomputes standings, Elo, form
- *   - Blends stats into team profiles
- *   - Publishes "match_completed" event for SSE consumers
+ * Tournament fixtures URL and round come from the DB (tournaments table).
  * 
  * Protected by CRON_SECRET header (Vercel injects this automatically for cron).
  */
@@ -17,160 +13,10 @@
 export const config = { maxDuration: 60 };
 
 import { getLiveOrScheduledMatches, upsertMatch, getTournament, upsertTournament, publishEvent, logRefresh } from '../lib/db.js';
-
-// Crawl4AI /extract helper
-async function crawl4aiExtract(url, instruction) {
-  const key = process.env.CRAWL4AI_KEY;
-  if (!key) return null;
-
-  const res = await fetch('https://gate.crawl4ai.com/extract', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${key}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ url, instruction }),
-  });
-
-  if (!res.ok) {
-    console.warn(`Crawl4AI /extract ${res.status} for ${url}`);
-    return null;
-  }
-
-  const result = await res.json();
-  // Normalize: response can be array, object, or string
-  let parsed = Array.isArray(result) ? result : result;
-  if (typeof parsed === 'string') {
-    try { parsed = JSON.parse(parsed); } catch { return null; }
-  }
-  return parsed;
-}
+import { discoverMatchUrls, extractMatchStats, toStatsUrl, matchTeamToUrl, buildFallbackStatsUrl } from '../lib/crawl4ai.js';
 
 // ============================================================
-// STEP 1: Discover match URLs from fixtures page
-// ============================================================
-
-// Map tournament IDs to their rugbypass fixtures page
-const FIXTURES_URLS = {
-  'nc2026': 'https://www.rugbypass.com/nations-championship/fixtures-results/',
-  'srp2026': 'https://www.rugbypass.com/super-rugby-pacific/fixtures-results/',
-  'rc2026': 'https://www.rugbypass.com/rugby-championship/fixtures-results/',
-  '6n2026': 'https://www.rugbypass.com/six-nations/fixtures-results/',
-};
-
-/**
- * Discover match stats URLs from the tournament fixtures page.
- * Returns array of { match, url } where url points to the live match page.
- */
-async function discoverMatchUrls(tournamentId, round) {
-  const fixturesUrl = FIXTURES_URLS[tournamentId];
-  if (!fixturesUrl) return [];
-
-  const instruction = `Give me round ${round} match links as a JSON array. Each item should have "match" (team names like "Ireland vs New Zealand") and "url" (the full rugbypass live match URL). Return ONLY valid JSON array, no explanation.`;
-
-  const result = await crawl4aiExtract(fixturesUrl, instruction);
-  if (!result) return [];
-
-  // Normalize to array
-  const links = Array.isArray(result) ? result : (result.matches || result.links || []);
-  
-  console.log(`Discovered ${links.length} match URLs for ${tournamentId} R${round}`);
-  return links.filter(l => l && l.url);
-}
-
-/**
- * Convert a live match URL to a stats URL.
- * Input:  https://www.rugbypass.com/live/argentina-vs-england/?g=949581
- * Output: https://www.rugbypass.com/live/argentina-vs-england/stats/?g=949581
- */
-function toStatsUrl(matchUrl) {
-  try {
-    const url = new URL(matchUrl);
-    // Insert /stats/ before the query string
-    let path = url.pathname;
-    if (!path.includes('/stats')) {
-      // Remove trailing slash, add /stats/
-      path = path.replace(/\/?$/, '/stats/');
-    }
-    return `${url.origin}${path}${url.search}`;
-  } catch {
-    // Fallback: simple string manipulation
-    const [base, query] = matchUrl.split('?');
-    const cleanBase = base.replace(/\/?$/, '/stats/');
-    return query ? `${cleanBase}?${query}` : cleanBase;
-  }
-}
-
-// ============================================================
-// STEP 2: Extract stats from individual match stats page
-// ============================================================
-
-const STATS_INSTRUCTION = `What was the final score and match stats for ${'{'}home_team{'}'} vs ${'{'}away_team{'}'}? CRITICAL RULES: Only answer if you are CERTAIN this match has been played and you know the real result. If you are not sure or the match hasn't happened yet, return {"played": false}. Do NOT guess. If the match HAS been played, return this JSON: {"played": true, "homeTeam": "<home>", "awayTeam": "<away>", "homeScore": <number>, "awayScore": <number>, "stats": {"home": {"tackles": null, "missed": null, "tackleRate": null, "carries": null, "lineBreaks": null, "penalties": null, "scrums": null, "scrumWin": null, "lineouts": null, "lineoutWin": null, "tries": null, "conversions": null, "penaltyGoals": null, "territory": null, "possession": null, "turnoversWon": null, "turnoversLost": null, "postContactMetres": null, "passes": null, "kicks": null, "gainline": null, "ruckSpeed": null, "dominantTackles": null, "offloads": null}, "away": {"tackles": null, "missed": null, "tackleRate": null, "carries": null, "lineBreaks": null, "penalties": null, "scrums": null, "scrumWin": null, "lineouts": null, "lineoutWin": null, "tries": null, "conversions": null, "penaltyGoals": null, "territory": null, "possession": null, "turnoversWon": null, "turnoversLost": null, "postContactMetres": null, "passes": null, "kicks": null, "gainline": null, "ruckSpeed": null, "dominantTackles": null, "offloads": null}}}. Return ONLY JSON. Use null for any stat you're not certain about.`;
-
-/**
- * Extract stats from a match stats URL.
- * Returns { isFinal, homeScore, awayScore, stats } or { isFinal: false }
- */
-async function extractMatchStats(statsUrl, homeTeam, awayTeam) {
-  const instruction = STATS_INSTRUCTION
-    .replace('{home_team}', homeTeam)
-    .replace('{away_team}', awayTeam);
-
-  const result = await crawl4aiExtract(statsUrl, instruction);
-  if (!result) return { isFinal: false };
-
-  // Normalize - could be array with single item
-  let parsed = Array.isArray(result) ? result[0] : result;
-  if (typeof parsed === 'string') {
-    try { parsed = JSON.parse(parsed); } catch { return { isFinal: false }; }
-  }
-
-  if (!parsed || !parsed.played || parsed.homeScore == null || parsed.awayScore == null) {
-    return { isFinal: false };
-  }
-
-  // Validate scores (rugby: 0-100)
-  if (parsed.homeScore < 0 || parsed.homeScore > 100 || parsed.awayScore < 0 || parsed.awayScore > 100) {
-    return { isFinal: false };
-  }
-
-  console.log(`Crawl4AI stats: ${homeTeam} ${parsed.homeScore}-${parsed.awayScore} ${awayTeam}`);
-
-  return {
-    isFinal: true,
-    homeScore: parsed.homeScore,
-    awayScore: parsed.awayScore,
-    stats: parsed.stats || { home: {}, away: {} },
-    source: 'crawl4ai-extract',
-  };
-}
-
-// ============================================================
-// MATCH TEAM NAME FUZZY MATCHING
-// ============================================================
-
-/**
- * Match a DB team name to a discovered URL by comparing slugified names.
- * DB: "New Zealand", URL match field: "Ireland vs New Zealand"
- */
-function matchTeamToUrl(homeTeam, awayTeam, discoveredLinks) {
-  const slugify = (s) => s.toLowerCase().replace(/[^a-z]/g, '');
-  const homeSlug = slugify(homeTeam);
-  const awaySlug = slugify(awayTeam);
-
-  for (const link of discoveredLinks) {
-    const matchText = slugify(link.match || '');
-    // Check if both team names appear in the match text or URL
-    if ((matchText.includes(homeSlug) || link.url.includes(homeTeam.toLowerCase().replace(/\s+/g, '-'))) &&
-        (matchText.includes(awaySlug) || link.url.includes(awayTeam.toLowerCase().replace(/\s+/g, '-')))) {
-      return link.url;
-    }
-  }
-  return null;
-}
-
-// ============================================================
-// STANDINGS / ELO / FORM RECOMPUTE (unchanged)
+// STANDINGS / ELO / FORM RECOMPUTE
 // ============================================================
 
 const REGRESSION_FACTOR = 0.30;
@@ -236,11 +82,16 @@ export default async function handler(req, res) {
 
     // Process each tournament-round group
     for (const group of Object.values(groups)) {
-      // Limit to one round (6 matches max) per run to stay within 60s
       if (checked >= 6) break;
 
-      // STEP 1: Discover match URLs from fixtures page
-      const discoveredLinks = await discoverMatchUrls(group.tournamentId, group.round);
+      // Get tournament from DB to retrieve fixtures URL and current round
+      const tournament = await getTournament(group.tournamentId);
+      const fixturesUrl = tournament?.data_url || null;
+
+      // STEP 1: Discover match URLs from the tournament's fixtures page
+      const discoveredLinks = fixturesUrl
+        ? await discoverMatchUrls(fixturesUrl, group.round)
+        : [];
 
       // STEP 2: For each pending match, find its URL and extract stats
       for (const match of group.matches) {
@@ -263,9 +114,7 @@ export default async function handler(req, res) {
           }
         } else {
           // No discovered URL - fall back to slug-based construction
-          const homeSlug = match.home_team.toLowerCase().replace(/\s+/g, '-');
-          const awaySlug = match.away_team.toLowerCase().replace(/\s+/g, '-');
-          const fallbackUrl = `https://www.rugbypass.com/live/${homeSlug}-vs-${awaySlug}/stats/`;
+          const fallbackUrl = buildFallbackStatsUrl(match.home_team, match.away_team);
           status = await extractMatchStats(fallbackUrl, match.home_team, match.away_team);
         }
 

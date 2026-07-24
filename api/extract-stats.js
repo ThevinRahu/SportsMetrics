@@ -1,15 +1,18 @@
 /**
- * Server-side AI Stats Extraction (v2 - uses same pipeline as client)
+ * Server-side Stats Extraction
  * 
  * POST /api/extract-stats
- * Body: { url, teamNames, tournamentName, mode: "standings"|"matchStats" }
+ * Body: { url, teamNames, tournamentName, mode, homeTeam, awayTeam, fixturesUrl, round }
  * 
- * Uses GROQ_API_KEY env var (browser never sees it).
- * Uses the same field hints, non-destructive cleaning, and prompt structure
- * as the client-side pipeline to avoid drift.
+ * PRIMARY: Crawl4AI /extract (renders JS SPAs, returns structured JSON)
+ * FALLBACK: Groq AI on raw HTML (for non-JS pages)
+ * 
+ * Shared extraction logic lives in api/lib/crawl4ai.js
  */
 
 export const config = { maxDuration: 60 };
+
+import { crawl4aiExtract, discoverMatchUrls, extractMatchStats, toStatsUrl, matchTeamToUrl, buildFallbackStatsUrl } from './lib/crawl4ai.js';
 
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_MODEL = 'llama-3.3-70b-versatile';
@@ -123,12 +126,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'POST only' });
   }
 
-  const groqKey = process.env.GROQ_API_KEY;
-  if (!groqKey) {
-    return res.status(500).json({ error: 'GROQ_API_KEY not configured' });
-  }
-
-  const { url, teamNames, tournamentName, mode, homeTeam, awayTeam } = req.body || {};
+  const { url, teamNames, tournamentName, mode, homeTeam, awayTeam, fixturesUrl, round } = req.body || {};
 
   if (!url || !teamNames || !Array.isArray(teamNames)) {
     return res.status(400).json({ error: 'Required: url, teamNames (array)' });
@@ -145,6 +143,71 @@ export default async function handler(req, res) {
   }
 
   const startTime = Date.now();
+  const isMatchStats = mode === 'matchStats' || url.includes('/live/') || url.includes('/stats');
+
+  // ─── PRIMARY: Crawl4AI /extract (handles JS SPAs like rugbypass) ───
+
+  // Mode 1: Discover match URLs from fixtures page + extract stats
+  if (fixturesUrl && round) {
+    try {
+      const links = await discoverMatchUrls(fixturesUrl, round);
+      const results = [];
+
+      for (const link of links) {
+        const statsUrl = toStatsUrl(link.url);
+        // Parse team names from link.match (e.g. "Ireland vs New Zealand")
+        const parts = (link.match || '').split(/\s+vs\s+/i);
+        const home = parts[0]?.trim() || teamNames[0];
+        const away = parts[1]?.trim() || teamNames[1];
+        
+        const extracted = await extractMatchStats(statsUrl, home, away);
+        if (extracted.isFinal) {
+          results.push({ ...extracted, match: link.match, url: statsUrl });
+        }
+      }
+
+      return res.status(200).json({
+        success: true,
+        data: results,
+        meta: { durationMs: Date.now() - startTime, source: fixturesUrl, mode: 'batch-extract', count: results.length },
+      });
+    } catch (e) {
+      console.warn('Batch Crawl4AI extraction failed, falling through to single-page:', e.message);
+    }
+  }
+
+  // Mode 2: Single match stats extraction via Crawl4AI
+  if (isMatchStats && process.env.CRAWL4AI_KEY) {
+    try {
+      const home = homeTeam || teamNames[0];
+      const away = awayTeam || teamNames[1];
+      const extracted = await extractMatchStats(url, home, away);
+      
+      if (extracted.isFinal) {
+        return res.status(200).json({
+          success: true,
+          data: {
+            homeTeam: home,
+            awayTeam: away,
+            homeScore: extracted.homeScore,
+            awayScore: extracted.awayScore,
+            stats: extracted.stats,
+          },
+          meta: { durationMs: Date.now() - startTime, source: url, mode: 'crawl4ai-extract' },
+        });
+      }
+      // If Crawl4AI didn't get a result, fall through to Groq
+    } catch (e) {
+      console.warn('Crawl4AI single extraction failed, falling through to Groq:', e.message);
+    }
+  }
+
+  // ─── FALLBACK: Groq AI on raw HTML (for non-JS pages or when Crawl4AI unavailable) ───
+
+  const groqKey = process.env.GROQ_API_KEY;
+  if (!groqKey) {
+    return res.status(500).json({ error: 'No extraction backend available (CRAWL4AI_KEY and GROQ_API_KEY both missing)' });
+  }
 
   try {
     // 1. Fetch page
@@ -165,7 +228,6 @@ export default async function handler(req, res) {
     }
 
     const html = await pageRes.text();
-    // Non-destructive cleaning (same as client pipeline)
     const content = cleanContent(html);
 
     if (content.length < 100) {
@@ -173,7 +235,6 @@ export default async function handler(req, res) {
     }
 
     // 2. Build prompt based on mode
-    const isMatchStats = mode === 'matchStats' || url.includes('/live/') || url.includes('/stats');
     const prompt = isMatchStats
       ? buildMatchStatsPrompt(homeTeam || teamNames[0], awayTeam || teamNames[1], content.slice(0, 8000))
       : buildStandingsPrompt(tournamentName || 'Tournament', teamNames, content.slice(0, 8000));
