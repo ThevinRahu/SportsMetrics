@@ -26,16 +26,19 @@ export default async function handler(req, res) {
     // We'll accept the tournament data in the request body for flexibility
     const { tournament, matches } = req.body || {};
 
-    if (!tournament) {
+    if (!tournament && !matches) {
       return res.status(400).json({ 
-        error: 'Send tournament data in request body',
+        error: 'Send tournament and/or matches in request body',
         example: 'POST with { tournament: { id, name, teams, ... }, matches: [...] }'
       });
     }
 
-    const result = await upsertTournament(tournament);
+    let result = null;
+    if (tournament) {
+      result = await upsertTournament(tournament);
+    }
 
-    // Seed matches if provided
+    // Seed matches if provided (works without tournament for match-only resets)
     let matchCount = 0;
     if (Array.isArray(matches)) {
       for (const m of matches) {
