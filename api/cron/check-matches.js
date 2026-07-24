@@ -26,253 +26,59 @@ function applySeasonRegression(currentRating) {
 
 // Check rugbypass for match status (Full Time indicator)
 async function checkMatchStatus(match) {
-  // Build rugbypass URL from team names
+  // Build rugbypass stats URL from team names
   const homeSlug = match.home_team.toLowerCase().replace(/\s+/g, '-');
   const awaySlug = match.away_team.toLowerCase().replace(/\s+/g, '-');
-  const url = `https://www.rugbypass.com/live/${homeSlug}-vs-${awaySlug}/stats/`;
+  const statsUrl = `https://www.rugbypass.com/live/${homeSlug}-vs-${awaySlug}/stats/`;
 
-  // PRIMARY: Use Crawl4AI to render JS page and extract structured stats
-  const crawl4aiResult = await extractWithCrawl4AI(url, match);
+  // PRIMARY: Use Crawl4AI /extract to get structured stats directly
+  const crawl4aiResult = await extractWithCrawl4AI(statsUrl, match);
   if (crawl4aiResult.isFinal) return crawl4aiResult;
 
-  // FALLBACK 1: Try plain fetch + regex (works for server-rendered pages)
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000);
-    
-    const res = await fetch(url, {
-      signal: controller.signal,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': 'text/html',
-      },
-    });
-    clearTimeout(timeout);
+  // FALLBACK: Try the match page without /stats/ suffix
+  const matchUrl = `https://www.rugbypass.com/live/${homeSlug}-vs-${awaySlug}/`;
+  const fallbackResult = await extractWithCrawl4AI(matchUrl, match);
+  if (fallbackResult.isFinal) return fallbackResult;
 
-    if (res.ok) {
-      const html = await res.text();
-      const scoreMatch = html.match(/(\d+)\s*-\s*(\d+)\s*(?:Full\s*Time|FT)/i);
-      if (scoreMatch) {
-        const stats = extractBasicStats(html);
-        return {
-          isFinal: true,
-          homeScore: parseInt(scoreMatch[1]),
-          awayScore: parseInt(scoreMatch[2]),
-          stats,
-          source: 'rugbypass-regex',
-        };
-      }
-    }
-  } catch (e) {
-    console.warn(`Plain fetch failed for ${match.home_team} vs ${match.away_team}:`, e.message);
-  }
-
-  // FALLBACK 2: Ask Groq AI from knowledge
-  return await fallbackToAI(match);
+  return { isFinal: false };
 }
 
 /**
- * Crawl4AI Extraction - renders JS pages via /scrape, then regex-parses stats
- * This handles SPAs like rugbypass where stats only appear after JS executes.
+ * Crawl4AI /extract - uses LLM instruction to return structured JSON directly.
+ * No regex needed. Renders the JS SPA and extracts scores + stats in one call.
  */
 async function extractWithCrawl4AI(url, match) {
   const crawl4aiKey = process.env.CRAWL4AI_KEY;
   if (!crawl4aiKey) return { isFinal: false };
 
+  const instruction = `What was the final score and match stats for ${match.home_team} vs ${match.away_team} played on ${match.match_date}? CRITICAL RULES: - Only answer if you are CERTAIN this match has been played and you know the real result - If you are not sure or the match hasn't happened yet, return {"played": false} - Do NOT guess or make up scores. Only provide verified, real data. - This data will be used for professional coaching decisions. If the match HAS been played, return this JSON: {"played": true, "homeTeam": "${match.home_team}", "awayTeam": "${match.away_team}", "homeScore": <number>, "awayScore": <number>, "stats": {"home": {"tackles": null, "missed": null, "tackleRate": null, "carries": null, "lineBreaks": null, "penalties": null, "scrums": null, "scrumWin": null, "lineouts": null, "lineoutWin": null, "tries": null, "conversions": null, "penaltyGoals": null, "territory": null, "possession": null, "turnoversWon": null, "turnoversLost": null, "postContactMetres": null, "passes": null, "kicks": null, "gainline": null, "ruckSpeed": null, "dominantTackles": null, "offloads": null}, "away": { same fields }}} STAT DEFINITIONS: tackles: total tackles made - missed: tackles missed - tackleRate: tackle completion percentage (0-100) - carries: ball carries - lineBreaks: line breaks made - penalties: penalties conceded - scrums: number of scrums - scrumWin: scrum win percentage (0-100) - lineouts: number of lineouts - lineoutWin: lineout win percentage (0-100) - tries: tries scored - conversions: conversions kicked - penaltyGoals: penalty goals kicked - territory: territory percentage (0-100) - possession: possession percentage (0-100) - turnoversWon: turnovers won - turnoversLost: turnovers conceded - postContactMetres: post-contact metres gained - passes: total passes - kicks: total kicks from hand - gainline: gainline success percentage (0-100) - ruckSpeed: ruck speed - percentage of rucks where ball is recycled in 0-3 seconds - dominantTackles: dominant tackles made (drove ball carrier backwards) - offloads: offloads in contact. Return ONLY JSON. Use null for any stat you're not certain about.`;
+
   try {
-    const res = await fetch('https://gate.crawl4ai.com/scrape', {
+    const res = await fetch('https://gate.crawl4ai.com/extract', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${crawl4aiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ url, format: 'md' }),
+      body: JSON.stringify({ url, instruction }),
     });
 
     if (!res.ok) {
-      console.warn(`Crawl4AI returned ${res.status}`);
+      console.warn(`Crawl4AI /extract returned ${res.status} for ${url}`);
       return { isFinal: false };
     }
 
     const result = await res.json();
-    if (!result.ok || !result.markdown) return { isFinal: false };
-
-    const content = result.markdown;
-
-    // Check for Full Time
-    if (!/Full\s*Time|FT/i.test(content)) {
-      return { isFinal: false };
+    
+    // Response can be an array or object - normalize
+    let parsed = Array.isArray(result) ? result[0] : result;
+    
+    // If the response is a string (raw JSON), parse it
+    if (typeof parsed === 'string') {
+      try { parsed = JSON.parse(parsed); } catch { return { isFinal: false }; }
     }
 
-    // Extract score - pattern in markdown: "40 - 21 \n\nFull Time"
-    const scoreMatch = content.match(/(\d+)\s*-\s*(\d+)\s*\n*\s*(?:Full\s*Time|FT)/i)
-      || content.match(/(\d+)\s*-\s*(\d+)/);
-    if (!scoreMatch) return { isFinal: false };
-
-    const homeScore = parseInt(scoreMatch[1]);
-    const awayScore = parseInt(scoreMatch[2]);
-
-    if (homeScore < 0 || homeScore > 100 || awayScore < 0 || awayScore > 100) {
-      return { isFinal: false };
-    }
-
-    // Extract stats using regex on the rendered markdown
-    const stats = extractBasicStats(content);
-
-    console.log(`Crawl4AI: ${match.home_team} ${homeScore}-${awayScore} ${match.away_team}`);
-
-    return {
-      isFinal: true,
-      homeScore,
-      awayScore,
-      stats,
-      source: 'crawl4ai',
-    };
-  } catch (e) {
-    console.error(`Crawl4AI failed for ${match.home_team} vs ${match.away_team}:`, e.message);
-    return { isFinal: false };
-  }
-}
-
-/**
- * AI Knowledge Fallback - ask Groq for match result when page scraping fails
- * (e.g., rugbypass is a JS SPA and stats don't appear in raw HTML)
- * 
- * Only accepts data the AI is confident about. Uses strict prompting
- * to minimize hallucination risk.
- */
-async function fallbackToAI(match) {
-  const groqKey = process.env.GROQ_API_KEY;
-  if (!groqKey) return { isFinal: false };
-
-  try {
-    const prompt = `What was the final score and match stats for ${match.home_team} vs ${match.away_team} played on ${match.match_date} in the Nations Championship 2026?
-
-CRITICAL RULES:
-- Only answer if you are CERTAIN this match has been played and you know the real result
-- If you are not sure or the match hasn't happened yet, return {"played": false}
-- Do NOT guess or make up scores. Only provide verified, real data.
-- This data will be used for professional coaching decisions.
-
-If the match HAS been played, return this JSON:
-{
-  "played": true,
-  "homeTeam": "${match.home_team}",
-  "awayTeam": "${match.away_team}",
-  "homeScore": <number>,
-  "awayScore": <number>,
-  "stats": {
-    "home": {
-      "tackles": null,
-      "missed": null,
-      "tackleRate": null,
-      "carries": null,
-      "lineBreaks": null,
-      "penalties": null,
-      "scrums": null,
-      "scrumWin": null,
-      "lineouts": null,
-      "lineoutWin": null,
-      "tries": null,
-      "conversions": null,
-      "penaltyGoals": null,
-      "territory": null,
-      "possession": null,
-      "turnoversWon": null,
-      "turnoversLost": null,
-      "postContactMetres": null,
-      "passes": null,
-      "kicks": null,
-      "gainline": null,
-      "ruckSpeed": null,
-      "dominantTackles": null,
-      "offloads": null
-    },
-    "away": {
-      "tackles": null,
-      "missed": null,
-      "tackleRate": null,
-      "carries": null,
-      "lineBreaks": null,
-      "penalties": null,
-      "scrums": null,
-      "scrumWin": null,
-      "lineouts": null,
-      "lineoutWin": null,
-      "tries": null,
-      "conversions": null,
-      "penaltyGoals": null,
-      "territory": null,
-      "possession": null,
-      "turnoversWon": null,
-      "turnoversLost": null,
-      "postContactMetres": null,
-      "passes": null,
-      "kicks": null,
-      "gainline": null,
-      "ruckSpeed": null,
-      "dominantTackles": null,
-      "offloads": null
-    }
-  }
-}
-
-STAT DEFINITIONS:
-- tackles: total tackles made
-- missed: tackles missed
-- tackleRate: tackle completion percentage (0-100)
-- carries: ball carries
-- lineBreaks: line breaks made
-- penalties: penalties conceded
-- scrums: number of scrums
-- scrumWin: scrum win percentage (0-100)
-- lineouts: number of lineouts
-- lineoutWin: lineout win percentage (0-100)
-- tries: tries scored
-- conversions: conversions kicked
-- penaltyGoals: penalty goals kicked
-- territory: territory percentage (0-100)
-- possession: possession percentage (0-100)
-- turnoversWon: turnovers won
-- turnoversLost: turnovers conceded
-- postContactMetres: post-contact metres gained
-- passes: total passes
-- kicks: total kicks from hand
-- gainline: gainline success percentage (0-100) - percentage of carries crossing the advantage line
-- ruckSpeed: ruck speed - percentage of rucks where ball is recycled in 0-3 seconds
-- dominantTackles: dominant tackles made (drove ball carrier backwards)
-- offloads: offloads in contact
-
-Return ONLY JSON. Use null for any stat you're not certain about.`;
-
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${groqKey}`,
-      },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        messages: [
-          { role: 'system', content: 'You are a rugby data assistant. Only provide real, verified match results. Never guess. If unsure, say the match has not been played.' },
-          { role: 'user', content: prompt },
-        ],
-        temperature: 0.0,
-        max_tokens: 1000,
-      }),
-    });
-
-    if (!res.ok) return { isFinal: false };
-
-    const data = await res.json();
-    let jsonStr = (data.choices?.[0]?.message?.content || '').trim();
-    if (jsonStr.startsWith('```')) {
-      jsonStr = jsonStr.replace(/^```(?:json)?\s*/, '').replace(/\s*```$/, '');
-    }
-
-    const parsed = JSON.parse(jsonStr);
-
-    if (!parsed.played || parsed.homeScore == null || parsed.awayScore == null) {
+    if (!parsed || !parsed.played || parsed.homeScore == null || parsed.awayScore == null) {
       return { isFinal: false };
     }
 
@@ -281,17 +87,20 @@ Return ONLY JSON. Use null for any stat you're not certain about.`;
       return { isFinal: false };
     }
 
-    console.log(`AI fallback: ${match.home_team} ${parsed.homeScore}-${parsed.awayScore} ${match.away_team}`);
+    console.log(`Crawl4AI /extract: ${match.home_team} ${parsed.homeScore}-${parsed.awayScore} ${match.away_team}`);
+
+    // Normalize stats format
+    const stats = parsed.stats || { home: {}, away: {} };
 
     return {
       isFinal: true,
       homeScore: parsed.homeScore,
       awayScore: parsed.awayScore,
-      stats: parsed.stats || { home: {}, away: {} },
-      source: 'ai-knowledge',
+      stats,
+      source: 'crawl4ai-extract',
     };
   } catch (e) {
-    console.error(`AI fallback failed for ${match.home_team} vs ${match.away_team}:`, e.message);
+    console.error(`Crawl4AI /extract failed for ${match.home_team} vs ${match.away_team}:`, e.message);
     return { isFinal: false };
   }
 }
@@ -322,41 +131,6 @@ function blendStats(team, stats) {
     const maulProxy = Math.min(95, Math.max(40, stats.postContactMetres / 4));
     team.setpiece.maul = Math.round((team.setpiece.maul + maulProxy) / 2);
   }
-}
-
-function extractBasicStats(html) {
-  function extractStat(content, label) {
-    const re = new RegExp(`(\\d+\\.?\\d*)\\s*${label}\\s*(\\d+\\.?\\d*)`, 'i');
-    const m = content.match(re);
-    if (m) return [parseFloat(m[1]), parseFloat(m[2])];
-    return null;
-  }
-
-  function extractPct(content, label) {
-    const re = new RegExp(`(\\d+)%\\s*${label}\\s*(\\d+)%`, 'i');
-    const m = content.match(re);
-    if (m) return [parseInt(m[1]), parseInt(m[2])];
-    return null;
-  }
-
-  const tackles = extractStat(html, 'Tackles Made');
-  const missed = extractStat(html, 'Tackles Missed');
-  const carries = extractStat(html, 'Ball Carries') || extractStat(html, 'Carries');
-  const lineBreaks = extractStat(html, 'Line Breaks');
-  const penalties = extractStat(html, 'Penalties Conceded');
-  const scrumWin = extractPct(html, 'Scrum Win');
-  const lineoutWin = extractPct(html, 'Lineout Win');
-  const tries = extractStat(html, 'Tries');
-  const tackleRate = extractPct(html, 'Tackle Completion');
-  const territory = extractPct(html, 'Territory');
-  const possession = extractPct(html, 'Possession');
-  const gainline = extractPct(html, 'Gainline') || extractPct(html, 'Gainline Success');
-  const ruckSpeed = extractPct(html, 'Ruck Speed') || extractStat(html, 'Ruck Speed');
-
-  return {
-    home: { tackles: tackles?.[0], missed: missed?.[0], carries: carries?.[0], lineBreaks: lineBreaks?.[0], penalties: penalties?.[0], scrumWin: scrumWin?.[0], lineoutWin: lineoutWin?.[0], tries: tries?.[0], tackleRate: tackleRate?.[0], territory: territory?.[0], possession: possession?.[0], gainline: gainline?.[0] || null, ruckSpeed: ruckSpeed?.[0] || null },
-    away: { tackles: tackles?.[1], missed: missed?.[1], carries: carries?.[1], lineBreaks: lineBreaks?.[1], penalties: penalties?.[1], scrumWin: scrumWin?.[1], lineoutWin: lineoutWin?.[1], tries: tries?.[1], tackleRate: tackleRate?.[1], territory: territory?.[1], possession: possession?.[1], gainline: gainline?.[1] || null, ruckSpeed: ruckSpeed?.[1] || null },
-  };
 }
 
 export default async function handler(req, res) {
